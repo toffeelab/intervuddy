@@ -1,0 +1,116 @@
+# CLAUDE.md — Intervuddy 프로젝트 가이드
+
+## 프로젝트 개요
+
+면접 예상 Q&A 관리 웹앱. Next.js 16 App Router + TypeScript + SQLite.
+
+## 기술 스택
+
+- Next.js 16.1.7 (App Router, RSC), React 19, TypeScript 5
+- Tailwind CSS v4, shadcn/ui (base-nova 스타일, lucide 아이콘)
+- SQLite (better-sqlite3), Zustand (UI 상태)
+- pnpm (패키지 매니저 — npm/yarn 사용 금지)
+
+## 디렉토리 구조
+
+```
+src/
+├── app/              # 페이지 및 레이아웃 (App Router)
+├── components/
+│   ├── ui/           # shadcn/ui 공통 컴포넌트
+│   ├── interview/    # 면접 Q&A 페이지 컴포넌트
+│   ├── landing/      # 랜딩 페이지 컴포넌트
+│   └── shared/       # 공통 컴포넌트
+├── db/               # SQLite 스키마, 연결, 시드
+├── data-access/      # DB 접근 추상화 레이어
+├── stores/           # Zustand 상태 관리
+└── lib/              # 유틸리티, 상수
+```
+
+## 명령어
+
+```bash
+pnpm dev              # 개발 서버 (localhost:3000)
+pnpm build            # 프로덕션 빌드
+pnpm db:seed:sample   # 샘플 데이터 시드
+pnpm db:seed          # 개인 데이터 시드 (data/seed.ts 필요)
+```
+
+## 코드 컨벤션
+
+### Server / Client 분리
+
+- **Server Component (기본)**: 데이터 fetching, 정적 UI
+- **Client Component ('use client')**: 사용자 인터랙션, 상태 의존 UI
+- 불필요한 'use client' 지정 금지 — 필요한 컴포넌트에만 사용
+
+### 상태 관리
+
+- **Zustand**: UI 상태만 (카테고리 선택, 검색, 카드 확장)
+- **Server Props**: DB 데이터는 Server Component에서 fetch → props 전달
+- 전역 상태 남용 금지 — props로 충분하면 props 사용
+
+### 스타일링
+
+- Tailwind CSS 유틸리티 클래스 사용
+- 커스텀 CSS 변수: `iv-` 접두사 (globals.css 참조)
+- shadcn/ui 컴포넌트 추가: `pnpm dlx shadcn@latest add <component>`
+- cn() 유틸리티로 클래스 병합 (@/lib/utils)
+
+### 데이터베이스
+
+- better-sqlite3 동기 API 사용
+- 파라미터 바인딩 필수 (SQL injection 방지)
+- data-access 레이어를 통해 접근 (db 직접 import 금지)
+
+### Import 경로
+
+- 절대 경로 사용: `@/components/...`, `@/lib/...`, `@/stores/...`
+
+### 타입
+
+- `any` 사용 금지 — 구체적 타입 또는 `unknown` 사용
+- 인터페이스는 해당 파일 내 정의, 공유 타입은 data-access/types.ts
+
+## 개발 워크플로우 (필수 준수)
+
+### Git Flow
+
+```
+main (프로덕션) ← develop (통합) ← feature/* (기능 개발)
+```
+
+1. `develop`에서 `feature/*` 브랜치 생성
+2. conventional commits 사용 (feat:, fix:, refactor:, chore:)
+3. PR은 반드시 `develop` 대상으로 생성
+4. Claude 자동 리뷰 통과 후 squash merge
+5. 커밋 메시지에 Co-Authored-By 추가하지 않음
+
+### 필수 에이전트 활용
+
+기능 개발 시 반드시 다음 에이전트/스킬을 활용:
+
+- **frontend-developer**: React 컴포넌트 생성, 레이아웃, 클라이언트 상태 관리
+- **tdd-workflows:tdd-cycle**: 테스트 주도 개발 — red-green-refactor 사이클 준수
+
+### 작업 순서
+
+1. 요구사항 분석 → brainstorming 스킬 활용
+2. 테스트 작성 (red) → tdd-workflows:tdd-red
+3. 구현 (green) → tdd-workflows:tdd-green + frontend-developer
+4. 리팩토링 → simplify 스킬 활용
+5. PR 생성 → `gh pr create --base develop`
+
+### 병렬 작업
+
+- git worktree 활용: `git worktree add ../intervuddy-wt-<name> feature/<name>`
+- 각 worktree에서 `pnpm install` 필요
+- dev 서버 포트 충돌 방지: `--port 3001`, `--port 3002` 등
+
+## 금지 사항
+
+- main, develop 브랜치에 직접 커밋/push 금지
+- data/seed.ts (개인 데이터) 커밋 금지 — .gitignore 확인
+- *.db 파일 커밋 금지
+- console.log 남기고 커밋 금지
+- npm/yarn 사용 금지 — pnpm만 사용
