@@ -30,14 +30,16 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: "--model claude-haiku-4-5-20251001"
           show_full_output: true
+          pr_number: ${{ github.event.pull_request.number || github.event.issue.number }}
           prompt: |
-            이 PR의 변경사항을 코드 리뷰하고, 결과를 PR 코멘트로 게시하세요.
+            PR #${{ github.event.pull_request.number || github.event.issue.number }}의 변경사항을 코드 리뷰하고, 결과를 PR 코멘트로 게시하세요.
+            리포지토리: ${{ github.repository }}
 
             수행 순서:
-            1. `gh pr diff`로 PR의 diff를 가져와 분석하세요
+            1. `gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }}`로 diff를 가져와 분석하세요
             2. 코드 품질/버그/보안/성능 이슈를 찾아주세요
             3. 리뷰 내용을 마크다운으로 작성하세요
-            4. 반드시 `gh pr comment`으로 PR에 코멘트를 게시하세요
+            4. `gh pr comment ${{ github.event.pull_request.number || github.event.issue.number }} --body "리뷰내용"`으로 PR에 코멘트를 게시하세요
             5. 메모리 저장이나 설정 작업은 하지 마세요 — 코드 리뷰만 수행하세요
 
             응답 규칙:
