@@ -32,18 +32,35 @@ jobs:
           show_full_output: true
           pr_number: ${{ github.event.pull_request.number || github.event.issue.number }}
           prompt: |
-            PR #${{ github.event.pull_request.number || github.event.issue.number }}의 변경사항을 코드 리뷰하고, 결과를 PR 코멘트로 게시하세요.
-            리포지토리: ${{ github.repository }}
+            PR #${{ github.event.pull_request.number || github.event.issue.number }}을 코드 리뷰하세요.
 
-            수행 순서:
-            1. `gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }}`로 diff를 가져와 분석하세요
-            2. 코드 품질/버그/보안/성능 이슈를 찾아주세요
-            3. 리뷰 내용을 마크다운으로 작성하세요
-            4. `gh pr comment ${{ github.event.pull_request.number || github.event.issue.number }} --body "리뷰내용"`으로 PR에 코멘트를 게시하세요
-            5. 메모리 저장이나 설정 작업은 하지 마세요 — 코드 리뷰만 수행하세요
+            ## 분석 방법 (대용량 diff 대응)
+            1. 먼저 `gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }} --stat`으로 변경 파일 목록과 크기를 확인하세요
+            2. lock 파일(pnpm-lock.yaml), 설정 파일(.claude/), docs/ 는 리뷰 대상에서 제외하세요
+            3. src/ 하위의 변경된 파일만 개별적으로 Read 도구 또는 `git diff develop -- <파일경로>`로 읽으세요
+            4. 전체 diff를 한번에 읽지 마세요 — 파일별로 나눠서 읽으세요
 
-            응답 규칙:
-            - 모든 리뷰와 응답은 반드시 한국어로 작성
-            - 기술 용어와 코드 식별자는 원문 그대로 유지
-            - 리뷰 마지막에 토큰 사용량 표시:
-              📊 **토큰 사용량**: 입력 토큰 약 N개 / 출력 토큰 약 N개
+            ## 리뷰 기준
+            - 코드 품질, 버그, 보안, 성능 이슈
+            - 발견한 이슈는 파일명과 라인 번호를 명시하여 구체적으로 설명
+
+            ## 판정 및 게시 (필수)
+            리뷰 내용을 마크다운으로 작성한 뒤, 판정 결과에 따라 아래 중 하나를 실행하세요:
+
+            - 심각한 이슈 없음 (승인):
+              `gh pr review ${{ github.event.pull_request.number || github.event.issue.number }} --approve --body "리뷰 전체 내용"`
+
+            - 수정 필요한 이슈 있음 (변경 요청):
+              `gh pr review ${{ github.event.pull_request.number || github.event.issue.number }} --request-changes --body "리뷰 전체 내용"`
+
+            리뷰 본문에 토큰 사용량도 포함하세요.
+            반드시 `gh pr review`를 실행해야 합니다 — `gh pr comment`가 아닙니다.
+
+            ## 금지 사항
+            - 메모리 저장/설정 작업 금지
+            - 전체 diff를 한번에 읽기 금지
+            - `gh pr comment` 사용 금지 — 반드시 `gh pr review`만 사용
+
+            ## 응답 규칙
+            - 모든 리뷰는 한국어로 작성 (기술 용어/코드 식별자는 원문 유지)
+            - 리뷰 본문 마지막에 반드시 포함: 📊 **토큰 사용량**: 입력 토큰 약 N개 / 출력 토큰 약 N개
