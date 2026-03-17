@@ -83,16 +83,20 @@ pnpm start
 ## 아키텍처 설계 원칙
 
 ### Server / Client 분리
+
 - **Server Component**: 데이터 fetching, 정적 UI (통계, 키워드 태그)
 - **Client Component**: 사용자 인터랙션 (카테고리 선택, 검색, 카드 펼치기/접기)
 
 ### 상태 관리 전략
+
 - **Zustand**: UI 상태 (activeCategory, searchQuery, expandedCards) — 여러 컴포넌트에서 동시 소비
 - **Server Props**: QA 데이터 — Server Component에서 fetch 후 props로 전달
 - **추후 확장**: API Route + React Query로 전환 시 data-access 레이어만 교체
 
 ### 데이터 접근 추상화
+
 `src/data-access/qa.ts`의 함수들이 SQLite를 직접 호출합니다. 추후 백엔드 API가 추가되면:
+
 1. API Route Handler 생성 (`/api/qa`)
 2. Client에서 `useQuery`로 호출
 3. 나머지 컴포넌트 로직은 변경 없음
@@ -101,12 +105,12 @@ pnpm start
 
 ### 브랜치 전략
 
-| 브랜치 | 용도 | 머지 대상 |
-|--------|------|-----------|
-| `main` | 프로덕션 릴리스 | - |
-| `develop` | 통합 브랜치 | `main` |
-| `feature/*` | 신규 기능 | `develop` |
-| `hotfix/*` | 긴급 수정 | `main` + `develop` |
+| 브랜치      | 용도            | 머지 대상          |
+| ----------- | --------------- | ------------------ |
+| `main`      | 프로덕션 릴리스 | -                  |
+| `develop`   | 통합 브랜치     | `main`             |
+| `feature/*` | 신규 기능       | `develop`          |
+| `hotfix/*`  | 긴급 수정       | `main` + `develop` |
 
 ### Feature 작업 흐름
 
@@ -150,7 +154,7 @@ git worktree remove ../intervuddy-wt-taskB
    claude setup-token
    gh secret set CLAUDE_CODE_OAUTH_TOKEN
    ```
-3. **토큰 만료 시 갱신** (약 1일 주기): 위 명령어 재실행
+3. **토큰 만료 시 갱신** (1년 주기): 위 명령어 재실행
 
 ### 동작 방식
 
