@@ -37,6 +37,8 @@ interface CategoryRow {
   count: number;
 }
 
+// prepared statement를 함수 호출 시점에 생성하여 테스트에서 in-memory DB 주입(setDb) 가능.
+// 호출당 3개 prepare 실행이지만 현재 규모에서 성능 영향 무시 가능.
 export function getAllQAItems(): QAItem[] {
   const db = getDb();
 
