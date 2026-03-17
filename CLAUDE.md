@@ -88,21 +88,29 @@ main (프로덕션) ← develop (통합) ← feature/* (기능 개발)
 3. PR은 반드시 `develop` 대상으로 생성
 4. Claude 자동 리뷰 통과 후 squash merge
 
-### 필수 에이전트 활용
+### Superpowers 기반 개발
 
-기능 개발 시 반드시 다음 에이전트/스킬을 활용:
+기능 개발 시 superpowers 프로세스 스킬을 활용하여 체계적으로 진행:
 
-- **frontend-developer**: React 컴포넌트 생성, 레이아웃, 클라이언트 상태 관리
-- **tdd-workflows:tdd-cycle**: 테스트 주도 개발 — red-green-refactor 사이클 준수
+- **brainstorming**: 요구사항 분석, 설계 탐색 — 구현 전 반드시 수행
+- **writing-plans**: 멀티스텝 작업의 구현 계획 수립
+- **test-driven-development**: TDD red-green-refactor (내부에서 tdd-workflows 호출)
+- **verification-before-completion**: 완료 선언 전 검증 필수
+- **requesting-code-review**: 주요 구현 완료 후 코드 리뷰
+- **finishing-a-development-branch**: 브랜치 마무리 (merge/PR 결정)
+
+도메인별 구현 에이전트 (superpowers가 필요 시 활용):
+- **frontend-developer**: React 컴포넌트, 레이아웃, 클라이언트 상태
+- **simplify**: 리팩토링 및 코드 품질 개선
 
 ### 작업 순서
 
-1. 요구사항 분석 → brainstorming 스킬 활용
-2. 테스트 작성 (red) → tdd-workflows:tdd-red
-3. 구현 (green) → tdd-workflows:tdd-green + frontend-developer
-4. 리팩토링 → simplify 스킬 활용
-5. E2E 검증 → Playwright MCP로 실제 동작 확인 (아래 참조)
-6. PR 생성 → `gh pr create --base develop`
+1. **요구사항 분석** → `brainstorming` 스킬로 의도/요구사항/설계 탐색
+2. **계획 수립** → `writing-plans`로 구현 계획 작성 (복잡한 작업 시)
+3. **TDD 개발** → `test-driven-development`로 red-green-refactor 사이클
+4. **검증** → `verification-before-completion` + Playwright E2E (아래 참조)
+5. **코드 리뷰** → `requesting-code-review`로 품질 확인
+6. **완료** → `finishing-a-development-branch`로 PR 생성 (`--base develop`)
 
 ### E2E 검증 (커밋 전 필수)
 
@@ -117,8 +125,10 @@ main (프로덕션) ← develop (통합) ← feature/* (기능 개발)
 
 ### 병렬 작업
 
-- git worktree 활용: `git worktree add ../intervuddy-wt-<name> feature/<name>`
-- 각 worktree에서 `pnpm install` 필요
+독립적인 태스크가 2개 이상일 때 superpowers 스킬로 병렬 처리:
+
+- `using-git-worktrees`: worktree 생성 및 격리 환경 설정
+- `dispatching-parallel-agents`: 독립 태스크 병렬 실행
 - dev 서버 포트 충돌 방지: `--port 3001`, `--port 3002` 등
 
 ### Serena MCP 활용
