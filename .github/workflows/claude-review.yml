@@ -30,6 +30,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: "--model claude-haiku-4-5-20251001"
           show_full_output: true
+          allowed_tools: "Bash(gh pr *),Bash(git diff *),Bash(git log *),Bash(git show *),Read,Glob,Grep"
           prompt: |
             이 PR의 변경사항을 코드 리뷰해주세요. 반드시 다음을 수행하세요:
 
