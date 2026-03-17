@@ -29,6 +29,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: "--model claude-haiku-4-5-20251001"
+          show_full_output: true
           prompt: |
             모든 코드 리뷰와 응답은 반드시 한국어로 작성해주세요.
             기술 용어와 코드 식별자는 원문 그대로 유지하되, 설명은 한국어로 해주세요.
