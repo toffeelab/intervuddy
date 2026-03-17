@@ -1,0 +1,3 @@
+- Monorepo 화
+- Schema -> Prisma
+- Backend + Database 구축

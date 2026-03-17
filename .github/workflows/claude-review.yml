@@ -1,0 +1,37 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'src/**'
+  issue_comment:
+    types: [created]
+
+jobs:
+  review:
+    if: |
+      (github.event_name == 'pull_request') ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: "--model claude-haiku-4-5-20251001"
+          prompt: |
+            모든 코드 리뷰와 응답은 반드시 한국어로 작성해주세요.
+            기술 용어와 코드 식별자는 원문 그대로 유지하되, 설명은 한국어로 해주세요.
+            리뷰 마지막에 반드시 다음 형식으로 토큰 사용량을 표시해주세요:
+            ---
+            📊 **토큰 사용량**: 입력 토큰 약 N개 / 출력 토큰 약 N개
