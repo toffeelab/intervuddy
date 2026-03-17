@@ -7,9 +7,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setMode = useThemeStore((s) => s.setMode);
 
   useEffect(() => {
-    const saved = localStorage.getItem('iv-theme') as 'dark' | 'light' | 'system' | null;
-    if (saved) {
-      setMode(saved);
+    const saved = localStorage.getItem('iv-theme');
+    const validModes = ['dark', 'light', 'system'] as const;
+    if (saved && validModes.includes(saved as typeof validModes[number])) {
+      setMode(saved as typeof validModes[number]);
     } else {
       setMode('system');
     }
