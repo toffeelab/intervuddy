@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR, JetBrains_Mono } from "next/font/google";
+import { ThemeScript } from "@/components/shared/theme-script";
+import { ThemeProvider } from "@/components/shared/theme-provider";
 import "./globals.css";
 
 const notoSansKR = Noto_Sans_KR({
@@ -17,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Intervuddy — 면접 준비 도우미",
+  title: "Intervuddy -- 면접 준비 도우미",
   description:
     "AI 기반 면접 준비 도우미. 자기소개서 분석, 예상 질문 생성, 모의 면접 연습으로 체계적인 면접 준비를 도와드립니다.",
 };
@@ -28,11 +30,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="dark">
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body
         className={`${notoSansKR.variable} ${jetbrainsMono.variable} antialiased min-h-screen bg-iv-bg text-iv-text`}
       >
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );
