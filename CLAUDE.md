@@ -159,6 +159,7 @@ E2E 스크린샷을 PR에 첨부할 때는 **feature 브랜치에 임시 커밋*
 - **참조 추적**: `find_referencing_symbols`로 변경 영향 범위 파악 후 편집
 - **검색**: 심볼명 불확실 시 `search_for_pattern`으로 후보 탐색 → 심볼릭 도구로 진입
 - 파일 전체 읽기보다 심볼 단위 읽기를 우선 — 컨텍스트 효율화
+- **메모리**: 프로젝트 진행 상황, 작업 컨텍스트를 `write_memory`로 `.serena/memories/`에 저장. 다른 PC에서 `read_memory`로 복원 가능. 세션 간 컨텍스트 공유에 활용
 
 ## 금지 사항
 
