@@ -1,4 +1,4 @@
-import db from '../db/index';
+import { getDb } from '@/db/index';
 import type { QAItem, Category, DeepQA } from './types';
 
 interface QAItemRow {
@@ -37,55 +37,35 @@ interface CategoryRow {
   count: number;
 }
 
-const qaItemsQuery = db.prepare(`
-  SELECT
-    qi.id,
-    qi.category_id,
-    c.name AS category_name,
-    c.tag,
-    c.tag_label,
-    qi.question,
-    qi.answer,
-    qi.tip,
-    qi.jd_tip,
-    qi.is_jd,
-    qi.is_deep,
-    qi.display_order
-  FROM qa_items qi
-  JOIN categories c ON c.id = qi.category_id
-  ORDER BY c.display_order, qi.display_order
-`);
-
-const keywordsQuery = db.prepare(`
-  SELECT keyword FROM qa_keywords WHERE qa_item_id = ?
-`);
-
-const deepQAQuery = db.prepare(`
-  SELECT id, question, answer FROM deep_qa WHERE qa_item_id = ? ORDER BY display_order
-`);
-
-const categoriesQuery = db.prepare(`
-  SELECT
-    c.id,
-    c.name,
-    c.tag,
-    c.tag_label,
-    c.icon,
-    c.is_jd_group,
-    c.display_order,
-    COUNT(qi.id) AS count
-  FROM categories c
-  LEFT JOIN qa_items qi ON qi.category_id = c.id
-  GROUP BY c.id
-  ORDER BY c.display_order
-`);
-
 export function getAllQAItems(): QAItem[] {
-  const rows = qaItemsQuery.all() as QAItemRow[];
+  const db = getDb();
+
+  const rows = db.prepare(`
+    SELECT
+      qi.id,
+      qi.category_id,
+      c.name AS category_name,
+      c.tag,
+      c.tag_label,
+      qi.question,
+      qi.answer,
+      qi.tip,
+      qi.jd_tip,
+      qi.is_jd,
+      qi.is_deep,
+      qi.display_order
+    FROM qa_items qi
+    JOIN categories c ON c.id = qi.category_id
+    ORDER BY c.display_order, qi.display_order
+  `).all() as QAItemRow[];
+
+  const keywordsStmt = db.prepare(`SELECT keyword FROM qa_keywords WHERE qa_item_id = ?`);
+  const deepQAStmt = db.prepare(`SELECT id, question, answer FROM deep_qa WHERE qa_item_id = ? ORDER BY display_order`);
 
   return rows.map((row) => {
-    const keywords = (keywordsQuery.all(row.id) as KeywordRow[]).map((k) => k.keyword);
-    const deepQA = (deepQAQuery.all(row.id) as DeepQARow[]).map((d): DeepQA => ({
+    const keywords = (keywordsStmt.all(row.id) as KeywordRow[]).map((k) => k.keyword);
+
+    const deepQA = (deepQAStmt.all(row.id) as DeepQARow[]).map((d): DeepQA => ({
       id: d.id,
       question: d.question,
       answer: d.answer,
@@ -109,7 +89,23 @@ export function getAllQAItems(): QAItem[] {
 }
 
 export function getCategories(): Category[] {
-  const rows = categoriesQuery.all() as CategoryRow[];
+  const db = getDb();
+
+  const rows = db.prepare(`
+    SELECT
+      c.id,
+      c.name,
+      c.tag,
+      c.tag_label,
+      c.icon,
+      c.is_jd_group,
+      c.display_order,
+      COUNT(qi.id) AS count
+    FROM categories c
+    LEFT JOIN qa_items qi ON qi.category_id = c.id
+    GROUP BY c.id
+    ORDER BY c.display_order
+  `).all() as CategoryRow[];
 
   return rows.map((row) => ({
     id: row.id,
