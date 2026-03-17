@@ -158,6 +158,13 @@
   --iv-text: #e8eaf0;
   --iv-text2: #8b90a0;
   --iv-text3: #555b6e;
+  --iv-accent: #4f8ef7;
+  --iv-accent2: #7c6cf0;
+  --iv-green: #3ecf8e;
+  --iv-amber: #f59e0b;
+  --iv-red: #f87171;
+  --iv-pink: #e879a0;
+  --iv-jd: #22d3ee;
 }
 
 @layer base {
