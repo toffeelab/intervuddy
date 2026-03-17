@@ -1,5 +1,5 @@
 import { getDb } from '@/db/index';
-import type { InterviewCategory, CreateCategoryInput } from './types';
+import type { InterviewCategory, CreateCategoryInput, UpdateCategoryInput } from './types';
 
 interface CategoryRow {
   id: number;
@@ -88,7 +88,7 @@ export function createCategory(input: CreateCategoryInput): number {
   return Number(result.lastInsertRowid);
 }
 
-export function updateCategory(id: number, input: Partial<CreateCategoryInput>): void {
+export function updateCategory(id: number, input: Omit<UpdateCategoryInput, 'id'>): void {
   const db = getDb();
   const fields: string[] = [];
   const values: unknown[] = [];

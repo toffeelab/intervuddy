@@ -103,3 +103,11 @@ export interface CreateCategoryInput {
   displayLabel: string;
   icon: string;
 }
+
+export interface UpdateCategoryInput {
+  id: number;
+  name?: string;
+  slug?: string;
+  displayLabel?: string;
+  icon?: string;
+}
