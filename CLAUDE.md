@@ -84,7 +84,6 @@ main (프로덕션) ← develop (통합) ← feature/* (기능 개발)
 2. conventional commits 사용 (feat:, fix:, refactor:, chore:)
 3. PR은 반드시 `develop` 대상으로 생성
 4. Claude 자동 리뷰 통과 후 squash merge
-5. 커밋 메시지에 Co-Authored-By 추가하지 않음
 
 ### 필수 에이전트 활용
 
@@ -99,7 +98,19 @@ main (프로덕션) ← develop (통합) ← feature/* (기능 개발)
 2. 테스트 작성 (red) → tdd-workflows:tdd-red
 3. 구현 (green) → tdd-workflows:tdd-green + frontend-developer
 4. 리팩토링 → simplify 스킬 활용
-5. PR 생성 → `gh pr create --base develop`
+5. E2E 검증 → Playwright MCP로 실제 동작 확인 (아래 참조)
+6. PR 생성 → `gh pr create --base develop`
+
+### E2E 검증 (커밋 전 필수)
+
+구현 완료 후, 커밋 전에 Playwright MCP를 통해 실제 동작을 검증:
+
+1. `pnpm dev`로 개발 서버 실행
+2. `browser_navigate`로 해당 페이지 접근
+3. `browser_take_screenshot`으로 렌더링 결과 캡처
+4. `browser_click`, `browser_fill_form`, `browser_type` 등으로 주요 인터랙션 테스트
+5. 스크린샷을 PR 본문에 첨부하여 동작 증빙 제공
+6. 콘솔 에러 없음 확인 (`browser_console_messages`)
 
 ### 병렬 작업
 
@@ -107,10 +118,20 @@ main (프로덕션) ← develop (통합) ← feature/* (기능 개발)
 - 각 worktree에서 `pnpm install` 필요
 - dev 서버 포트 충돌 방지: `--port 3001`, `--port 3002` 등
 
+### Serena MCP 활용
+
+코드베이스 탐색 및 편집 시 Serena의 심볼릭 도구를 우선 활용:
+
+- **탐색**: `get_symbols_overview` → `find_symbol`(name_path + include_body) 순서로 점진적 탐색
+- **편집**: 심볼 단위 수정은 `replace_symbol_body`, 부분 수정은 `replace_content` (정규식 지원)
+- **참조 추적**: `find_referencing_symbols`로 변경 영향 범위 파악 후 편집
+- **검색**: 심볼명 불확실 시 `search_for_pattern`으로 후보 탐색 → 심볼릭 도구로 진입
+- 파일 전체 읽기보다 심볼 단위 읽기를 우선 — 컨텍스트 효율화
+
 ## 금지 사항
 
 - main, develop 브랜치에 직접 커밋/push 금지
 - data/seed.ts (개인 데이터) 커밋 금지 — .gitignore 확인
-- *.db 파일 커밋 금지
+- \*.db 파일 커밋 금지
 - console.log 남기고 커밋 금지
 - npm/yarn 사용 금지 — pnpm만 사용
