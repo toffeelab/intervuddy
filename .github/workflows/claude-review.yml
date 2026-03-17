@@ -24,6 +24,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Determine review context
+        id: context
+        run: |
+          if [ "${{ github.event.action }}" = "synchronize" ]; then
+            echo "is_incremental=true" >> $GITHUB_OUTPUT
+            echo "before_sha=${{ github.event.before }}" >> $GITHUB_OUTPUT
+          else
+            echo "is_incremental=false" >> $GITHUB_OUTPUT
+            echo "before_sha=" >> $GITHUB_OUTPUT
+          fi
+
       - name: Claude Code Action
         uses: anthropics/claude-code-action@v1
         with:
@@ -33,34 +45,57 @@ jobs:
           pr_number: ${{ github.event.pull_request.number || github.event.issue.number }}
           prompt: |
             PR #${{ github.event.pull_request.number || github.event.issue.number }}을 코드 리뷰하세요.
+            리뷰 모드: ${{ steps.context.outputs.is_incremental == 'true' && '증분 리뷰' || '전체 리뷰' }}
+            ${{ steps.context.outputs.is_incremental == 'true' && format('이전 커밋 SHA: {0}', steps.context.outputs.before_sha) || '' }}
 
-            ## 분석 방법 (대용량 diff 대응)
-            1. 먼저 `gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }} --stat`으로 변경 파일 목록과 크기를 확인하세요
-            2. lock 파일(pnpm-lock.yaml), 설정 파일(.claude/), docs/ 는 리뷰 대상에서 제외하세요
-            3. src/ 하위의 변경된 파일만 개별적으로 Read 도구 또는 `git diff develop -- <파일경로>`로 읽으세요
-            4. 전체 diff를 한번에 읽지 마세요 — 파일별로 나눠서 읽으세요
+            ---
+
+            ## 전체 리뷰 모드 (리뷰 모드가 "전체 리뷰"인 경우)
+            1. `gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }} --stat`으로 변경 파일 목록 확인
+            2. lock 파일(pnpm-lock.yaml), .claude/, docs/ 제외
+            3. src/ 파일만 `git diff develop -- <파일>`로 개별 읽기
+            4. 전체 diff를 한번에 읽지 말 것
+
+            ## 증분 리뷰 모드 (리뷰 모드가 "증분 리뷰"인 경우)
+            1. `git diff ${{ steps.context.outputs.before_sha }}..HEAD --stat`으로 새 변경 파일 확인
+            2. src/ 파일만 `git diff ${{ steps.context.outputs.before_sha }}..HEAD -- <파일>`로 개별 읽기
+            3. `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number || github.event.issue.number }}/reviews --jq '.[-1].body'`로 가장 최근 리뷰 본문 조회
+            4. 이전 리뷰에서 지적된 이슈가 이번 커밋에서 해결되었는지 검증
+            5. 새 코드에서 추가 이슈 확인
+            6. `git diff` 실패 시 전체 리뷰 모드로 fallback
+
+            증분 리뷰 본문 형식:
+            ```
+            ## 증분 리뷰 (이전 리뷰 대비)
+
+            ### 이전 이슈 해결 상태
+            - [x] 이슈1: 해결됨
+            - [ ] 이슈2: 미해결 — 설명
+
+            ### 새로운 이슈
+            - (없음 또는 이슈 목록)
+            ```
 
             ## 리뷰 기준
             - 코드 품질, 버그, 보안, 성능 이슈
-            - 발견한 이슈는 파일명과 라인 번호를 명시하여 구체적으로 설명
+            - 발견한 이슈는 파일명과 라인 번호를 명시
 
             ## 판정 및 게시 (필수)
-            리뷰 내용을 마크다운으로 작성한 뒤, 판정 결과에 따라 아래 중 하나를 실행하세요:
+            리뷰 내용을 마크다운으로 작성한 뒤 판정:
 
-            - 심각한 이슈 없음 (승인):
-              `gh pr review ${{ github.event.pull_request.number || github.event.issue.number }} --approve --body "리뷰 전체 내용"`
+            - 이슈 없음 (또는 증분에서 모든 이전 이슈 해결 + 새 이슈 없음):
+              `gh pr review ${{ github.event.pull_request.number || github.event.issue.number }} --approve --body "리뷰 내용"`
 
-            - 수정 필요한 이슈 있음 (변경 요청):
-              `gh pr review ${{ github.event.pull_request.number || github.event.issue.number }} --request-changes --body "리뷰 전체 내용"`
+            - 수정 필요:
+              `gh pr review ${{ github.event.pull_request.number || github.event.issue.number }} --request-changes --body "리뷰 내용"`
 
-            리뷰 본문에 토큰 사용량도 포함하세요.
             반드시 `gh pr review`를 실행해야 합니다 — `gh pr comment`가 아닙니다.
 
             ## 금지 사항
             - 메모리 저장/설정 작업 금지
             - 전체 diff를 한번에 읽기 금지
-            - `gh pr comment` 사용 금지 — 반드시 `gh pr review`만 사용
+            - `gh pr comment` 사용 금지
 
             ## 응답 규칙
-            - 모든 리뷰는 한국어로 작성 (기술 용어/코드 식별자는 원문 유지)
-            - 리뷰 본문 마지막에 반드시 포함: 📊 **토큰 사용량**: 입력 토큰 약 N개 / 출력 토큰 약 N개
+            - 한국어 작성 (기술 용어/코드 식별자는 원문 유지)
+            - 리뷰 본문 마지막에 포함: 📊 **토큰 사용량**: 입력 토큰 약 N개 / 출력 토큰 약 N개
