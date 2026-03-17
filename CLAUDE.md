@@ -24,6 +24,7 @@ src/
 ├── db/               # SQLite 스키마, 연결, 시드
 ├── data-access/      # DB 접근 추상화 레이어
 ├── stores/           # Zustand 상태 관리
+├── test/             # 테스트 헬퍼 및 setup
 └── lib/              # 유틸리티, 상수
 ```
 
@@ -34,6 +35,8 @@ pnpm dev              # 개발 서버 (localhost:3000)
 pnpm build            # 프로덕션 빌드
 pnpm db:seed:sample   # 샘플 데이터 시드
 pnpm db:seed          # 개인 데이터 시드 (data/seed.ts 필요)
+pnpm test             # 테스트 실행
+pnpm test:watch       # 테스트 watch 모드
 ```
 
 ## 코드 컨벤션
