@@ -1,27 +1,27 @@
 'use client';
 
-import { useInterviewStore } from '@/stores/interview-store';
+import { useStudyStore } from '@/stores/study-store';
 import { TAG_COLORS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import { QAAnswer } from '@/components/interview/qa-answer';
-import type { QAItem } from '@/data-access/types';
+import { QAAnswer } from '@/components/study/qa-answer';
+import type { InterviewQuestion } from '@/data-access/types';
 
 interface QACardProps {
-  item: QAItem;
+  item: InterviewQuestion;
   index: number;
 }
 
 export function QACard({ item, index }: QACardProps) {
-  const expandedCards = useInterviewStore((s) => s.expandedCards);
-  const toggleCard = useInterviewStore((s) => s.toggleCard);
+  const expandedCards = useStudyStore((s) => s.expandedCards);
+  const toggleCard = useStudyStore((s) => s.toggleCard);
 
   const isOpen = expandedCards.has(item.id);
-  const tagColor = TAG_COLORS[item.tag];
+  const tagColor = TAG_COLORS[item.categorySlug];
 
   const borderColor = isOpen
-    ? item.isJD
+    ? item.jdId !== null
       ? 'border-iv-jd/25'
-      : item.isDeep
+      : item.followups.length > 0
         ? 'border-iv-accent2/30'
         : 'border-iv-accent/25'
     : 'border-iv-border';
@@ -45,12 +45,12 @@ export function QACard({ item, index }: QACardProps) {
           {item.question}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
-          {item.isJD && (
+          {item.jdId !== null && (
             <span className="px-1.5 py-0.5 text-[9px] font-mono rounded bg-iv-jd/10 text-iv-jd border border-iv-jd/20">
               JD
             </span>
           )}
-          {item.isDeep && (
+          {item.followups.length > 0 && (
             <span className="px-1.5 py-0.5 text-[9px] font-mono rounded bg-iv-accent2/10 text-[#a89ff5] border border-iv-accent2/20">
               꼬리질문
             </span>
@@ -64,7 +64,7 @@ export function QACard({ item, index }: QACardProps) {
                 tagColor.border
               )}
             >
-              {item.tagLabel}
+              {item.categoryDisplayLabel}
             </span>
           )}
           <span
