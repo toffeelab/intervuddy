@@ -120,8 +120,16 @@ main (프로덕션) ← develop (통합) ← feature/* (기능 개발)
 2. `browser_navigate`로 해당 페이지 접근
 3. `browser_take_screenshot`으로 렌더링 결과 캡처
 4. `browser_click`, `browser_fill_form`, `browser_type` 등으로 주요 인터랙션 테스트
-5. 스크린샷을 PR 본문에 첨부하여 동작 증빙 제공
-6. 콘솔 에러 없음 확인 (`browser_console_messages`)
+5. 콘솔 에러 없음 확인 (`browser_console_messages`)
+
+### PR 스크린샷 첨부
+
+E2E 스크린샷을 PR에 첨부할 때는 feature 브랜치에 이미지를 커밋하지 않고, **GitHub 이미지 호스팅**을 활용:
+
+1. 스크린샷을 `/tmp/e2e/` 등 임시 경로에 저장
+2. `gh pr create`로 PR 생성
+3. `gh pr comment <PR번호> --body "$(cat <<'EOF' ... EOF)"` 코멘트에 이미지 첨부는 불가하므로, PR 생성 후 수동으로 Edit → 이미지 드래그&드롭 (GitHub이 `user-images.githubusercontent.com`에 자동 호스팅)
+4. 또는 PR 본문에 텍스트로 E2E 검증 결과만 기록 (스크린샷 생략)
 
 ### 병렬 작업
 
