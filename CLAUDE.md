@@ -80,13 +80,14 @@ pnpm test:watch       # 테스트 watch 모드
 ### Git Flow
 
 ```
-main (프로덕션) ← develop (통합) ← feature/* (기능 개발)
+main (프로덕션) ← develop (통합) ← feature/<날짜>/<이름> (기능 개발)
 ```
 
-1. `develop`에서 `feature/*` 브랜치 생성
+1. `develop`에서 `feature/<YYYY-MM-DD>/<이름>` 브랜치 생성 (예: `feature/2026-03-17/theme-mode-toggle`)
 2. conventional commits 사용 (feat:, fix:, refactor:, chore:)
 3. PR은 반드시 `develop` 대상으로 생성
 4. Claude 자동 리뷰 통과 후 squash merge
+5. 머지 완료된 feature 브랜치는 30일 후 자동 삭제 (GitHub Actions)
 
 ### Superpowers 기반 개발
 
@@ -124,12 +125,13 @@ main (프로덕션) ← develop (통합) ← feature/* (기능 개발)
 
 ### PR 스크린샷 첨부
 
-E2E 스크린샷을 PR에 첨부할 때는 feature 브랜치에 이미지를 커밋하지 않고, **GitHub 이미지 호스팅**을 활용:
+E2E 스크린샷을 PR에 첨부할 때는 **feature 브랜치에 임시 커밋** → raw URL 참조:
 
-1. 스크린샷을 `/tmp/e2e/` 등 임시 경로에 저장
-2. `gh pr create`로 PR 생성
-3. `gh pr comment <PR번호> --body "$(cat <<'EOF' ... EOF)"` 코멘트에 이미지 첨부는 불가하므로, PR 생성 후 수동으로 Edit → 이미지 드래그&드롭 (GitHub이 `user-images.githubusercontent.com`에 자동 호스팅)
-4. 또는 PR 본문에 텍스트로 E2E 검증 결과만 기록 (스크린샷 생략)
+1. 스크린샷을 `.github/screenshots/`에 저장
+2. feature 브랜치에 커밋: `git add .github/screenshots/ && git commit -m "chore: E2E 스크린샷 첨부"`
+3. PR 본문에서 raw URL로 참조: `![설명](https://raw.githubusercontent.com/toffeelab/intervuddy/feature/<날짜>/<이름>/.github/screenshots/<파일명>)`
+4. squash merge 시 develop에는 스크린샷이 포함되지 않음
+5. feature 브랜치 삭제 전까지 PR에서 이미지 확인 가능 (30일 보관)
 
 ### 병렬 작업
 
