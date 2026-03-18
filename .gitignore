@@ -47,3 +47,10 @@ next-env.d.ts
 
 # personal seed data (only sample is committed)
 data/seed.ts
+
+# MCP ignore files
+.superpowers
+.playwright-mcp/
+
+# Claude worktrees
+.claude/worktrees/
