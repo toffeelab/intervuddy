@@ -19,13 +19,16 @@
 src/
 ├── app/
 │   ├── page.tsx              # 랜딩 페이지 (브랜딩/기능 소개)
-│   ├── globals.css           # 다크 테마 + Tailwind 설정
-│   └── interview/
-│       └── page.tsx          # 메인 Q&A 인터뷰 페이지
+│   ├── globals.css           # 다크/라이트 테마 + Tailwind 설정
+│   ├── study/                # 학습 페이지 (Q&A 카드 뷰 + 간편편집)
+│   └── interviews/           # 관리 페이지 (질문 CRUD, JD 관리)
+├── actions/                  # Next.js Server Actions (질문/꼬리질문/카테고리)
 ├── components/
 │   ├── ui/                   # shadcn/ui 컴포넌트
+│   ├── shared/               # 공통 컴포넌트 (테마 토글, 인라인 편집 등)
 │   ├── landing/              # 랜딩 페이지 컴포넌트
-│   └── interview/            # 인터뷰 페이지 컴포넌트
+│   ├── study/                # 학습 페이지 컴포넌트
+│   └── interviews/           # 관리 페이지 컴포넌트
 ├── db/                       # SQLite 연결 및 스키마
 ├── data-access/              # 데이터 접근 추상화 레이어
 ├── stores/                   # Zustand 상태 관리
@@ -78,6 +81,9 @@ pnpm start
 - **키워드 가이드**: 답변에 포함해야 할 핵심 키워드
 - **면접 팁**: 실전 면접 노하우
 - **검색 & 필터**: 질문, 답변, 키워드 기반 검색
+- **인라인 편집**: /study 페이지에서 답변/팁/꼬리질문을 클릭하여 바로 수정
+- **질문 관리**: /interviews에서 질문 테이블, 편집 드로어, 카테고리 관리
+- **다크/라이트 테마**: 시스템 설정 연동 + 수동 토글
 - **데이터 영속성**: SQLite 기반으로 서버 재시작 후에도 데이터 보존
 
 ## 아키텍처 설계 원칙
@@ -95,11 +101,7 @@ pnpm start
 
 ### 데이터 접근 추상화
 
-`src/data-access/qa.ts`의 함수들이 SQLite를 직접 호출합니다. 추후 백엔드 API가 추가되면:
-
-1. API Route Handler 생성 (`/api/qa`)
-2. Client에서 `useQuery`로 호출
-3. 나머지 컴포넌트 로직은 변경 없음
+`src/data-access/`의 모듈별 함수(`questions.ts`, `categories.ts`, `followups.ts`, `jobs.ts`)가 SQLite를 직접 호출합니다. Server Actions(`src/actions/`)가 이를 래핑하여 `revalidatePath`를 호출합니다.
 
 ## Git Flow
 
@@ -163,6 +165,8 @@ git worktree remove ../intervuddy-wt-taskB
 - **Draft PR에서는 리뷰 스킵** → Draft → Ready 전환 시 리뷰 트리거
 - PR 코멘트에 `@claude` → 수동 리뷰/질문
 - 리뷰는 한국어로 작성되며, 토큰 사용량이 하단에 표시됨
+- **자동 판정**: Claude 리뷰 결과를 후처리 step이 파싱하여 `gh pr review`로 Approve/Request Changes 게시
+- **파일 제외**: `src/components/ui/*`(shadcn 보일러플레이트), `.github/screenshots/*`, lock 파일 등은 리뷰에서 자동 제외
 
 ### Draft PR 활용
 
