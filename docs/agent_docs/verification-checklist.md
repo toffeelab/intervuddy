@@ -54,16 +54,17 @@ pnpm dev              # 개발 서버 실행
 E2E 스크린샷은 PR에 첨부하기 위해 feature 브랜치에 임시 커밋한다.
 
 ```bash
-# 1. 스크린샷 저장
-mkdir -p .github/screenshots
-# (스크린샷 파일 저장)
+# 1. feature 브랜치 이름으로 폴더 생성 후 스크린샷 저장
+BRANCH=$(git branch --show-current)
+mkdir -p ".github/screenshots/${BRANCH}"
+# (스크린샷 파일을 해당 폴더에 저장)
 
 # 2. feature 브랜치에 커밋
 git add .github/screenshots/
 git commit -m "chore: E2E 스크린샷 첨부"
 
 # 3. PR 본문에서 참조 (squash merge 시 develop에 포함되지 않음)
-# ![설명](https://raw.githubusercontent.com/toffeelab/intervuddy/<branch>/.github/screenshots/<파일명>)
+# ![설명](https://raw.githubusercontent.com/toffeelab/intervuddy/<branch>/.github/screenshots/<branch>/<파일명>)
 ```
 
 ### 스크린샷 캡션 규칙

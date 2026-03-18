@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { JobCard } from '@/components/interviews/job-card';
 import { JobStatusFilter } from '@/components/interviews/job-status-filter';
-import { buttonVariants } from '@/components/ui/button';
 import { getAllJobs } from '@/data-access/jobs';
 
 interface Props {
@@ -23,7 +22,10 @@ export default async function InterviewsPage({ searchParams }: Props) {
             면접 대상 JD를 관리하고 질문을 맞춤 구성합니다.
           </p>
         </div>
-        <Link href="/interviews/jobs/new" className={buttonVariants({ size: 'sm' })}>
+        <Link
+          href="/interviews/jobs/new"
+          className="bg-iv-accent text-iv-accent-foreground hover:bg-iv-accent/90 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+        >
           <Plus className="size-4" />새 JD
         </Link>
       </div>
