@@ -27,26 +27,34 @@ function mapRow(row: FollowupRow): FollowupQuestion {
 
 export function getFollowupsByQuestionId(questionId: number): FollowupQuestion[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT id, question_id, question, answer, display_order, deleted_at, created_at, updated_at
     FROM followup_questions
     WHERE question_id = ? AND deleted_at IS NULL
     ORDER BY display_order
-  `).all(questionId) as FollowupRow[];
+  `
+    )
+    .all(questionId) as FollowupRow[];
 
   return rows.map(mapRow);
 }
 
 export function createFollowup(input: CreateFollowupInput): number {
   const db = getDb();
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     INSERT INTO followup_questions (question_id, question, answer, display_order)
     VALUES (?, ?, ?, COALESCE(
       (SELECT MAX(display_order) + 1 FROM followup_questions
        WHERE question_id = ? AND deleted_at IS NULL),
       0
     ))
-  `).run(input.questionId, input.question, input.answer, input.questionId);
+  `
+    )
+    .run(input.questionId, input.question, input.answer, input.questionId);
 
   return Number(result.lastInsertRowid);
 }

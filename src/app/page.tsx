@@ -1,6 +1,6 @@
-import { HeroSection } from "@/components/landing/hero-section";
-import { FeatureGrid } from "@/components/landing/feature-grid";
-import { TechStackBanner } from "@/components/landing/tech-stack-banner";
+import { FeatureGrid } from '@/components/landing/feature-grid';
+import { HeroSection } from '@/components/landing/hero-section';
+import { TechStackBanner } from '@/components/landing/tech-stack-banner';
 
 export default function LandingPage() {
   return (

@@ -23,10 +23,6 @@ interface QuestionRow {
   updated_at: string;
 }
 
-interface KeywordRow {
-  keyword: string;
-}
-
 interface FollowupRow {
   id: number;
   question_id: number;
@@ -38,37 +34,10 @@ interface FollowupRow {
   updated_at: string;
 }
 
-function loadKeywords(db: ReturnType<typeof getDb>, questionId: number): string[] {
-  const rows = db.prepare(
-    `SELECT keyword FROM question_keywords WHERE question_id = ?`
-  ).all(questionId) as KeywordRow[];
-  return rows.map((r) => r.keyword);
-}
-
-function loadFollowups(db: ReturnType<typeof getDb>, questionId: number): FollowupQuestion[] {
-  const rows = db.prepare(`
-    SELECT id, question_id, question, answer, display_order, deleted_at, created_at, updated_at
-    FROM followup_questions
-    WHERE question_id = ? AND deleted_at IS NULL
-    ORDER BY display_order
-  `).all(questionId) as FollowupRow[];
-
-  return rows.map((r) => ({
-    id: r.id,
-    questionId: r.question_id,
-    question: r.question,
-    answer: r.answer,
-    displayOrder: r.display_order,
-    deletedAt: r.deleted_at,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-  }));
-}
-
 function mapRow(
   row: QuestionRow,
   keywords: string[] = [],
-  followups: FollowupQuestion[] = [],
+  followups: FollowupQuestion[] = []
 ): InterviewQuestion {
   return {
     id: row.id,
@@ -90,16 +59,23 @@ function mapRow(
   };
 }
 
-interface BatchKeywordRow { question_id: number; keyword: string }
-interface BatchFollowupRow extends FollowupRow { question_id: number }
+interface BatchKeywordRow {
+  question_id: number;
+  keyword: string;
+}
+interface BatchFollowupRow extends FollowupRow {
+  question_id: number;
+}
 
 function batchLoadKeywords(db: ReturnType<typeof getDb>, ids: number[]): Map<number, string[]> {
   const map = new Map<number, string[]>();
   if (ids.length === 0) return map;
   const placeholders = ids.map(() => '?').join(',');
-  const rows = db.prepare(
-    `SELECT question_id, keyword FROM question_keywords WHERE question_id IN (${placeholders})`
-  ).all(...ids) as BatchKeywordRow[];
+  const rows = db
+    .prepare(
+      `SELECT question_id, keyword FROM question_keywords WHERE question_id IN (${placeholders})`
+    )
+    .all(...ids) as BatchKeywordRow[];
   for (const r of rows) {
     const arr = map.get(r.question_id) ?? [];
     arr.push(r.keyword);
@@ -108,16 +84,23 @@ function batchLoadKeywords(db: ReturnType<typeof getDb>, ids: number[]): Map<num
   return map;
 }
 
-function batchLoadFollowups(db: ReturnType<typeof getDb>, ids: number[]): Map<number, FollowupQuestion[]> {
+function batchLoadFollowups(
+  db: ReturnType<typeof getDb>,
+  ids: number[]
+): Map<number, FollowupQuestion[]> {
   const map = new Map<number, FollowupQuestion[]>();
   if (ids.length === 0) return map;
   const placeholders = ids.map(() => '?').join(',');
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT id, question_id, question, answer, display_order, deleted_at, created_at, updated_at
     FROM followup_questions
     WHERE question_id IN (${placeholders}) AND deleted_at IS NULL
     ORDER BY display_order
-  `).all(...ids) as BatchFollowupRow[];
+  `
+    )
+    .all(...ids) as BatchFollowupRow[];
   for (const r of rows) {
     const arr = map.get(r.question_id) ?? [];
     arr.push({
@@ -139,7 +122,9 @@ function mapRows(db: ReturnType<typeof getDb>, rows: QuestionRow[]): InterviewQu
   const ids = rows.map((r) => r.id);
   const keywordsMap = batchLoadKeywords(db, ids);
   const followupsMap = batchLoadFollowups(db, ids);
-  return rows.map((row) => mapRow(row, keywordsMap.get(row.id) ?? [], followupsMap.get(row.id) ?? []));
+  return rows.map((row) =>
+    mapRow(row, keywordsMap.get(row.id) ?? [], followupsMap.get(row.id) ?? [])
+  );
 }
 
 const BASE_SELECT = `
@@ -154,54 +139,70 @@ const BASE_SELECT = `
 
 export function getLibraryQuestions(): InterviewQuestion[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     ${BASE_SELECT}
     WHERE q.jd_id IS NULL AND q.deleted_at IS NULL
     ORDER BY c.display_order, q.display_order
-  `).all() as QuestionRow[];
+  `
+    )
+    .all() as QuestionRow[];
 
   return mapRows(db, rows);
 }
 
 export function getQuestionsByJdId(jdId: number): InterviewQuestion[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     ${BASE_SELECT}
     WHERE q.jd_id = ? AND q.deleted_at IS NULL
     ORDER BY c.display_order, q.display_order
-  `).all(jdId) as QuestionRow[];
+  `
+    )
+    .all(jdId) as QuestionRow[];
 
   return mapRows(db, rows);
 }
 
 export function getQuestionsByCategory(categoryId: number): InterviewQuestion[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     ${BASE_SELECT}
     WHERE q.category_id = ? AND q.deleted_at IS NULL
     ORDER BY q.display_order
-  `).all(categoryId) as QuestionRow[];
+  `
+    )
+    .all(categoryId) as QuestionRow[];
 
   return mapRows(db, rows);
 }
 
 export function createQuestion(input: CreateQuestionInput): number {
   const db = getDb();
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     INSERT INTO interview_questions (category_id, jd_id, question, answer, tip, display_order)
     VALUES (?, ?, ?, ?, ?, COALESCE(
       (SELECT MAX(display_order) + 1 FROM interview_questions
        WHERE category_id = ? AND deleted_at IS NULL),
       0
     ))
-  `).run(
-    input.categoryId,
-    input.jdId ?? null,
-    input.question,
-    input.answer,
-    input.tip ?? null,
-    input.categoryId,
-  );
+  `
+    )
+    .run(
+      input.categoryId,
+      input.jdId ?? null,
+      input.question,
+      input.answer,
+      input.tip ?? null,
+      input.categoryId
+    );
 
   return Number(result.lastInsertRowid);
 }
@@ -237,7 +238,9 @@ export function updateQuestion(input: UpdateQuestionInput): void {
 export function updateQuestionKeywords(questionId: number, keywords: string[]): void {
   const db = getDb();
   const deleteStmt = db.prepare('DELETE FROM question_keywords WHERE question_id = ?');
-  const insertStmt = db.prepare('INSERT INTO question_keywords (question_id, keyword) VALUES (?, ?)');
+  const insertStmt = db.prepare(
+    'INSERT INTO question_keywords (question_id, keyword) VALUES (?, ?)'
+  );
 
   const updateAll = db.transaction(() => {
     deleteStmt.run(questionId);

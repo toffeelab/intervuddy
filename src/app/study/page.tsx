@@ -1,8 +1,8 @@
-import { getLibraryQuestions, getGlobalCategories } from '@/data-access';
 import { InterviewHeader } from '@/components/study/interview-header';
-import { Sidebar } from '@/components/study/sidebar';
-import { SearchInput } from '@/components/study/search-input';
 import { QAList } from '@/components/study/qa-list';
+import { SearchInput } from '@/components/study/search-input';
+import { Sidebar } from '@/components/study/sidebar';
+import { getLibraryQuestions, getGlobalCategories } from '@/data-access';
 
 export default function StudyPage() {
   const items = getLibraryQuestions();
@@ -11,11 +11,11 @@ export default function StudyPage() {
   const allItemIds = items.map((item) => item.id);
 
   return (
-    <div className="min-h-screen bg-iv-bg text-iv-text">
+    <div className="bg-iv-bg text-iv-text min-h-screen">
       <InterviewHeader totalCount={items.length} allItemIds={allItemIds} />
-      <div className="grid grid-cols-[230px_1fr] min-h-[calc(100vh-57px)]">
+      <div className="grid min-h-[calc(100vh-57px)] grid-cols-[230px_1fr]">
         <Sidebar categories={categories} />
-        <main className="p-6 overflow-y-auto">
+        <main className="overflow-y-auto p-6">
           <SearchInput />
           <QAList items={items} />
         </main>

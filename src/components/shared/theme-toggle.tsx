@@ -21,9 +21,7 @@ export function ThemeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer"
-      >
+      <DropdownMenuTrigger className="hover:bg-accent hover:text-accent-foreground inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md">
         <CurrentIcon className="h-4 w-4" />
         <span className="sr-only">테마 변경</span>
       </DropdownMenuTrigger>

@@ -3,23 +3,23 @@
 import { useState, useTransition, useEffect } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import {
+  createFollowupAction,
+  updateFollowupAction,
+  deleteFollowupAction,
+} from '@/actions/followup-actions';
+import { updateQuestionAction, updateQuestionKeywordsAction } from '@/actions/question-actions';
+import { Button } from '@/components/ui/button';
+import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
   DrawerFooter,
 } from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import type { InterviewQuestion, InterviewCategory } from '@/data-access/types';
 import { useEditStore } from '@/stores/edit-store';
-import { updateQuestionAction, updateQuestionKeywordsAction } from '@/actions/question-actions';
-import {
-  createFollowupAction,
-  updateFollowupAction,
-  deleteFollowupAction,
-} from '@/actions/followup-actions';
-import type { InterviewQuestion, InterviewCategory, FollowupQuestion } from '@/data-access/types';
 
 interface Props {
   questions: InterviewQuestion[];
@@ -55,11 +55,11 @@ function KeywordEditor({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-1.5 min-h-[28px]">
+      <div className="flex min-h-[28px] flex-wrap gap-1.5">
         {keywords.map((kw) => (
           <span
             key={kw}
-            className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-iv-bg3 text-iv-text2 border border-iv-border"
+            className="bg-iv-bg3 text-iv-text2 border-iv-border flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs"
           >
             {kw}
             <button
@@ -71,9 +71,7 @@ function KeywordEditor({
             </button>
           </span>
         ))}
-        {keywords.length === 0 && (
-          <span className="text-xs text-iv-text3">키워드 없음</span>
-        )}
+        {keywords.length === 0 && <span className="text-iv-text3 text-xs">키워드 없음</span>}
       </div>
       <div className="flex gap-2">
         <Input
@@ -86,14 +84,14 @@ function KeywordEditor({
             }
           }}
           placeholder="키워드 입력 후 Enter"
-          className="h-7 text-xs bg-iv-bg border-iv-border"
+          className="bg-iv-bg border-iv-border h-7 text-xs"
         />
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={addKeyword}
-          className="shrink-0 h-7 text-xs"
+          className="h-7 shrink-0 text-xs"
         >
           <Plus className="size-3" />
           추가
@@ -126,32 +124,32 @@ function FollowupEditor({
   return (
     <div className="flex flex-col gap-3">
       {followups.map((f, i) => (
-        <div key={i} className="border border-iv-border rounded-lg p-3 bg-iv-bg relative">
+        <div key={i} className="border-iv-border bg-iv-bg relative rounded-lg border p-3">
           <button
             type="button"
             onClick={() => remove(i)}
-            className="absolute top-2 right-2 text-iv-text3 hover:text-iv-red transition-colors"
+            className="text-iv-text3 hover:text-iv-red absolute top-2 right-2 transition-colors"
           >
             <Trash2 className="size-3.5" />
           </button>
           <div className="flex flex-col gap-2 pr-6">
             <div>
-              <label className="text-xs text-iv-text3 mb-1 block">질문</label>
+              <label className="text-iv-text3 mb-1 block text-xs">질문</label>
               <Textarea
                 value={f.question}
                 onChange={(e) => update(i, 'question', e.target.value)}
                 rows={2}
-                className="text-xs bg-iv-bg2 border-iv-border resize-none"
+                className="bg-iv-bg2 border-iv-border resize-none text-xs"
                 placeholder="꼬리 질문"
               />
             </div>
             <div>
-              <label className="text-xs text-iv-text3 mb-1 block">답변</label>
+              <label className="text-iv-text3 mb-1 block text-xs">답변</label>
               <Textarea
                 value={f.answer}
                 onChange={(e) => update(i, 'answer', e.target.value)}
                 rows={2}
-                className="text-xs bg-iv-bg2 border-iv-border resize-none"
+                className="bg-iv-bg2 border-iv-border resize-none text-xs"
                 placeholder="답변"
               />
             </div>
@@ -163,7 +161,7 @@ function FollowupEditor({
         variant="outline"
         size="sm"
         onClick={add}
-        className="self-start h-7 text-xs border-iv-border text-iv-text2"
+        className="border-iv-border text-iv-text2 h-7 self-start text-xs"
       >
         <Plus className="size-3" />
         꼬리 질문 추가
@@ -213,9 +211,7 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
     }
 
     // Filter out empty followups
-    const validFollowups = formFollowups.filter(
-      (f) => f.question.trim() && f.answer.trim()
-    );
+    const validFollowups = formFollowups.filter((f) => f.question.trim() && f.answer.trim());
 
     startTransition(async () => {
       try {
@@ -245,7 +241,11 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
         // Update or create followups
         for (const f of validFollowups) {
           if (f.id && originalFollowupIds.has(f.id)) {
-            await updateFollowupAction({ id: f.id, question: f.question.trim(), answer: f.answer.trim() });
+            await updateFollowupAction({
+              id: f.id,
+              question: f.question.trim(),
+              answer: f.answer.trim(),
+            });
           } else if (!f.id) {
             await createFollowupAction({
               questionId: question.id,
@@ -267,19 +267,19 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
 
   return (
     <Drawer open={drawerOpen} onOpenChange={(open) => !open && closeDrawer()} direction="right">
-      <DrawerContent className="w-full sm:max-w-lg flex flex-col bg-iv-bg border-iv-border">
-        <DrawerHeader className="border-b border-iv-border px-5 py-4">
+      <DrawerContent className="bg-iv-bg border-iv-border flex w-full flex-col sm:max-w-lg">
+        <DrawerHeader className="border-iv-border border-b px-5 py-4">
           <DrawerTitle className="text-iv-text text-sm font-medium">질문 편집</DrawerTitle>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
           {/* Category */}
           <div>
-            <label className="text-xs text-iv-text3 mb-1.5 block font-medium">카테고리</label>
+            <label className="text-iv-text3 mb-1.5 block text-xs font-medium">카테고리</label>
             <select
               value={formCategoryId}
               onChange={(e) => setFormCategoryId(Number(e.target.value))}
-              className="w-full h-8 rounded-lg border border-iv-border bg-iv-bg2 px-2.5 text-sm text-iv-text focus:outline-none focus:border-iv-accent"
+              className="border-iv-border bg-iv-bg2 text-iv-text focus:border-iv-accent h-8 w-full rounded-lg border px-2.5 text-sm focus:outline-none"
             >
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -291,58 +291,63 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
 
           {/* Question */}
           <div>
-            <label className="text-xs text-iv-text3 mb-1.5 block font-medium">질문</label>
+            <label className="text-iv-text3 mb-1.5 block text-xs font-medium">질문</label>
             <Textarea
               value={formQuestion}
               onChange={(e) => setFormQuestion(e.target.value)}
               rows={3}
-              className="bg-iv-bg2 border-iv-border resize-none text-sm text-iv-text"
+              className="bg-iv-bg2 border-iv-border text-iv-text resize-none text-sm"
               placeholder="면접 질문을 입력하세요"
             />
           </div>
 
           {/* Answer */}
           <div>
-            <label className="text-xs text-iv-text3 mb-1.5 block font-medium">답변</label>
+            <label className="text-iv-text3 mb-1.5 block text-xs font-medium">답변</label>
             <Textarea
               value={formAnswer}
               onChange={(e) => setFormAnswer(e.target.value)}
               rows={5}
-              className="bg-iv-bg2 border-iv-border resize-none text-sm text-iv-text"
+              className="bg-iv-bg2 border-iv-border text-iv-text resize-none text-sm"
               placeholder="답변을 입력하세요"
             />
           </div>
 
           {/* Tip */}
           <div>
-            <label className="text-xs text-iv-text3 mb-1.5 block font-medium">팁 (선택)</label>
+            <label className="text-iv-text3 mb-1.5 block text-xs font-medium">팁 (선택)</label>
             <Textarea
               value={formTip}
               onChange={(e) => setFormTip(e.target.value)}
               rows={2}
-              className="bg-iv-bg2 border-iv-border resize-none text-sm text-iv-text"
+              className="bg-iv-bg2 border-iv-border text-iv-text resize-none text-sm"
               placeholder="답변 팁이나 포인트"
             />
           </div>
 
           {/* Keywords */}
           <div>
-            <label className="text-xs text-iv-text3 mb-1.5 block font-medium">키워드</label>
+            <label className="text-iv-text3 mb-1.5 block text-xs font-medium">키워드</label>
             <KeywordEditor keywords={formKeywords} onChange={setFormKeywords} />
           </div>
 
           {/* Followups */}
           <div>
-            <label className="text-xs text-iv-text3 mb-1.5 block font-medium">꼬리 질문</label>
+            <label className="text-iv-text3 mb-1.5 block text-xs font-medium">꼬리 질문</label>
             <FollowupEditor followups={formFollowups} onChange={setFormFollowups} />
           </div>
         </div>
 
-        <DrawerFooter className="border-t border-iv-border px-5 py-4">
-          {error && <p className="text-xs text-iv-red mb-2">{error}</p>}
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" size="sm" onClick={closeDrawer} disabled={isPending}
-              className="border-iv-border text-iv-text2">
+        <DrawerFooter className="border-iv-border border-t px-5 py-4">
+          {error && <p className="text-iv-red mb-2 text-xs">{error}</p>}
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={closeDrawer}
+              disabled={isPending}
+              className="border-iv-border text-iv-text2"
+            >
               취소
             </Button>
             <Button size="sm" onClick={handleSave} disabled={isPending}>

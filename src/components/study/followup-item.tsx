@@ -2,10 +2,10 @@
 
 import { useTransition } from 'react';
 import { Trash2 } from 'lucide-react';
-import { InlineEdit } from '@/components/shared/inline-edit';
 import { updateFollowupAction, deleteFollowupAction } from '@/actions/followup-actions';
-import { cn } from '@/lib/utils';
+import { InlineEdit } from '@/components/shared/inline-edit';
 import type { FollowupQuestion } from '@/data-access/types';
+import { cn } from '@/lib/utils';
 
 interface FollowupItemProps {
   item: FollowupQuestion;
@@ -29,10 +29,10 @@ export function FollowupItem({ item }: FollowupItemProps) {
   };
 
   return (
-    <div className={cn('space-y-1 group/followup', isPending && 'opacity-50')}>
+    <div className={cn('group/followup space-y-1', isPending && 'opacity-50')}>
       <div className="flex items-start gap-1">
-        <span className="text-[12px] text-[#a89ff5] mr-1 mt-0.5 shrink-0">↳</span>
-        <div className="flex-1 min-w-0">
+        <span className="mt-0.5 mr-1 shrink-0 text-[12px] text-[#a89ff5]">↳</span>
+        <div className="min-w-0 flex-1">
           <InlineEdit
             value={item.question}
             onSave={handleUpdateQuestion}
@@ -47,8 +47,8 @@ export function FollowupItem({ item }: FollowupItemProps) {
           onClick={handleDelete}
           disabled={isPending}
           className={cn(
-            'shrink-0 p-0.5 rounded text-iv-text3 opacity-0 group-hover/followup:opacity-100',
-            'hover:text-red-400 hover:bg-red-400/10 transition-all',
+            'text-iv-text3 shrink-0 rounded p-0.5 opacity-0 group-hover/followup:opacity-100',
+            'transition-all hover:bg-red-400/10 hover:text-red-400',
             isPending && 'cursor-wait'
           )}
           title="꼬리 질문 삭제"

@@ -1,5 +1,6 @@
-import db from './index';
+/* eslint-disable no-console */
 import { initializeDatabase } from './schema';
+import db from './index';
 
 const useSample = process.argv.includes('--sample');
 const dataSource = useSample ? '../../data/seed.sample' : '../../data/seed';
@@ -97,10 +98,18 @@ async function main() {
   insertAllQuestions();
 
   // Verify
-  const catCount = db.prepare('SELECT COUNT(*) as count FROM interview_categories').get() as { count: number };
-  const qCount = db.prepare('SELECT COUNT(*) as count FROM interview_questions').get() as { count: number };
-  const kwCount = db.prepare('SELECT COUNT(*) as count FROM question_keywords').get() as { count: number };
-  const fCount = db.prepare('SELECT COUNT(*) as count FROM followup_questions').get() as { count: number };
+  const catCount = db.prepare('SELECT COUNT(*) as count FROM interview_categories').get() as {
+    count: number;
+  };
+  const qCount = db.prepare('SELECT COUNT(*) as count FROM interview_questions').get() as {
+    count: number;
+  };
+  const kwCount = db.prepare('SELECT COUNT(*) as count FROM question_keywords').get() as {
+    count: number;
+  };
+  const fCount = db.prepare('SELECT COUNT(*) as count FROM followup_questions').get() as {
+    count: number;
+  };
 
   console.log('\nSeed complete!');
   console.log(`  Categories:  ${catCount.count}`);

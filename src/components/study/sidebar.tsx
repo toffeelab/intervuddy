@@ -1,12 +1,12 @@
 'use client';
 
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { StatGrid } from '@/components/study/stat-grid';
 import { KeywordTags } from '@/components/study/keyword-tags';
-import { useStudyStore } from '@/stores/study-store';
+import { StatGrid } from '@/components/study/stat-grid';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import type { InterviewCategory } from '@/data-access/types';
 import { CATEGORY_ALL, CATEGORY_ICON_BG } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import type { InterviewCategory } from '@/data-access/types';
+import { useStudyStore } from '@/stores/study-store';
 
 const JD_DISPLAY_NAMES: Record<string, string> = {
   'JD-실시간/통신': '실시간/통신 기술',
@@ -32,31 +32,31 @@ export function Sidebar({ categories }: SidebarProps) {
   const isActive = (name: string) => activeCategory === name;
 
   return (
-    <aside className="border-r border-iv-border bg-iv-bg2">
+    <aside className="border-iv-border bg-iv-bg2 border-r">
       <ScrollArea className="sticky top-[57px] h-[calc(100vh-57px)]">
-        <div className="p-3 space-y-1">
+        <div className="space-y-1 p-3">
           {/* All category */}
           <button
             onClick={() => setActiveCategory(CATEGORY_ALL)}
             className={cn(
-              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] transition-colors',
+              'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] transition-colors',
               isActive(CATEGORY_ALL)
                 ? 'bg-iv-accent/10 text-iv-accent'
                 : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
             )}
           >
-            <span className="flex items-center justify-center w-5 h-5 rounded bg-iv-accent/[0.07] text-[11px]">
+            <span className="bg-iv-accent/[0.07] flex h-5 w-5 items-center justify-center rounded text-[11px]">
               📋
             </span>
             <span className="flex-1 text-left font-medium">전체</span>
-            <span className="text-[10px] font-mono text-iv-text3">{totalCount}</span>
+            <span className="text-iv-text3 font-mono text-[10px]">{totalCount}</span>
           </button>
 
           {/* Divider */}
-          <div className="border-t border-iv-border my-2" />
+          <div className="border-iv-border my-2 border-t" />
 
           {/* Common categories section */}
-          <p className="px-2.5 pt-1 pb-1.5 text-[10px] font-mono text-iv-text3 uppercase tracking-wider">
+          <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
             🔵 공통 질문
           </p>
           {commonCategories.map((cat) => (
@@ -64,7 +64,7 @@ export function Sidebar({ categories }: SidebarProps) {
               key={cat.id}
               onClick={() => setActiveCategory(cat.name)}
               className={cn(
-                'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] transition-colors',
+                'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] transition-colors',
                 isActive(cat.name)
                   ? 'bg-iv-accent/10 text-iv-accent'
                   : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
@@ -72,22 +72,22 @@ export function Sidebar({ categories }: SidebarProps) {
             >
               <span
                 className={cn(
-                  'flex items-center justify-center w-5 h-5 rounded text-[11px]',
+                  'flex h-5 w-5 items-center justify-center rounded text-[11px]',
                   CATEGORY_ICON_BG[cat.name] ?? 'bg-iv-bg3'
                 )}
               >
                 {cat.icon}
               </span>
               <span className="flex-1 text-left">{cat.name}</span>
-              <span className="text-[10px] font-mono text-iv-text3">{cat.questionCount}</span>
+              <span className="text-iv-text3 font-mono text-[10px]">{cat.questionCount}</span>
             </button>
           ))}
 
           {/* Divider */}
-          <div className="border-t border-iv-border my-2" />
+          <div className="border-iv-border my-2 border-t" />
 
           {/* JD categories section */}
-          <p className="px-2.5 pt-1 pb-1.5 text-[10px] font-mono text-iv-text3 uppercase tracking-wider">
+          <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
             🟡 JD 맞춤
           </p>
           {jdCategories.map((cat) => (
@@ -95,7 +95,7 @@ export function Sidebar({ categories }: SidebarProps) {
               key={cat.id}
               onClick={() => setActiveCategory(cat.name)}
               className={cn(
-                'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] transition-colors',
+                'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] transition-colors',
                 isActive(cat.name)
                   ? 'bg-iv-jd/[0.08] text-iv-jd'
                   : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
@@ -103,7 +103,7 @@ export function Sidebar({ categories }: SidebarProps) {
             >
               <span
                 className={cn(
-                  'flex items-center justify-center w-5 h-5 rounded text-[11px]',
+                  'flex h-5 w-5 items-center justify-center rounded text-[11px]',
                   CATEGORY_ICON_BG[cat.name] ?? 'bg-iv-bg3'
                 )}
               >
@@ -112,18 +112,18 @@ export function Sidebar({ categories }: SidebarProps) {
               <span className="flex-1 text-left">
                 {JD_DISPLAY_NAMES[cat.name] ?? cat.name.replace('JD-', '')}
               </span>
-              <span className="text-[10px] font-mono text-iv-text3">{cat.questionCount}</span>
+              <span className="text-iv-text3 font-mono text-[10px]">{cat.questionCount}</span>
             </button>
           ))}
 
           {/* Divider */}
-          <div className="border-t border-iv-border my-2" />
+          <div className="border-iv-border my-2 border-t" />
 
           {/* Stats */}
           <StatGrid />
 
           {/* Divider */}
-          <div className="border-t border-iv-border my-2" />
+          <div className="border-iv-border my-2 border-t" />
 
           {/* JD Keywords */}
           <KeywordTags />

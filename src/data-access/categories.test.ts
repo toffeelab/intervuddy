@@ -1,6 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Database from 'better-sqlite3';
-import { createTestDb, cleanupTestDb, seedTestCategories, seedTestJobDescription } from '@/test/helpers/db';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import {
+  createTestDb,
+  cleanupTestDb,
+  seedTestCategories,
+  seedTestJobDescription,
+} from '@/test/helpers/db';
 import {
   getGlobalCategories,
   getCategoriesByJdId,

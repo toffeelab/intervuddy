@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Database from 'better-sqlite3';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createTestDb, cleanupTestDb, seedTestQuestions } from '@/test/helpers/db';
 import {
   getFollowupsByQuestionId,

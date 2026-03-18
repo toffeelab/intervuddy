@@ -1,10 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import Database from 'better-sqlite3';
-import { createTestDb, cleanupTestDb, seedTestCategories, seedTestQuestions } from '@/test/helpers/db';
-
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
-
-import { revalidatePath } from 'next/cache';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { getLibraryQuestions, getDeletedQuestions } from '@/data-access/questions';
+import {
+  createTestDb,
+  cleanupTestDb,
+  seedTestCategories,
+  seedTestQuestions,
+} from '@/test/helpers/db';
 import {
   createQuestionAction,
   updateQuestionAction,
@@ -12,10 +14,11 @@ import {
   restoreQuestionAction,
   updateQuestionKeywordsAction,
 } from './question-actions';
-import {
-  getLibraryQuestions,
-  getDeletedQuestions,
-} from '@/data-access/questions';
+
+const { mockRevalidatePath } = vi.hoisted(() => ({
+  mockRevalidatePath: vi.fn(),
+}));
+vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
 
 describe('question-actions', () => {
   let db: Database.Database;
@@ -67,9 +70,9 @@ describe('question-actions', () => {
         answer: '답변',
       });
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -89,9 +92,9 @@ describe('question-actions', () => {
 
       await updateQuestionAction({ id: 1, question: '수정된 질문' });
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -112,9 +115,9 @@ describe('question-actions', () => {
 
       await deleteQuestionAction(1);
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -136,9 +139,9 @@ describe('question-actions', () => {
 
       await restoreQuestionAction(1);
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -169,9 +172,9 @@ describe('question-actions', () => {
 
       await updateQuestionKeywordsAction(1, ['키워드']);
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 });

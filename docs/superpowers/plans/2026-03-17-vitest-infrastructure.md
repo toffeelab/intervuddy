@@ -15,6 +15,7 @@
 ### Task 1: 패키지 설치 및 기본 설정
 
 **Files:**
+
 - Modify: `package.json` (devDependencies, scripts)
 - Create: `vitest.config.ts`
 - Create: `src/test/setup.ts`
@@ -51,9 +52,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    environmentMatchGlobs: [
-      ['src/components/**/*.test.tsx', 'jsdom'],
-    ],
+    environmentMatchGlobs: [['src/components/**/*.test.tsx', 'jsdom']],
     setupFiles: ['src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
   },
@@ -86,6 +85,7 @@ git commit -m "chore: add vitest and testing library dependencies"
 ### Task 2: DB 레이어 리팩토링 (DI 지원)
 
 **Files:**
+
 - Modify: `src/db/index.ts`
 
 - [ ] **Step 1: src/db/index.ts를 DI 지원 구조로 변경**
@@ -153,6 +153,7 @@ git commit -m "refactor: add DI support to db layer with Proxy for backward comp
 ### Task 3: data-access 레이어 리팩토링 (lazy prepared statements)
 
 **Files:**
+
 - Modify: `src/data-access/qa.ts`
 
 - [ ] **Step 1: qa.ts를 lazy prepared statement 방식으로 변경**
@@ -202,7 +203,9 @@ interface CategoryRow {
 export function getAllQAItems(): QAItem[] {
   const db = getDb();
 
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT
       qi.id,
       qi.category_id,
@@ -219,19 +222,25 @@ export function getAllQAItems(): QAItem[] {
     FROM qa_items qi
     JOIN categories c ON c.id = qi.category_id
     ORDER BY c.display_order, qi.display_order
-  `).all() as QAItemRow[];
+  `
+    )
+    .all() as QAItemRow[];
 
   const keywordsStmt = db.prepare(`SELECT keyword FROM qa_keywords WHERE qa_item_id = ?`);
-  const deepQAStmt = db.prepare(`SELECT id, question, answer FROM deep_qa WHERE qa_item_id = ? ORDER BY display_order`);
+  const deepQAStmt = db.prepare(
+    `SELECT id, question, answer FROM deep_qa WHERE qa_item_id = ? ORDER BY display_order`
+  );
 
   return rows.map((row) => {
     const keywords = (keywordsStmt.all(row.id) as KeywordRow[]).map((k) => k.keyword);
 
-    const deepQA = (deepQAStmt.all(row.id) as DeepQARow[]).map((d): DeepQA => ({
-      id: d.id,
-      question: d.question,
-      answer: d.answer,
-    }));
+    const deepQA = (deepQAStmt.all(row.id) as DeepQARow[]).map(
+      (d): DeepQA => ({
+        id: d.id,
+        question: d.question,
+        answer: d.answer,
+      })
+    );
 
     return {
       id: row.id,
@@ -253,7 +262,9 @@ export function getAllQAItems(): QAItem[] {
 export function getCategories(): Category[] {
   const db = getDb();
 
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT
       c.id,
       c.name,
@@ -267,7 +278,9 @@ export function getCategories(): Category[] {
     LEFT JOIN qa_items qi ON qi.category_id = c.id
     GROUP BY c.id
     ORDER BY c.display_order
-  `).all() as CategoryRow[];
+  `
+    )
+    .all() as CategoryRow[];
 
   return rows.map((row) => ({
     id: row.id,
@@ -302,6 +315,7 @@ git commit -m "refactor: lazy prepared statements in data-access for test DI sup
 ### Task 4: 테스트 헬퍼 생성
 
 **Files:**
+
 - Create: `src/test/helpers/db.ts`
 
 - [ ] **Step 1: src/test/helpers/db.ts 생성**
@@ -352,6 +366,7 @@ git commit -m "chore: add test helper for in-memory SQLite DB setup"
 ### Task 5: 유틸리티 레이어 샘플 테스트
 
 **Files:**
+
 - Create: `src/lib/utils.test.ts`
 
 - [ ] **Step 1: 실패하는 테스트 작성**
@@ -395,6 +410,7 @@ git commit -m "test: add unit tests for cn utility"
 ### Task 6: data-access 레이어 샘플 테스트
 
 **Files:**
+
 - Create: `src/data-access/qa.test.ts`
 
 - [ ] **Step 1: 테스트 작성**
@@ -489,6 +505,7 @@ git commit -m "test: add data-access layer tests for getAllQAItems and getCatego
 ### Task 7: React 컴포넌트 레이어 샘플 테스트
 
 **Files:**
+
 - Create: `src/components/interview/tip-box.test.tsx`
 
 참고: `TipBox`는 서버/클라이언트 구분 없는 순수 렌더링 컴포넌트이므로 컴포넌트 테스트 대상으로 적합하다.

@@ -1,27 +1,27 @@
-import type { Metadata } from "next";
-import { Noto_Sans_KR, JetBrains_Mono } from "next/font/google";
-import { ThemeScript } from "@/components/shared/theme-script";
-import { ThemeProvider } from "@/components/shared/theme-provider";
-import "./globals.css";
+import { Noto_Sans_KR, JetBrains_Mono } from 'next/font/google';
+import type { Metadata } from 'next';
+import { ThemeProvider } from '@/components/shared/theme-provider';
+import { ThemeScript } from '@/components/shared/theme-script';
+import './globals.css';
 
 const notoSansKR = Noto_Sans_KR({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  display: "swap",
+  variable: '--font-sans',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
+  display: 'swap',
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
+  variable: '--font-mono',
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "Intervuddy — 면접 준비 도우미",
+  title: 'Intervuddy — 면접 준비 도우미',
   description:
-    "AI 기반 면접 준비 도우미. 자기소개서 분석, 예상 질문 생성, 모의 면접 연습으로 체계적인 면접 준비를 도와드립니다.",
+    'AI 기반 면접 준비 도우미. 자기소개서 분석, 예상 질문 생성, 모의 면접 연습으로 체계적인 면접 준비를 도와드립니다.',
 };
 
 export default function RootLayout({
@@ -35,7 +35,7 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body
-        className={`${notoSansKR.variable} ${jetbrainsMono.variable} antialiased min-h-screen bg-iv-bg text-iv-text`}
+        className={`${notoSansKR.variable} ${jetbrainsMono.variable} bg-iv-bg text-iv-text min-h-screen antialiased`}
       >
         <ThemeProvider>{children}</ThemeProvider>
       </body>

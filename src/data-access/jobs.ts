@@ -1,10 +1,5 @@
 import { getDb } from '@/db/index';
-import type {
-  JobDescription,
-  JobDescriptionStatus,
-  CreateJobInput,
-  UpdateJobInput,
-} from './types';
+import type { JobDescription, JobDescriptionStatus, CreateJobInput, UpdateJobInput } from './types';
 
 interface JobRow {
   id: number;
@@ -43,31 +38,43 @@ const BASE_SELECT = `
 
 export function getAllJobs(): JobDescription[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     ${BASE_SELECT}
     WHERE j.deleted_at IS NULL
     ORDER BY j.created_at DESC
-  `).all() as JobRow[];
+  `
+    )
+    .all() as JobRow[];
 
   return rows.map(mapRow);
 }
 
 export function getJobById(id: number): JobDescription | null {
   const db = getDb();
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     ${BASE_SELECT}
     WHERE j.id = ? AND j.deleted_at IS NULL
-  `).get(id) as JobRow | undefined;
+  `
+    )
+    .get(id) as JobRow | undefined;
 
   return row ? mapRow(row) : null;
 }
 
 export function createJob(input: CreateJobInput): number {
   const db = getDb();
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     INSERT INTO job_descriptions (company_name, position_title, memo)
     VALUES (?, ?, ?)
-  `).run(input.companyName, input.positionTitle, input.memo ?? null);
+  `
+    )
+    .run(input.companyName, input.positionTitle, input.memo ?? null);
 
   return Number(result.lastInsertRowid);
 }
@@ -117,11 +124,15 @@ export function restoreJob(id: number): void {
 
 export function getDeletedJobs(): JobDescription[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     ${BASE_SELECT}
     WHERE j.deleted_at IS NOT NULL
     ORDER BY j.deleted_at DESC
-  `).all() as JobRow[];
+  `
+    )
+    .all() as JobRow[];
 
   return rows.map(mapRow);
 }

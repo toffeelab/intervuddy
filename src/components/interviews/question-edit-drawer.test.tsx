@@ -1,16 +1,16 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { QuestionEditDrawer } from './question-edit-drawer';
-import { useEditStore } from '@/stores/edit-store';
-import { updateQuestionAction, updateQuestionKeywordsAction } from '@/actions/question-actions';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   createFollowupAction,
   updateFollowupAction,
   deleteFollowupAction,
 } from '@/actions/followup-actions';
+import { updateQuestionAction, updateQuestionKeywordsAction } from '@/actions/question-actions';
 import type { InterviewQuestion, InterviewCategory } from '@/data-access/types';
+import { useEditStore } from '@/stores/edit-store';
+import { QuestionEditDrawer } from './question-edit-drawer';
 
 // Mock all server actions
 vi.mock('@/actions/question-actions', () => ({
@@ -48,9 +48,7 @@ vi.mock('@/components/ui/input', () => ({
   Input: vi.fn((props: React.ComponentPropsWithRef<'input'>) => <input {...props} />),
 }));
 vi.mock('@/components/ui/textarea', () => ({
-  Textarea: vi.fn((props: React.ComponentPropsWithRef<'textarea'>) => (
-    <textarea {...props} />
-  )),
+  Textarea: vi.fn((props: React.ComponentPropsWithRef<'textarea'>) => <textarea {...props} />),
 }));
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -258,9 +256,7 @@ describe('QuestionEditDrawer', () => {
       fireEvent.click(getSaveButton());
 
       await waitFor(() => {
-        expect(
-          screen.queryByText('질문과 답변은 필수 입력입니다')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText('질문과 답변은 필수 입력입니다')).not.toBeInTheDocument();
         expect(
           screen.queryByText('저장에 실패했습니다. 다시 시도해주세요.')
         ).not.toBeInTheDocument();
@@ -334,9 +330,7 @@ describe('QuestionEditDrawer', () => {
       fireEvent.click(getSaveButton());
 
       await waitFor(() => {
-        expect(
-          screen.getByText('저장에 실패했습니다. 다시 시도해주세요.')
-        ).toBeInTheDocument();
+        expect(screen.getByText('저장에 실패했습니다. 다시 시도해주세요.')).toBeInTheDocument();
       });
     });
 
@@ -350,9 +344,7 @@ describe('QuestionEditDrawer', () => {
       fireEvent.click(getSaveButton());
 
       await waitFor(() => {
-        expect(
-          screen.getByText('저장에 실패했습니다. 다시 시도해주세요.')
-        ).toBeInTheDocument();
+        expect(screen.getByText('저장에 실패했습니다. 다시 시도해주세요.')).toBeInTheDocument();
       });
 
       expect(mockCloseDrawer).not.toHaveBeenCalled();

@@ -1,17 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import Database from 'better-sqlite3';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { getGlobalCategories } from '@/data-access/categories';
 import { createTestDb, cleanupTestDb, seedTestCategories } from '@/test/helpers/db';
-
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
-
-import { revalidatePath } from 'next/cache';
 import {
   createCategoryAction,
   updateCategoryAction,
   deleteCategoryAction,
   restoreCategoryAction,
 } from './category-actions';
-import { getGlobalCategories } from '@/data-access/categories';
+
+const { mockRevalidatePath } = vi.hoisted(() => ({
+  mockRevalidatePath: vi.fn(),
+}));
+vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
 
 describe('category-actions', () => {
   let db: Database.Database;
@@ -79,9 +80,9 @@ describe('category-actions', () => {
         icon: '🧪',
       });
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -114,9 +115,9 @@ describe('category-actions', () => {
 
       await updateCategoryAction(1, { name: '수정' });
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -137,7 +138,9 @@ describe('category-actions', () => {
 
       await deleteCategoryAction(1);
 
-      interface CategoryDeletedRow { deleted_at: string | null }
+      interface CategoryDeletedRow {
+        deleted_at: string | null;
+      }
       const row = db
         .prepare('SELECT deleted_at FROM interview_categories WHERE id = ?')
         .get(1) as CategoryDeletedRow;
@@ -149,9 +152,9 @@ describe('category-actions', () => {
 
       await deleteCategoryAction(1);
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -172,7 +175,9 @@ describe('category-actions', () => {
 
       await restoreCategoryAction(1);
 
-      interface CategoryDeletedRow { deleted_at: string | null }
+      interface CategoryDeletedRow {
+        deleted_at: string | null;
+      }
       const row = db
         .prepare('SELECT deleted_at FROM interview_categories WHERE id = ?')
         .get(1) as CategoryDeletedRow;
@@ -185,9 +190,9 @@ describe('category-actions', () => {
 
       await restoreCategoryAction(1);
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 });

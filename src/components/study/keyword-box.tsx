@@ -8,7 +8,7 @@ export function KeywordBox({ keywords }: KeywordBoxProps) {
       {keywords.map((keyword) => (
         <span
           key={keyword}
-          className="bg-iv-bg3 border border-iv-border2 text-iv-text3 text-[10px] font-mono px-1.5 py-0.5 rounded"
+          className="bg-iv-bg3 border-iv-border2 text-iv-text3 rounded border px-1.5 py-0.5 font-mono text-[10px]"
         >
           {keyword}
         </span>
