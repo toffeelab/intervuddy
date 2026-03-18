@@ -1,5 +1,5 @@
-import Database from 'better-sqlite3';
 import path from 'path';
+import Database from 'better-sqlite3';
 
 const DB_PATH = path.join(process.cwd(), 'intervuddy.db');
 

@@ -21,14 +21,14 @@ export function SearchInput() {
 
   return (
     <div className="relative mb-5 max-w-md">
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-iv-text3 text-sm pointer-events-none">
+      <span className="text-iv-text3 pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm">
         🔍
       </span>
       <Input
         type="text"
         placeholder="질문 또는 키워드 검색..."
         onChange={handleChange}
-        className="pl-9 bg-iv-bg2 border-iv-border text-iv-text placeholder:text-iv-text3 text-[13px] h-9 rounded-lg focus-visible:ring-iv-accent/30"
+        className="bg-iv-bg2 border-iv-border text-iv-text placeholder:text-iv-text3 focus-visible:ring-iv-accent/30 h-9 rounded-lg pl-9 text-[13px]"
       />
     </div>
   );

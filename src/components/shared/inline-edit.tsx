@@ -1,8 +1,8 @@
 'use client';
 
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 interface InlineEditProps {
@@ -120,10 +120,10 @@ export function InlineEdit({
           }
         }}
         className={cn(
-          'cursor-pointer rounded-md px-1 py-0.5 -mx-1',
+          '-mx-1 cursor-pointer rounded-md px-1 py-0.5',
           'hover:bg-iv-bg2 transition-colors',
           disabled && 'cursor-default hover:bg-transparent',
-          isSaving && 'opacity-60 cursor-wait',
+          isSaving && 'cursor-wait opacity-60',
           textClassName,
           className
         )}
@@ -153,23 +153,13 @@ export function InlineEdit({
   return (
     <div className="relative w-full">
       {multiline ? (
-        <Textarea
-          {...sharedProps}
-          ref={inputRef as React.Ref<HTMLTextAreaElement>}
-        />
+        <Textarea {...sharedProps} ref={inputRef as React.Ref<HTMLTextAreaElement>} />
       ) : (
-        <Input
-          {...sharedProps}
-          ref={inputRef as React.Ref<HTMLInputElement>}
-        />
+        <Input {...sharedProps} ref={inputRef as React.Ref<HTMLInputElement>} />
       )}
-      {error && (
-        <p className="mt-1 text-xs text-iv-red">{error}</p>
-      )}
-      <p className="mt-1 text-xs text-iv-text3">
-        {isSaving
-          ? '저장 중...'
-          : 'Ctrl+Enter로 저장, Esc로 취소'}
+      {error && <p className="text-iv-red mt-1 text-xs">{error}</p>}
+      <p className="text-iv-text3 mt-1 text-xs">
+        {isSaving ? '저장 중...' : 'Ctrl+Enter로 저장, Esc로 취소'}
       </p>
     </div>
   );

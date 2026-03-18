@@ -5,8 +5,12 @@ const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    clear: () => { store = {}; },
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    clear: () => {
+      store = {};
+    },
   };
 })();
 Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock });
@@ -33,18 +37,23 @@ describe('theme-store', () => {
   });
 
   it('system 모드는 시스템 설정을 따름', () => {
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({
-      matches: true,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })
+    );
     useThemeStore.getState().setMode('system');
     expect(useThemeStore.getState().mode).toBe('system');
   });
 
   it('localStorage 실패 시에도 테마 변경은 동작', () => {
     const originalSetItem = localStorageMock.setItem;
-    localStorageMock.setItem = () => { throw new Error('SecurityError'); };
+    localStorageMock.setItem = () => {
+      throw new Error('SecurityError');
+    };
 
     expect(() => useThemeStore.getState().setMode('light')).not.toThrow();
     expect(useThemeStore.getState().mode).toBe('light');

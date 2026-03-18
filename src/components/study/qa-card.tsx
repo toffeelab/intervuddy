@@ -1,10 +1,10 @@
 'use client';
 
-import { useStudyStore } from '@/stores/study-store';
-import { TAG_COLORS } from '@/lib/constants';
-import { cn } from '@/lib/utils';
 import { QAAnswer } from '@/components/study/qa-answer';
 import type { InterviewQuestion } from '@/data-access/types';
+import { TAG_COLORS } from '@/lib/constants';
+import { cn } from '@/lib/utils';
+import { useStudyStore } from '@/stores/study-store';
 
 interface QACardProps {
   item: InterviewQuestion;
@@ -27,38 +27,29 @@ export function QACard({ item, index }: QACardProps) {
     : 'border-iv-border';
 
   return (
-    <div
-      className={cn(
-        'bg-iv-bg2 border rounded-[10px] transition-colors',
-        borderColor
-      )}
-    >
+    <div className={cn('bg-iv-bg2 rounded-[10px] border transition-colors', borderColor)}>
       <button
         type="button"
         onClick={() => toggleCard(item.id)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left"
+        className="flex w-full items-center gap-3 px-4 py-3 text-left"
       >
-        <span className="font-mono text-[11px] text-iv-text3 shrink-0 w-7">
-          Q{index}
-        </span>
-        <span className="flex-1 text-[13px] text-iv-text leading-snug">
-          {item.question}
-        </span>
-        <div className="flex items-center gap-1.5 shrink-0">
+        <span className="text-iv-text3 w-7 shrink-0 font-mono text-[11px]">Q{index}</span>
+        <span className="text-iv-text flex-1 text-[13px] leading-snug">{item.question}</span>
+        <div className="flex shrink-0 items-center gap-1.5">
           {item.jdId !== null && (
-            <span className="px-1.5 py-0.5 text-[9px] font-mono rounded bg-iv-jd/10 text-iv-jd border border-iv-jd/20">
+            <span className="bg-iv-jd/10 text-iv-jd border-iv-jd/20 rounded border px-1.5 py-0.5 font-mono text-[9px]">
               JD
             </span>
           )}
           {item.followups.length > 0 && (
-            <span className="px-1.5 py-0.5 text-[9px] font-mono rounded bg-iv-accent2/10 text-[#a89ff5] border border-iv-accent2/20">
+            <span className="bg-iv-accent2/10 border-iv-accent2/20 rounded border px-1.5 py-0.5 font-mono text-[9px] text-[#a89ff5]">
               꼬리질문
             </span>
           )}
           {tagColor && (
             <span
               className={cn(
-                'px-1.5 py-0.5 text-[9px] font-mono rounded border',
+                'rounded border px-1.5 py-0.5 font-mono text-[9px]',
                 tagColor.bg,
                 tagColor.text,
                 tagColor.border
@@ -70,7 +61,7 @@ export function QACard({ item, index }: QACardProps) {
           <span
             className={cn(
               'text-[11px] transition-transform duration-200',
-              isOpen ? 'rotate-180 text-iv-accent' : 'text-iv-text3'
+              isOpen ? 'text-iv-accent rotate-180' : 'text-iv-text3'
             )}
           >
             ▼
@@ -79,8 +70,8 @@ export function QACard({ item, index }: QACardProps) {
       </button>
 
       {isOpen && (
-        <div className="px-4 pb-4 pt-0">
-          <div className="border-t border-iv-border pt-3 ml-10">
+        <div className="px-4 pt-0 pb-4">
+          <div className="border-iv-border ml-10 border-t pt-3">
             <QAAnswer item={item} />
           </div>
         </div>

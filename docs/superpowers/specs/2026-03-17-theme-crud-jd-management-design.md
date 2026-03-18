@@ -18,18 +18,18 @@ Intervuddy에 다음 4가지 기능을 추가한다:
 
 ## 2. 설계 결정 요약
 
-| 결정 사항 | 선택 | 근거 |
-|-----------|------|------|
-| JD 모델 | 특정 채용 공고를 독립 엔티티로 관리 | 회사명, 포지션 등 메타데이터 포함 |
-| 카테고리 구조 | 공통 카테고리 풀 공유 + JD별 커스텀 추가 | 유연성과 재사용성 균형 |
-| 라이브러리 ↔ JD 관계 | 복사(copy) 방식 | 면접 답변은 회사별로 커스텀해야 함 |
-| CRUD UI 위치 | `/interviews/*` 관리 페이지 + `/study` 인라인 편집 | 읽기/편집 경험 분리 |
-| 인라인 편집 범위 | 루트 질문/답변/팁, 꼬리질문/답변 텍스트만 | 구조적 변경은 드로어에서 |
-| 라이트 모드 톤 | 클린 화이트 (A) | 가독성, 범용성 |
-| 휴지통 | 소속 기반 (각 컨텍스트 내 토글) | 삭제 위치에서 복구가 자연스러움 |
-| 소프트 삭제 보관 기간 | 30일 기본, 파라미터화 | 향후 요금제별 차별화 가능 |
-| DB 접근법 | 스키마 리디자인 (v2) | 프로젝트 초기, 프로덕션 데이터 없음 |
-| 테마 토글 위치 | 헤더 우측 상단 아이콘 | 접근성, 일반적 패턴 |
+| 결정 사항             | 선택                                               | 근거                                |
+| --------------------- | -------------------------------------------------- | ----------------------------------- |
+| JD 모델               | 특정 채용 공고를 독립 엔티티로 관리                | 회사명, 포지션 등 메타데이터 포함   |
+| 카테고리 구조         | 공통 카테고리 풀 공유 + JD별 커스텀 추가           | 유연성과 재사용성 균형              |
+| 라이브러리 ↔ JD 관계  | 복사(copy) 방식                                    | 면접 답변은 회사별로 커스텀해야 함  |
+| CRUD UI 위치          | `/interviews/*` 관리 페이지 + `/study` 인라인 편집 | 읽기/편집 경험 분리                 |
+| 인라인 편집 범위      | 루트 질문/답변/팁, 꼬리질문/답변 텍스트만          | 구조적 변경은 드로어에서            |
+| 라이트 모드 톤        | 클린 화이트 (A)                                    | 가독성, 범용성                      |
+| 휴지통                | 소속 기반 (각 컨텍스트 내 토글)                    | 삭제 위치에서 복구가 자연스러움     |
+| 소프트 삭제 보관 기간 | 30일 기본, 파라미터화                              | 향후 요금제별 차별화 가능           |
+| DB 접근법             | 스키마 리디자인 (v2)                               | 프로젝트 초기, 프로덕션 데이터 없음 |
+| 테마 토글 위치        | 헤더 우측 상단 아이콘                              | 접근성, 일반적 패턴                 |
 
 ### 향후 확장 고려 사항 (이번 스펙 범위 밖)
 
@@ -45,16 +45,16 @@ Intervuddy에 다음 4가지 기능을 추가한다:
 
 ### 3.1 네이밍 원칙
 
-| 기존 | 변경 | 근거 |
-|------|------|------|
-| `jds` | `job_descriptions` | 약어 → 도메인 전체 용어 |
-| `categories` | `interview_categories` | 도메인 명시 |
-| `qa_items` | `interview_questions` | 핵심 엔티티 명확화 |
-| `qa_keywords` | `question_keywords` | 소속 엔티티 명확화 |
-| `deep_qa` | `followup_questions` | 꼬리질문 도메인 용어 |
-| `tag` / `tag_label` | `slug` / `display_label` | 역할 명확화 |
-| `company` / `position` | `company_name` / `position_title` | 구체적 필드명 |
-| `source_id` | `origin_question_id` | 복사 원본 추적 의미 명확화 |
+| 기존                   | 변경                              | 근거                       |
+| ---------------------- | --------------------------------- | -------------------------- |
+| `jds`                  | `job_descriptions`                | 약어 → 도메인 전체 용어    |
+| `categories`           | `interview_categories`            | 도메인 명시                |
+| `qa_items`             | `interview_questions`             | 핵심 엔티티 명확화         |
+| `qa_keywords`          | `question_keywords`               | 소속 엔티티 명확화         |
+| `deep_qa`              | `followup_questions`              | 꼬리질문 도메인 용어       |
+| `tag` / `tag_label`    | `slug` / `display_label`          | 역할 명확화                |
+| `company` / `position` | `company_name` / `position_title` | 구체적 필드명              |
+| `source_id`            | `origin_question_id`              | 복사 원본 추적 의미 명확화 |
 
 ### 3.2 제거되는 레거시 필드
 
@@ -257,18 +257,21 @@ WHERE deleted_at IS NOT NULL
 ### 4.2 각 페이지 역할
 
 **`/interviews` (JD 대시보드)**
+
 - JD 카드 목록 (회사명, 포지션, 상태 뱃지, 질문 수)
 - 상태별 필터 (진행중 / 완료 / 보관)
 - "삭제된 JD 보기" 토글 → 소프트 삭제된 JD 표시 + 복구 버튼
 - "새 JD 만들기" 버튼
 
 **`/interviews/questions` (공통 라이브러리)**
+
 - 카테고리별 질문 리스트
 - 질문 CRUD (추가/수정/삭제)
 - "삭제된 질문 보기" 토글
 - 카테고리 관리 (추가/수정/삭제)
 
 **`/interviews/jobs/new` (JD 생성)**
+
 - 메타정보 입력 (회사명, 포지션, 메모)
 - "질문 가져오기" 스텝 (선택사항, 건너뛰기 가능)
   - 카테고리 필터 + 검색
@@ -276,6 +279,7 @@ WHERE deleted_at IS NOT NULL
   - "카테고리 전체 가져오기" 버튼
 
 **`/interviews/jobs/[id]` (JD 상세)**
+
 - 상단: JD 메타정보 (회사명, 포지션, 상태, 메모)
 - 본문: 카테고리별 질문 리스트
 - "질문 가져오기" 버튼 → 라이브러리 모달 (이미 가져온 질문은 뱃지 표시)
@@ -284,6 +288,7 @@ WHERE deleted_at IS NOT NULL
 - 개별 질문 편집은 드로어
 
 **`/study` (학습 뷰)**
+
 - 기존 읽기 뷰 유지
 - JD 선택 드롭다운 추가 (공통 라이브러리 / 각 JD)
 - 간편 편집:
@@ -296,6 +301,7 @@ WHERE deleted_at IS NOT NULL
 ### 4.3 레이아웃 구조
 
 **`/study` 레이아웃** — 독립 레이아웃 (기존 interview 레이아웃 계승)
+
 ```
 ┌─────────────────────────────────────────────┐
 │ 헤더              [JD선택] [테마토글]         │
@@ -308,6 +314,7 @@ WHERE deleted_at IS NOT NULL
 ```
 
 **`/interviews/*` 레이아웃** — 관리 전용 레이아웃 (별도)
+
 ```
 ┌─────────────────────────────────────────────┐
 │ 헤더                    [테마토글] [사용자]   │
@@ -378,15 +385,18 @@ src/components/
 ### 5.2 인라인 편집 상세
 
 **간편 편집 모드 (루트 질문)**
+
 - 질문/답변/팁 텍스트를 클릭 → 편집 모드 전환
 - 편집 완료: blur 또는 Ctrl+Enter로 저장
 - 취소: Escape
 
 **간편 편집 모드 (꼬리질문)**
+
 - 개별 꼬리질문/답변 텍스트에 동일 패턴 적용
 - 상위 질문의 편집과 독립적으로 동작
 
 **전체 편집 (드로어)**
+
 - 질문/답변/팁 + 키워드 태그 편집 + 꼬리질문 추가/삭제/순서변경 + 카테고리 변경
 
 ---
@@ -407,11 +417,11 @@ DB (SQLite) ← data-access ← Server Actions ← Components
 
 ### 6.2 Zustand 스토어
 
-| 스토어 | 상태 | 용도 |
-|--------|------|------|
-| `study-store` | activeCategory, searchQuery, expandedCards, selectedJdId | 학습 뷰 UI |
-| `theme-store` | mode (dark/light/system), resolvedTheme | 테마, localStorage + cookie 동기화 |
-| `edit-store` | editingItemId, drawerOpen, drawerTarget | 편집 UI 상태 |
+| 스토어        | 상태                                                     | 용도                               |
+| ------------- | -------------------------------------------------------- | ---------------------------------- |
+| `study-store` | activeCategory, searchQuery, expandedCards, selectedJdId | 학습 뷰 UI                         |
+| `theme-store` | mode (dark/light/system), resolvedTheme                  | 테마, localStorage + cookie 동기화 |
+| `edit-store`  | editingItemId, drawerOpen, drawerTarget                  | 편집 UI 상태                       |
 
 ### 6.3 Server Actions
 
@@ -475,13 +485,13 @@ feature/theme-mode-toggle (독립)    feature/interview-schema-v2 (기반)
 
 ### 7.2 브랜치 및 머지 순서
 
-| 순서 | 브랜치 | 병렬 가능 | 설명 |
-|:----:|--------|:---------:|------|
-| 1 | `feature/theme-mode-toggle` | A 그룹 (독립) | 테마 토글 UI + CSS 변수 |
-| 2 | `feature/interview-schema-v2` | B 그룹 선행 | 스키마 + data-access 재구성 |
-| 3 | `feature/question-crud-actions` | B-2 (2 이후) | Server Actions + CRUD UI |
-| 4 | `feature/job-description-management` | B-3 (3 이후) | JD CRUD + 가져오기 |
-| 5 | `feature/soft-delete-and-recovery` | B-4 (4 이후) | 소프트 삭제 + 휴지통 복구 |
+| 순서 | 브랜치                               |   병렬 가능   | 설명                        |
+| :--: | ------------------------------------ | :-----------: | --------------------------- |
+|  1   | `feature/theme-mode-toggle`          | A 그룹 (독립) | 테마 토글 UI + CSS 변수     |
+|  2   | `feature/interview-schema-v2`        |  B 그룹 선행  | 스키마 + data-access 재구성 |
+|  3   | `feature/question-crud-actions`      | B-2 (2 이후)  | Server Actions + CRUD UI    |
+|  4   | `feature/job-description-management` | B-3 (3 이후)  | JD CRUD + 가져오기          |
+|  5   | `feature/soft-delete-and-recovery`   | B-4 (4 이후)  | 소프트 삭제 + 휴지통 복구   |
 
 ### 7.3 병렬 실행
 
@@ -498,9 +508,9 @@ feature/theme-mode-toggle (독립)    feature/interview-schema-v2 (기반)
 
 기존 코드의 리네이밍은 `feature/interview-schema-v2`에서 일괄 처리:
 
-| 기존 | 변경 |
-|------|------|
-| `src/app/interview/` | `src/app/study/` |
-| `src/components/interview/` | `src/components/study/` |
+| 기존                            | 변경                        |
+| ------------------------------- | --------------------------- |
+| `src/app/interview/`            | `src/app/study/`            |
+| `src/components/interview/`     | `src/components/study/`     |
 | `src/stores/interview-store.ts` | `src/stores/study-store.ts` |
-| data-access 타입/함수 | 새 스키마에 맞게 재구성 |
+| data-access 타입/함수           | 새 스키마에 맞게 재구성     |

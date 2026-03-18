@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { createQuestionAction } from '@/actions/question-actions';
 import { createFollowupAction } from '@/actions/followup-actions';
+import { createQuestionAction } from '@/actions/question-actions';
+import { cn } from '@/lib/utils';
 
 interface QuickAddFormProps {
   categoryId: number;
@@ -32,9 +32,18 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
     startTransition(async () => {
       try {
         if (isFollowupMode) {
-          await createFollowupAction({ questionId: questionId!, question: trimmedQ, answer: trimmedA });
+          await createFollowupAction({
+            questionId: questionId!,
+            question: trimmedQ,
+            answer: trimmedA,
+          });
         } else {
-          await createQuestionAction({ categoryId, jdId: jdId ?? null, question: trimmedQ, answer: trimmedA });
+          await createQuestionAction({
+            categoryId,
+            jdId: jdId ?? null,
+            question: trimmedQ,
+            answer: trimmedA,
+          });
         }
         setQuestion('');
         setAnswer('');
@@ -60,8 +69,8 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
         type="button"
         onClick={() => setIsOpen(true)}
         className={cn(
-          'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px]',
-          'text-iv-text3 border border-dashed border-iv-border',
+          'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px]',
+          'text-iv-text3 border-iv-border border border-dashed',
           'hover:text-iv-text hover:border-iv-accent/40 hover:bg-iv-accent/[0.04]',
           'transition-colors'
         )}
@@ -75,9 +84,9 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
   return (
     <form
       onSubmit={handleSubmit}
-      className="border border-iv-border rounded-lg p-3 bg-iv-bg2 space-y-2"
+      className="border-iv-border bg-iv-bg2 space-y-2 rounded-lg border p-3"
     >
-      <p className="text-[11px] font-mono text-iv-text3 mb-1">
+      <p className="text-iv-text3 mb-1 font-mono text-[11px]">
         {isFollowupMode ? '꼬리 질문 추가' : '질문 추가'}
       </p>
       <input
@@ -88,10 +97,10 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
         disabled={isPending}
         autoFocus
         className={cn(
-          'w-full px-2.5 py-1.5 rounded-md text-[12px]',
-          'bg-iv-bg border border-iv-border text-iv-text',
+          'w-full rounded-md px-2.5 py-1.5 text-[12px]',
+          'bg-iv-bg border-iv-border text-iv-text border',
           'placeholder:text-iv-text3',
-          'focus:outline-none focus:ring-1 focus:ring-iv-accent/40',
+          'focus:ring-iv-accent/40 focus:ring-1 focus:outline-none',
           'disabled:opacity-50'
         )}
       />
@@ -102,20 +111,20 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
         rows={3}
         disabled={isPending}
         className={cn(
-          'w-full px-2.5 py-1.5 rounded-md text-[12px] resize-none',
-          'bg-iv-bg border border-iv-border text-iv-text',
+          'w-full resize-none rounded-md px-2.5 py-1.5 text-[12px]',
+          'bg-iv-bg border-iv-border text-iv-text border',
           'placeholder:text-iv-text3',
-          'focus:outline-none focus:ring-1 focus:ring-iv-accent/40',
+          'focus:ring-iv-accent/40 focus:ring-1 focus:outline-none',
           'disabled:opacity-50'
         )}
       />
-      {error && <p className="text-xs text-iv-red">{error}</p>}
-      <div className="flex items-center gap-2 justify-end">
+      {error && <p className="text-iv-red text-xs">{error}</p>}
+      <div className="flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={handleCancel}
           disabled={isPending}
-          className="px-2.5 py-1 text-[11px] text-iv-text3 hover:text-iv-text rounded transition-colors"
+          className="text-iv-text3 hover:text-iv-text rounded px-2.5 py-1 text-[11px] transition-colors"
         >
           취소
         </button>
@@ -123,10 +132,10 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
           type="submit"
           disabled={isPending || !question.trim() || !answer.trim()}
           className={cn(
-            'flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium',
-            'bg-iv-accent/10 text-iv-accent border border-iv-accent/20',
+            'flex items-center gap-1 rounded px-2.5 py-1 text-[11px] font-medium',
+            'bg-iv-accent/10 text-iv-accent border-iv-accent/20 border',
             'hover:bg-iv-accent/20 transition-colors',
-            'disabled:opacity-40 disabled:cursor-not-allowed'
+            'disabled:cursor-not-allowed disabled:opacity-40'
           )}
         >
           <Plus size={11} />

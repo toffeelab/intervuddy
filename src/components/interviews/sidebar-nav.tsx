@@ -10,7 +10,7 @@ export function SidebarNav() {
   const isQuestions = pathname.startsWith('/interviews/questions');
 
   return (
-    <nav className="w-52 border-r border-iv-border bg-iv-bg2 flex flex-col gap-1 p-3 shrink-0">
+    <nav className="border-iv-border bg-iv-bg2 flex w-52 shrink-0 flex-col gap-1 border-r p-3">
       <Link
         href="/interviews"
         className={cn(

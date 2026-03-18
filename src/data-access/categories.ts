@@ -31,7 +31,9 @@ function mapRow(row: CategoryRow): InterviewCategory {
 
 export function getGlobalCategories(): InterviewCategory[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT
       c.id, c.jd_id, c.name, c.slug, c.display_label, c.icon,
       c.display_order, c.deleted_at, c.created_at,
@@ -42,14 +44,18 @@ export function getGlobalCategories(): InterviewCategory[] {
     WHERE c.jd_id IS NULL AND c.deleted_at IS NULL
     GROUP BY c.id
     ORDER BY c.display_order
-  `).all() as CategoryRow[];
+  `
+    )
+    .all() as CategoryRow[];
 
   return rows.map(mapRow);
 }
 
 export function getCategoriesByJdId(jdId: number): InterviewCategory[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT
       c.id, c.jd_id, c.name, c.slug, c.display_label, c.icon,
       c.display_order, c.deleted_at, c.created_at,
@@ -60,14 +66,18 @@ export function getCategoriesByJdId(jdId: number): InterviewCategory[] {
     WHERE (c.jd_id IS NULL OR c.jd_id = ?) AND c.deleted_at IS NULL
     GROUP BY c.id
     ORDER BY c.display_order
-  `).all(jdId) as CategoryRow[];
+  `
+    )
+    .all(jdId) as CategoryRow[];
 
   return rows.map(mapRow);
 }
 
 export function createCategory(input: CreateCategoryInput): number {
   const db = getDb();
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     INSERT INTO interview_categories (jd_id, name, slug, display_label, icon, display_order)
     -- display_order: 같은 jd_id 그룹 내 최대값 + 1, 없으면 0부터 시작
     -- CASE WHEN: jdId가 NULL이면 글로벌 카테고리, 아니면 해당 JD의 카테고리만 조회
@@ -77,15 +87,17 @@ export function createCategory(input: CreateCategoryInput): number {
         AND deleted_at IS NULL),
       0
     ))
-  `).run(
-    input.jdId ?? null,
-    input.name,
-    input.slug,
-    input.displayLabel,
-    input.icon,
-    input.jdId ?? null,
-    input.jdId ?? null,
-  );
+  `
+    )
+    .run(
+      input.jdId ?? null,
+      input.name,
+      input.slug,
+      input.displayLabel,
+      input.icon,
+      input.jdId ?? null,
+      input.jdId ?? null
+    );
 
   return Number(result.lastInsertRowid);
 }

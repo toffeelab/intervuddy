@@ -1,17 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import Database from 'better-sqlite3';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { getFollowupsByQuestionId } from '@/data-access/followups';
 import { createTestDb, cleanupTestDb, seedTestQuestions } from '@/test/helpers/db';
-
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
-
-import { revalidatePath } from 'next/cache';
 import {
   createFollowupAction,
   updateFollowupAction,
   deleteFollowupAction,
   restoreFollowupAction,
 } from './followup-actions';
-import { getFollowupsByQuestionId } from '@/data-access/followups';
+
+const { mockRevalidatePath } = vi.hoisted(() => ({
+  mockRevalidatePath: vi.fn(),
+}));
+vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
 
 describe('followup-actions', () => {
   let db: Database.Database;
@@ -59,9 +60,9 @@ describe('followup-actions', () => {
         answer: '꼬리답변',
       });
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -77,9 +78,9 @@ describe('followup-actions', () => {
     it('revalidatePath를 /study와 /interviews/questions 경로로 호출한다', async () => {
       await updateFollowupAction({ id: 1, question: '수정된 꼬리질문' });
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -93,7 +94,9 @@ describe('followup-actions', () => {
     it('삭제 후 deleted_at이 설정된다', async () => {
       await deleteFollowupAction(1);
 
-      interface FollowupDeletedRow { deleted_at: string | null }
+      interface FollowupDeletedRow {
+        deleted_at: string | null;
+      }
       const row = db
         .prepare('SELECT deleted_at FROM followup_questions WHERE id = ?')
         .get(1) as FollowupDeletedRow;
@@ -103,9 +106,9 @@ describe('followup-actions', () => {
     it('revalidatePath를 /study와 /interviews/questions 경로로 호출한다', async () => {
       await deleteFollowupAction(1);
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -124,7 +127,9 @@ describe('followup-actions', () => {
 
       await restoreFollowupAction(1);
 
-      interface FollowupDeletedRow { deleted_at: string | null }
+      interface FollowupDeletedRow {
+        deleted_at: string | null;
+      }
       const row = db
         .prepare('SELECT deleted_at FROM followup_questions WHERE id = ?')
         .get(1) as FollowupDeletedRow;
@@ -136,9 +141,9 @@ describe('followup-actions', () => {
 
       await restoreFollowupAction(1);
 
-      expect(revalidatePath).toHaveBeenCalledWith('/study');
-      expect(revalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(revalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
   });
 });

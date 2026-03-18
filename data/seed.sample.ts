@@ -1,5 +1,11 @@
 export const categories = [
-  { name: '자기소개/커리어', slug: 'self-intro', displayLabel: '자기소개', icon: '👤', displayOrder: 1 },
+  {
+    name: '자기소개/커리어',
+    slug: 'self-intro',
+    displayLabel: '자기소개',
+    icon: '👤',
+    displayOrder: 1,
+  },
   { name: '기술역량', slug: 'tech', displayLabel: '기술', icon: '⚙️', displayOrder: 2 },
   { name: '리더십/팀', slug: 'lead', displayLabel: '리더십', icon: '🤝', displayOrder: 3 },
   { name: '프로젝트 심화', slug: 'proj', displayLabel: '프로젝트', icon: '🔬', displayOrder: 4 },

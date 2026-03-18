@@ -16,10 +16,7 @@ export async function createCategoryAction(input: CreateCategoryInput) {
   return { id };
 }
 
-export async function updateCategoryAction(
-  id: number,
-  input: Omit<UpdateCategoryInput, 'id'>
-) {
+export async function updateCategoryAction(id: number, input: Omit<UpdateCategoryInput, 'id'>) {
   updateCategory(id, input);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');

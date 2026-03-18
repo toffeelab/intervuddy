@@ -8,8 +8,15 @@ export const STATS = [
 ] as const;
 
 export const JD_KEYWORDS = [
-  'React', 'Next.js', 'TypeScript', 'Docker', 'REST API',
-  'WebSocket', 'CI/CD', 'Agile', 'TDD',
+  'React',
+  'Next.js',
+  'TypeScript',
+  'Docker',
+  'REST API',
+  'WebSocket',
+  'CI/CD',
+  'Agile',
+  'TDD',
 ] as const;
 
 export const TAG_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -52,7 +59,7 @@ export const TAG_COLORS: Record<string, { bg: string; text: string; border: stri
 
 export const CATEGORY_ICON_BG: Record<string, string> = {
   '자기소개/커리어': 'bg-iv-accent2/[0.07]',
-  '기술역량': 'bg-iv-accent/[0.07]',
+  기술역량: 'bg-iv-accent/[0.07]',
   '리더십/팀': 'bg-iv-green/[0.07]',
   '프로젝트 심화': 'bg-iv-amber/[0.07]',
   '커리어 방향성': 'bg-iv-red/[0.07]',

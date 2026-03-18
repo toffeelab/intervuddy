@@ -1,12 +1,12 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useStudyStore } from '@/stores/study-store';
-import { CATEGORY_ALL } from '@/lib/constants';
-import { QACard } from '@/components/study/qa-card';
 import { EmptyState } from '@/components/study/empty-state';
+import { QACard } from '@/components/study/qa-card';
 import { QuickAddForm } from '@/components/study/quick-add-form';
 import type { InterviewQuestion } from '@/data-access/types';
+import { CATEGORY_ALL } from '@/lib/constants';
+import { useStudyStore } from '@/stores/study-store';
 
 interface QAListProps {
   items: InterviewQuestion[];
@@ -56,9 +56,7 @@ export function QAList({ items }: QAListProps) {
   return (
     <div className="space-y-2">
       {(searchQuery.trim() || activeCategory !== CATEGORY_ALL) && (
-        <p className="text-[12px] font-mono text-iv-text3 mb-3">
-          검색 결과: {filtered.length}문항
-        </p>
+        <p className="text-iv-text3 mb-3 font-mono text-[12px]">검색 결과: {filtered.length}문항</p>
       )}
 
       {Array.from(grouped.entries()).map(([categoryName, groupItems]) => {
@@ -71,19 +69,15 @@ export function QAList({ items }: QAListProps) {
         return (
           <div key={categoryName} className="space-y-2">
             {showHeaders && (
-              <h2 className="text-[13px] font-semibold text-iv-text2 mt-6 mb-2 first:mt-0">
-                {isJd
-                  ? `🟡 JD 맞춤 — ${categoryName.replace('JD-', '')}`
-                  : `🔵 ${categoryName}`}
+              <h2 className="text-iv-text2 mt-6 mb-2 text-[13px] font-semibold first:mt-0">
+                {isJd ? `🟡 JD 맞춤 — ${categoryName.replace('JD-', '')}` : `🔵 ${categoryName}`}
               </h2>
             )}
             {groupItems.map((item) => {
               globalIndex += 1;
               return <QACard key={item.id} item={item} index={globalIndex} />;
             })}
-            {!searchQuery.trim() && (
-              <QuickAddForm categoryId={categoryId} jdId={jdId} />
-            )}
+            {!searchQuery.trim() && <QuickAddForm categoryId={categoryId} jdId={jdId} />}
           </div>
         );
       })}
