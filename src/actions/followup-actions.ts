@@ -26,10 +26,12 @@ export async function deleteFollowupAction(id: number) {
   dbDelete(id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
+  revalidatePath('/interviews/trash');
 }
 
 export async function restoreFollowupAction(id: number) {
   dbRestore(id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
+  revalidatePath('/interviews/trash');
 }
