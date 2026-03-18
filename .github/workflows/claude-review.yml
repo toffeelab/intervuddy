@@ -128,19 +128,37 @@ jobs:
             exit 1
           fi
 
-          REVIEW_RESULT=$(python3 -c "import sys,json; print(json.load(sys.stdin).get('result',''))" < "$EXECUTION_FILE" 2>/dev/null || echo "")
-          if [ -z "$REVIEW_RESULT" ]; then
-            echo "::error::execution_file에서 리뷰 결과(result)를 파싱할 수 없습니다"
-            cat "$EXECUTION_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print('keys:', list(d.keys())); print('is_error:', d.get('is_error'))" 2>/dev/null || true
+          # JSON에서 result를 파일로 직접 추출 (쉘 변수 할당 시 개행/특수문자 손실 방지)
+          python3 -c "
+          import json, sys
+          with open('$EXECUTION_FILE') as f:
+              data = json.load(f)
+          result = data.get('result', '')
+          if not result:
+              print('::error::execution_file에서 리뷰 결과(result)가 비어있습니다')
+              print(f'keys: {list(data.keys())}')
+              print(f'is_error: {data.get(\"is_error\")}')
+              sys.exit(1)
+          with open('/tmp/review-body.md', 'w') as out:
+              out.write(result)
+          # VERDICT 추출
+          verdict = ''
+          for line in result.split('\n'):
+              if 'VERDICT:' in line:
+                  parts = line.split('VERDICT:')
+                  if len(parts) > 1:
+                      verdict = parts[-1].strip()
+          print(f'verdict={verdict}')
+          " >> $GITHUB_OUTPUT
+
+          if [ $? -ne 0 ]; then
             exit 1
           fi
 
-          echo "$REVIEW_RESULT" > /tmp/review-body.md
-          VERDICT=$(echo "$REVIEW_RESULT" | grep -oP 'VERDICT: \K\w+' | tail -1 || echo "")
+          VERDICT=$(grep 'verdict=' $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
           if [ -z "$VERDICT" ]; then
             echo "::warning::VERDICT 태그를 찾을 수 없습니다. 코멘트로 게시합니다."
           fi
-          echo "verdict=$VERDICT" >> $GITHUB_OUTPUT
 
       - name: Submit review decision
         if: github.event_name == 'pull_request'
@@ -149,6 +167,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERDICT: ${{ steps.parse-review.outputs.verdict }}
         run: |
+          if [ ! -f /tmp/review-body.md ]; then
+            echo "::error::리뷰 본문 파일이 없습니다"
+            exit 1
+          fi
+
           if [ "$VERDICT" = "APPROVED" ]; then
             gh pr review "$PR_NUMBER" --approve --body-file /tmp/review-body.md
           elif [ "$VERDICT" = "CHANGES_REQUESTED" ]; then
