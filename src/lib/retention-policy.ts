@@ -1,0 +1,1 @@
+export const DEFAULT_RETENTION_DAYS = 30;
