@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { ArrowLeft, FolderOpen, LayoutList } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { SidebarNav } from '@/components/interviews/sidebar-nav';
 
 export default function InterviewsLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -19,22 +20,7 @@ export default function InterviewsLayout({ children }: { children: React.ReactNo
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <nav className="w-52 border-r border-iv-border bg-iv-bg2 flex flex-col gap-1 p-3 shrink-0">
-          <Link
-            href="/interviews"
-            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text transition-colors"
-          >
-            <FolderOpen className="size-4 shrink-0" />
-            <span>JD 관리</span>
-          </Link>
-          <Link
-            href="/interviews/questions"
-            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text transition-colors"
-          >
-            <LayoutList className="size-4 shrink-0" />
-            <span>공통 라이브러리</span>
-          </Link>
-        </nav>
+        <SidebarNav />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
