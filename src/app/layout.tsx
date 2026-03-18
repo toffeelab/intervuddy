@@ -2,7 +2,11 @@ import { Noto_Sans_KR, JetBrains_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/shared/theme-provider';
 import { ThemeScript } from '@/components/shared/theme-script';
+import { runStartupTasks } from '@/db/startup';
 import './globals.css';
+
+// 앱 시작 시 만료된 소프트 삭제 항목 정리 (1회)
+runStartupTasks();
 
 const notoSansKR = Noto_Sans_KR({
   variable: '--font-sans',
