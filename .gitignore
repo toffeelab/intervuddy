@@ -50,3 +50,7 @@ data/seed.ts
 
 # MCP ignore files
 .superpowers
+.playwright-mcp/
+
+# Claude worktrees
+.claude/worktrees/
