@@ -1,7 +1,7 @@
-import type { DeepQA } from '@/data-access/types';
+import type { FollowupQuestion } from '@/data-access/types';
 
 interface DeepQABoxProps {
-  items: DeepQA[];
+  items: FollowupQuestion[];
 }
 
 export function DeepQABox({ items }: DeepQABoxProps) {

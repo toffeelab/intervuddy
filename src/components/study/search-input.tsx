@@ -2,10 +2,10 @@
 
 import { useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { useInterviewStore } from '@/stores/interview-store';
+import { useStudyStore } from '@/stores/study-store';
 
 export function SearchInput() {
-  const setSearchQuery = useInterviewStore((s) => s.setSearchQuery);
+  const setSearchQuery = useStudyStore((s) => s.setSearchQuery);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleChange = useCallback(

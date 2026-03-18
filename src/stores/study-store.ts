@@ -1,23 +1,26 @@
 import { create } from 'zustand';
 import { CATEGORY_ALL } from '@/lib/constants';
 
-interface InterviewStore {
+interface StudyStore {
   activeCategory: string;
   searchQuery: string;
   expandedCards: Set<number>;
   allExpanded: boolean;
+  selectedJdId: number | null;
 
   setActiveCategory: (category: string) => void;
   setSearchQuery: (query: string) => void;
   toggleCard: (id: number) => void;
   toggleAll: (allIds: number[]) => void;
+  setSelectedJdId: (jdId: number | null) => void;
 }
 
-export const useInterviewStore = create<InterviewStore>((set, get) => ({
+export const useStudyStore = create<StudyStore>((set) => ({
   activeCategory: CATEGORY_ALL,
   searchQuery: '',
   expandedCards: new Set(),
   allExpanded: false,
+  selectedJdId: null,
 
   setActiveCategory: (category) => set({ activeCategory: category }),
 
@@ -41,4 +44,6 @@ export const useInterviewStore = create<InterviewStore>((set, get) => ({
       }
       return { expandedCards: new Set(allIds), allExpanded: true };
     }),
+
+  setSelectedJdId: (jdId) => set({ selectedJdId: jdId }),
 }));

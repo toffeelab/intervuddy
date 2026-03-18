@@ -1,13 +1,14 @@
 Structure
 
-- Monorepo 화
-- Schema -> Prisma
-- Backend + Database 구축
+- [ ] Monorepo 화
+- [ ] Schema -> Prisma
+- [ ] Backend + Database 구축
 
 UI
 
-- Custom Light/Dark Theme
+- [x] Custom Light/Dark Theme (PR #3)
+- [ ] 모바일 및 반응형 UI 대응
 
 ETC
 
-- NextAuth / NextIntl
+- [ ] NextAuth / NextIntl

@@ -1,12 +1,12 @@
 'use client';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { StatGrid } from '@/components/interview/stat-grid';
-import { KeywordTags } from '@/components/interview/keyword-tags';
-import { useInterviewStore } from '@/stores/interview-store';
+import { StatGrid } from '@/components/study/stat-grid';
+import { KeywordTags } from '@/components/study/keyword-tags';
+import { useStudyStore } from '@/stores/study-store';
 import { CATEGORY_ALL, CATEGORY_ICON_BG } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import type { Category } from '@/data-access/types';
+import type { InterviewCategory } from '@/data-access/types';
 
 const JD_DISPLAY_NAMES: Record<string, string> = {
   'JD-실시간/통신': '실시간/통신 기술',
@@ -18,16 +18,16 @@ const JD_DISPLAY_NAMES: Record<string, string> = {
 };
 
 interface SidebarProps {
-  categories: Category[];
+  categories: InterviewCategory[];
 }
 
 export function Sidebar({ categories }: SidebarProps) {
-  const activeCategory = useInterviewStore((s) => s.activeCategory);
-  const setActiveCategory = useInterviewStore((s) => s.setActiveCategory);
+  const activeCategory = useStudyStore((s) => s.activeCategory);
+  const setActiveCategory = useStudyStore((s) => s.setActiveCategory);
 
-  const commonCategories = categories.filter((c) => !c.isJdGroup);
-  const jdCategories = categories.filter((c) => c.isJdGroup);
-  const totalCount = categories.reduce((sum, c) => sum + c.count, 0);
+  const commonCategories = categories.filter((c) => c.jdId === null);
+  const jdCategories = categories.filter((c) => c.jdId !== null);
+  const totalCount = categories.reduce((sum, c) => sum + c.questionCount, 0);
 
   const isActive = (name: string) => activeCategory === name;
 
@@ -79,7 +79,7 @@ export function Sidebar({ categories }: SidebarProps) {
                 {cat.icon}
               </span>
               <span className="flex-1 text-left">{cat.name}</span>
-              <span className="text-[10px] font-mono text-iv-text3">{cat.count}</span>
+              <span className="text-[10px] font-mono text-iv-text3">{cat.questionCount}</span>
             </button>
           ))}
 
@@ -112,7 +112,7 @@ export function Sidebar({ categories }: SidebarProps) {
               <span className="flex-1 text-left">
                 {JD_DISPLAY_NAMES[cat.name] ?? cat.name.replace('JD-', '')}
               </span>
-              <span className="text-[10px] font-mono text-iv-text3">{cat.count}</span>
+              <span className="text-[10px] font-mono text-iv-text3">{cat.questionCount}</span>
             </button>
           ))}
 

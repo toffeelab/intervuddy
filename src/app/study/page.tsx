@@ -1,12 +1,12 @@
-import { getAllQAItems, getCategories } from '@/data-access';
-import { InterviewHeader } from '@/components/interview/interview-header';
-import { Sidebar } from '@/components/interview/sidebar';
-import { SearchInput } from '@/components/interview/search-input';
-import { QAList } from '@/components/interview/qa-list';
+import { getLibraryQuestions, getGlobalCategories } from '@/data-access';
+import { InterviewHeader } from '@/components/study/interview-header';
+import { Sidebar } from '@/components/study/sidebar';
+import { SearchInput } from '@/components/study/search-input';
+import { QAList } from '@/components/study/qa-list';
 
-export default function InterviewPage() {
-  const items = getAllQAItems();
-  const categories = getCategories();
+export default function StudyPage() {
+  const items = getLibraryQuestions();
+  const categories = getGlobalCategories();
 
   const allItemIds = items.map((item) => item.id);
 

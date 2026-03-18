@@ -3,7 +3,7 @@
 import { LogoDot } from '@/components/shared/logo-dot';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
-import { useInterviewStore } from '@/stores/interview-store';
+import { useStudyStore } from '@/stores/study-store';
 
 interface InterviewHeaderProps {
   totalCount: number;
@@ -11,8 +11,8 @@ interface InterviewHeaderProps {
 }
 
 export function InterviewHeader({ totalCount, allItemIds }: InterviewHeaderProps) {
-  const allExpanded = useInterviewStore((s) => s.allExpanded);
-  const toggleAll = useInterviewStore((s) => s.toggleAll);
+  const allExpanded = useStudyStore((s) => s.allExpanded);
+  const toggleAll = useStudyStore((s) => s.toggleAll);
 
   return (
     <header className="sticky top-0 z-50 h-[57px] flex items-center justify-between px-5 bg-iv-bg/80 backdrop-blur-md border-b border-iv-border">
