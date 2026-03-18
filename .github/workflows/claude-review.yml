@@ -2,7 +2,7 @@ name: Claude PR Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, ready_for_review]
     paths:
       - 'src/**'
   issue_comment:
@@ -11,7 +11,7 @@ on:
 jobs:
   review:
     if: |
-      (github.event_name == 'pull_request') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
     runs-on: ubuntu-latest
     permissions:

@@ -158,6 +158,29 @@ git worktree remove ../intervuddy-wt-taskB
 
 ### 동작 방식
 
-- `src/**` 파일 변경 PR → 자동 리뷰
+- `src/**` 파일 변경 PR → 자동 전체 리뷰
+- 리뷰 반영 후 push → 자동 증분 리뷰 (이전 이슈 해결 여부 확인)
 - PR 코멘트에 `@claude` → 수동 리뷰/질문
 - 리뷰는 한국어로 작성되며, 토큰 사용량이 하단에 표시됨
+
+### Workflow 파일 수정 시 주의사항
+
+Claude Code Action은 **default branch(main)의 workflow 파일**과 PR 브랜치의 workflow가 동일한지 검증한다.
+따라서 `.github/workflows/` 파일은 일반 코드의 git flow(feature → develop → main)와 다르게 취급해야 한다.
+
+```bash
+# 1. main에서 직접 workflow 수정 브랜치 생성
+git checkout main && git pull
+git checkout -b chore/workflow-update
+
+# 2. workflow 수정 후 main 대상 PR 생성 → 머지
+gh pr create --base main
+
+# 3. main을 develop에 동기화
+git checkout develop && git merge main && git push
+
+# 4. 진행 중인 feature 브랜치가 있다면 develop merge
+git checkout feature/xxx && git merge develop && git push
+```
+
+> **주의:** workflow를 develop이나 feature에서만 수정하면 main과 불일치가 발생하여 Claude 리뷰 Action이 실패한다.
