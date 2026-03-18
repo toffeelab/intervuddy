@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { buttonVariants } from '@/components/ui/button';
 import { JobCard } from '@/components/interviews/job-card';
 import { JobStatusFilter } from '@/components/interviews/job-status-filter';
+import { buttonVariants } from '@/components/ui/button';
 import { getAllJobs } from '@/data-access/jobs';
 
 interface Props {
@@ -24,8 +24,7 @@ export default async function InterviewsPage({ searchParams }: Props) {
           </p>
         </div>
         <Link href="/interviews/jobs/new" className={buttonVariants({ size: 'sm' })}>
-          <Plus className="size-4" />
-          새 JD
+          <Plus className="size-4" />새 JD
         </Link>
       </div>
 

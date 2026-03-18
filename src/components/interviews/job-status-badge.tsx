@@ -1,10 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import type { JobDescriptionStatus } from '@/data-access/types';
 
-const STATUS_CONFIG: Record<
-  JobDescriptionStatus,
-  { label: string; className: string }
-> = {
+const STATUS_CONFIG: Record<JobDescriptionStatus, { label: string; className: string }> = {
   in_progress: {
     label: '진행중',
     className: 'bg-blue-500/10 text-blue-500 border-blue-500/20',

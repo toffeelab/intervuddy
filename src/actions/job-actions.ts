@@ -1,12 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import {
-  createJob,
-  updateJob,
-  updateJobStatus,
-  softDeleteJob,
-} from '@/data-access/jobs';
+import { createJob, updateJob, updateJobStatus, softDeleteJob } from '@/data-access/jobs';
 import type { CreateJobInput, UpdateJobInput, JobDescriptionStatus } from '@/data-access/types';
 
 export async function createJobAction(input: CreateJobInput) {

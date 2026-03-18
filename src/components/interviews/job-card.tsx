@@ -3,11 +3,11 @@
 import { useTransition, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { JobStatusBadge } from '@/components/interviews/job-status-badge';
 import { deleteJobAction } from '@/actions/job-actions';
-import { cn } from '@/lib/utils';
+import { JobStatusBadge } from '@/components/interviews/job-status-badge';
+import { Button } from '@/components/ui/button';
 import type { JobDescription } from '@/data-access/types';
+import { cn } from '@/lib/utils';
 
 interface Props {
   job: JobDescription;
@@ -20,8 +20,7 @@ export function JobCard({ job }: Props) {
 
   function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
-    if (!confirm(`"${job.companyName} — ${job.positionTitle}" JD를 삭제하시겠습니까?`))
-      return;
+    if (!confirm(`"${job.companyName} — ${job.positionTitle}" JD를 삭제하시겠습니까?`)) return;
     startTransition(async () => {
       try {
         await deleteJobAction(job.id);
@@ -60,7 +59,7 @@ export function JobCard({ job }: Props) {
           size="icon-sm"
           onClick={handleDelete}
           title="삭제"
-          className="opacity-0 group-hover:opacity-100 hover:text-iv-red hover:bg-iv-red/10"
+          className="hover:text-iv-red hover:bg-iv-red/10 opacity-0 group-hover:opacity-100"
         >
           <Trash2 className="size-3.5" />
         </Button>

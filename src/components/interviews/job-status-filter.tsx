@@ -22,9 +22,7 @@ export function JobStatusFilter({ currentStatus }: Props) {
       {FILTERS.map((f) => (
         <button
           key={f.value ?? 'all'}
-          onClick={() =>
-            router.push(f.value ? `/interviews?status=${f.value}` : '/interviews')
-          }
+          onClick={() => router.push(f.value ? `/interviews?status=${f.value}` : '/interviews')}
           className={cn(
             'rounded-md px-3 py-1.5 text-xs transition-colors',
             currentStatus === f.value

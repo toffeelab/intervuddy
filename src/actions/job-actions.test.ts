@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { createTestDb, cleanupTestDb, seedTestJobDescription } from '@/test/helpers/db';
 import { getAllJobs, getJobById } from '@/data-access/jobs';
+import { createTestDb, cleanupTestDb, seedTestJobDescription } from '@/test/helpers/db';
 
 const { mockRevalidatePath } = vi.hoisted(() => ({
   mockRevalidatePath: vi.fn(),

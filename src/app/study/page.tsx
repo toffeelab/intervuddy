@@ -3,8 +3,8 @@ import { QAList } from '@/components/study/qa-list';
 import { SearchInput } from '@/components/study/search-input';
 import { Sidebar } from '@/components/study/sidebar';
 import { getLibraryQuestions, getGlobalCategories, getAllJobs } from '@/data-access';
-import { getQuestionsByJdId } from '@/data-access/questions';
 import { getCategoriesByJdId } from '@/data-access/categories';
+import { getQuestionsByJdId } from '@/data-access/questions';
 
 interface StudyPageProps {
   searchParams: Promise<{ jdId?: string }>;

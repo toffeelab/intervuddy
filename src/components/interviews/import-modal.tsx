@@ -2,6 +2,10 @@
 
 import { useState, useTransition } from 'react';
 import { Download, Check } from 'lucide-react';
+import { importQuestionsAction } from '@/actions/import-actions';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -9,12 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { importQuestionsAction } from '@/actions/import-actions';
-import { cn } from '@/lib/utils';
 import type { InterviewQuestion, InterviewCategory } from '@/data-access/types';
+import { cn } from '@/lib/utils';
 
 interface Props {
   jdId: number;
@@ -138,7 +138,7 @@ export function ImportModal({
               >
                 <Checkbox
                   checked={isImported || selectedIds.has(q.id)}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={() => {
                     if (!isImported) toggleQuestion(q.id);
                   }}
                   disabled={isImported}
