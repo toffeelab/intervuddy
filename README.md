@@ -160,8 +160,19 @@ git worktree remove ../intervuddy-wt-taskB
 
 - `src/**` 파일 변경 PR → 자동 전체 리뷰
 - 리뷰 반영 후 push → 자동 증분 리뷰 (이전 이슈 해결 여부 확인)
+- **Draft PR에서는 리뷰 스킵** → Draft → Ready 전환 시 리뷰 트리거
 - PR 코멘트에 `@claude` → 수동 리뷰/질문
 - 리뷰는 한국어로 작성되며, 토큰 사용량이 하단에 표시됨
+
+### Draft PR 활용
+
+리뷰 피드백 반영 중 중간 저장이 필요할 때 (장소 이동 등):
+
+```bash
+gh pr ready --undo <PR번호>   # draft 전환 → 이후 push에 리뷰 안 돌아감
+# ... 중간 작업 commit & push ...
+gh pr ready <PR번호>           # ready 전환 → 리뷰 트리거
+```
 
 ### Workflow 파일 수정 시 주의사항
 
