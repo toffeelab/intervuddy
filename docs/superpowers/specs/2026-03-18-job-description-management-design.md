@@ -27,7 +27,7 @@ interface ImportResult {
   skippedCount: number;
 }
 
-function importQuestionsToJob(params: { jdId: number; questionIds: number[] }): ImportResult
+function importQuestionsToJob(params: { jdId: number; questionIds: number[] }): ImportResult;
 ```
 
 - 라이브러리 질문을 JD로 복사 (question, answer, tip, display_order)
@@ -42,29 +42,29 @@ function importQuestionsToJob(params: { jdId: number; questionIds: number[] }): 
 
 **`src/actions/job-actions.ts`:**
 
-| Action | 호출 | 반환 | revalidate |
-|--------|------|------|------------|
-| `createJobAction(input)` | `createJob(input)` | `{ id: number }` | `/interviews` |
-| `updateJobAction(input)` | `updateJob(input)` | `void` | `/interviews`, `/interviews/jobs/[id]` |
-| `updateJobStatusAction(id, status)` | `updateJobStatus(id, status)` | `void` | `/interviews`, `/interviews/jobs/[id]` |
-| `deleteJobAction(id)` | `softDeleteJob(id)` | `void` | `/interviews` |
+| Action                              | 호출                          | 반환             | revalidate                             |
+| ----------------------------------- | ----------------------------- | ---------------- | -------------------------------------- |
+| `createJobAction(input)`            | `createJob(input)`            | `{ id: number }` | `/interviews`                          |
+| `updateJobAction(input)`            | `updateJob(input)`            | `void`           | `/interviews`, `/interviews/jobs/[id]` |
+| `updateJobStatusAction(id, status)` | `updateJobStatus(id, status)` | `void`           | `/interviews`, `/interviews/jobs/[id]` |
+| `deleteJobAction(id)`               | `softDeleteJob(id)`           | `void`           | `/interviews`                          |
 
 > `restoreJobAction`은 Branch 5 (소프트 삭제/복구 UI)에서 추가.
 
 **`src/actions/import-actions.ts`:**
 
-| Action | 호출 | 반환 | revalidate |
-|--------|------|------|------------|
+| Action                                         | 호출                        | 반환           | revalidate                        |
+| ---------------------------------------------- | --------------------------- | -------------- | --------------------------------- |
 | `importQuestionsAction({ jdId, questionIds })` | `importQuestionsToJob(...)` | `ImportResult` | `/interviews/jobs/[id]`, `/study` |
 
 ### 2. 페이지 구조
 
-| 라우트 | 타입 | 역할 |
-|--------|------|------|
-| `/interviews` | Server Component | JD 목록 카드 그리드 + 상태 필터 + "새 JD" 버튼 |
-| `/interviews/jobs/new` | Server Component | JD 생성 폼 (회사명, 포지션, 메모) |
-| `/interviews/jobs/[id]` | Server Component | JD 상세 — 메타정보 + 카테고리별 질문 + 질문 가져오기 |
-| `/interviews/jobs/[id]/edit` | Server Component | JD 수정 (JobForm 재사용) |
+| 라우트                       | 타입             | 역할                                                 |
+| ---------------------------- | ---------------- | ---------------------------------------------------- |
+| `/interviews`                | Server Component | JD 목록 카드 그리드 + 상태 필터 + "새 JD" 버튼       |
+| `/interviews/jobs/new`       | Server Component | JD 생성 폼 (회사명, 포지션, 메모)                    |
+| `/interviews/jobs/[id]`      | Server Component | JD 상세 — 메타정보 + 카테고리별 질문 + 질문 가져오기 |
+| `/interviews/jobs/[id]/edit` | Server Component | JD 수정 (JobForm 재사용)                             |
 
 **404 처리:** `getJobById(id)`가 `null`을 반환하면 `notFound()` (from `next/navigation`) 호출. `/interviews/jobs/[id]`와 `/interviews/jobs/[id]/edit` 모두 적용.
 
@@ -73,6 +73,7 @@ function importQuestionsToJob(params: { jdId: number; questionIds: number[] }): 
 #### `job-status-badge.tsx` (Server Component)
 
 상태별 뱃지 표시:
+
 - `in_progress` → 파란색 "진행중"
 - `completed` → 초록색 "완료"
 - `archived` → 회색 "보관"
@@ -82,6 +83,7 @@ shadcn Badge 사용. 상태 표시만 하므로 Client Component 불필요.
 #### `job-card.tsx` (Client Component — `'use client'`)
 
 JD 카드 컴포넌트. 표시 항목:
+
 - 회사명, 포지션
 - 상태 뱃지 (JobStatusBadge)
 - 질문 수
@@ -92,6 +94,7 @@ JD 카드 컴포넌트. 표시 항목:
 #### `job-form.tsx` (Client Component — `'use client'`)
 
 생성/수정 공용 폼:
+
 - 회사명 (필수), 포지션 (필수), 메모 (선택)
 - 빈 값 유효성 검사
 - 생성 모드: `createJobAction` → 반환된 `{ id }`로 `router.push('/interviews/jobs/${id}')` 리다이렉트
@@ -101,6 +104,7 @@ JD 카드 컴포넌트. 표시 항목:
 #### `import-modal.tsx` (Client Component — `'use client'`)
 
 Dialog 기반 질문 가져오기 모달:
+
 - 라이브러리 질문 데이터는 JD 상세 페이지(Server Component)에서 props로 전달 — 별도 fetch 불필요
 - 카테고리 필터 (Select)
 - 질문 체크박스 리스트 (질문 텍스트 + 키워드 미리보기)
@@ -125,6 +129,7 @@ sidebar (Client) → 사용자가 JD 선택
 #### sidebar 수정 (`src/components/study/sidebar.tsx`)
 
 상단에 JD 선택 드롭다운 추가 (shadcn Select):
+
 - "공통 라이브러리" (기본값, value = "")
 - 각 JD: "회사명 — 포지션" (value = jd.id)
 - JD 목록은 `/study/page.tsx` Server Component에서 `getAllJobs()`로 조회 → sidebar에 props 전달
@@ -133,22 +138,24 @@ sidebar (Client) → 사용자가 JD 선택
 #### `/study/page.tsx` 수정
 
 `searchParams.jdId`에 따라 데이터 fetch 분기:
+
 - `undefined` → `getLibraryQuestions()` + `getGlobalCategories()`
 - JD 선택 → `getQuestionsByJdId(jdId)` + `getCategoriesByJdId(jdId)`
 
 ### 5. sidebar-nav 수정 (`src/components/interviews/sidebar-nav.tsx`)
 
 현재 `/interviews`와 `/interviews/questions` 두 항목만 존재. `/interviews/jobs/*` 하위 라우트 접근 시 "JD 관리" 항목이 활성화되도록 매칭 로직 수정:
+
 - `/interviews/jobs/*` → "JD 관리" 활성 (`pathname === '/interviews' || pathname.startsWith('/interviews/jobs')`)
 - `/interviews/questions` → "공통 라이브러리" 활성 (기존 유지)
 
 ### 6. 테스트
 
-| 테스트 파일 | 범위 |
-|------------|------|
-| `src/data-access/import.test.ts` | 질문 복사, 키워드/꼬리질문 복사, 중복 스킵, 트랜잭션 |
-| `src/actions/job-actions.test.ts` | CRUD actions + revalidatePath + 반환값 검증 |
-| `src/actions/import-actions.test.ts` | import action + revalidatePath + ImportResult 검증 |
+| 테스트 파일                          | 범위                                                 |
+| ------------------------------------ | ---------------------------------------------------- |
+| `src/data-access/import.test.ts`     | 질문 복사, 키워드/꼬리질문 복사, 중복 스킵, 트랜잭션 |
+| `src/actions/job-actions.test.ts`    | CRUD actions + revalidatePath + 반환값 검증          |
+| `src/actions/import-actions.test.ts` | import action + revalidatePath + ImportResult 검증   |
 
 ### 7. 설치 필요 패키지
 

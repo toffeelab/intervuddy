@@ -70,6 +70,7 @@ pnpm format:check     # Prettier 포매팅 검사
 - better-sqlite3 동기 API 사용
 - 파라미터 바인딩 필수 (SQL injection 방지)
 - data-access 레이어를 통해 접근 (db 직접 import 금지)
+- **시드 업데이트**: DB 스키마 변경 시 `data/seed.sample.ts`와 `src/test/helpers/db.ts`도 동기화 필수
 
 ### Import 경로
 
@@ -77,9 +78,7 @@ pnpm format:check     # Prettier 포매팅 검사
 
 ### 린팅 & 포매팅
 
-- ESLint + Prettier로 코드 품질 및 스타일 강제
-- `prettier.config.mjs`: single quotes, semicolons, trailing comma (es5), printWidth 100
-- `eslint.config.mjs`: flat config — typescript-eslint, react, next, import 순서 자동 정렬
+- ESLint + Prettier + husky + lint-staged로 pre-commit 자동 검사
 - import 순서: builtin → external (react, next) → internal (@/) → relative
 - 테스트 파일에서 vi.mock 사용 시 `vi.hoisted()` 패턴 사용 (import 순서 유지)
 
@@ -96,119 +95,39 @@ pnpm format:check     # Prettier 포매팅 검사
 main (프로덕션) ← develop (통합) ← feature/<날짜>/<이름> (기능 개발)
 ```
 
-1. `develop`에서 `feature/<YYYY-MM-DD>/<이름>` 브랜치 생성 (예: `feature/2026-03-17/theme-mode-toggle`)
+1. `develop`에서 `feature/<YYYY-MM-DD>/<이름>` 브랜치 생성
 2. conventional commits 사용 (feat:, fix:, refactor:, chore:)
 3. PR은 반드시 `develop` 대상으로 생성
 4. Claude 자동 리뷰 통과 후 squash merge
-5. 머지 완료된 feature 브랜치는 30일 후 자동 삭제 (GitHub Actions)
-
-### GitHub Actions Workflow 수정
-
-Claude Code Action은 **default branch(main)의 workflow 파일**과 PR 브랜치의 workflow가 동일한지 검증한다.
-따라서 workflow 파일(`.github/workflows/`)은 일반 코드의 git flow와 다르게 취급해야 한다.
-
-**수정 절차:**
-
-1. `main`에서 `chore/workflow-*` 브랜치 생성
-2. workflow 수정 후 `main` 대상 PR 생성 → 머지
-3. `main`을 `develop`에 merge하여 동기화: `git checkout develop && git merge main`
-4. 진행 중인 feature 브랜치가 있다면 develop을 merge: `git merge develop`
-
-**주의:** workflow를 develop이나 feature에서만 수정하면 main과 불일치가 발생하여 Claude 리뷰 Action이 실패한다.
-
-### Draft PR 활용
-
-Draft PR에서는 Claude 자동 리뷰가 스킵된다. 리뷰 피드백 반영 중 중간 저장이 필요할 때 활용:
-
-- `gh pr ready --undo <PR번호>` → draft 전환 (이후 push에 리뷰 안 돌아감)
-- `gh pr ready <PR번호>` → ready 전환 (리뷰 트리거)
-
-### Superpowers 기반 개발
-
-기능 개발 시 superpowers 프로세스 스킬을 활용하여 체계적으로 진행:
-
-- **brainstorming**: 요구사항 분석, 설계 탐색 — 구현 전 반드시 수행
-- **writing-plans**: 멀티스텝 작업의 구현 계획 수립
-- **test-driven-development**: TDD red-green-refactor (내부에서 tdd-workflows 호출)
-- **verification-before-completion**: 완료 선언 전 검증 필수
-- **requesting-code-review**: 주요 구현 완료 후 코드 리뷰
-- **finishing-a-development-branch**: 브랜치 마무리 (merge/PR 결정)
-
-도메인별 구현 에이전트 (superpowers가 필요 시 활용):
-
-- **frontend-design**: 독창적이고 완성도 높은 프론트엔드 UI 구현
-- **frontend-developer**: React 컴포넌트, 레이아웃, 클라이언트 상태
-- **simplify**: 리팩토링 및 코드 품질 개선
+5. workflow 파일 수정 시 → [workflow 수정 가이드](docs/agent_docs/workflow-modification-guide.md) 참조
 
 ### 작업 순서
 
-1. **요구사항 분석** → `brainstorming` 스킬로 의도/요구사항/설계 탐색
-2. **계획 수립** → `writing-plans`로 구현 계획 작성 (복잡한 작업 시)
-3. **TDD 개발** → `test-driven-development`로 red-green-refactor 사이클
-4. **검증** → `verification-before-completion` + Playwright E2E (아래 참조)
-5. **코드 리뷰** → `requesting-code-review`로 품질 확인
+1. **요구사항 분석** → `brainstorming` 스킬
+2. **계획 수립** → `writing-plans` (복잡한 작업 시)
+3. **TDD 개발** → `test-driven-development` (red-green-refactor)
+4. **검증** → `verification-before-completion` → [검증 체크리스트](docs/agent_docs/verification-checklist.md) 참조
+5. **코드 리뷰** → `requesting-code-review`
 6. **완료** → `finishing-a-development-branch`로 PR 생성 (`--base develop`)
 
-### E2E 검증 (화면 개발 시 필수)
+### Superpowers 스킬
 
-화면(UI) 변경이 포함된 구현 완료 후, Playwright MCP를 통해 실제 동작을 검증 (데이터 레이어만 변경된 경우 불필요):
+**프로세스 스킬:**
+brainstorming, writing-plans, test-driven-development, verification-before-completion, requesting-code-review, finishing-a-development-branch
 
-1. `pnpm dev`로 개발 서버 실행
-2. `browser_navigate`로 해당 페이지 접근
-3. `browser_take_screenshot`으로 렌더링 결과 캡처
-4. `browser_click`, `browser_fill_form`, `browser_type` 등으로 주요 인터랙션 테스트
-5. 콘솔 에러 없음 확인 (`browser_console_messages`)
+**도메인 에이전트:**
+frontend-design, frontend-developer, simplify
 
-### PR 스크린샷 첨부
+## 참조 문서
 
-E2E 스크린샷을 PR에 첨부할 때는 **feature 브랜치에 임시 커밋** → raw URL 참조:
-
-1. 스크린샷을 `.github/screenshots/`에 저장
-2. feature 브랜치에 커밋: `git add .github/screenshots/ && git commit -m "chore: E2E 스크린샷 첨부"`
-3. PR 본문에서 raw URL로 참조: `![설명](https://raw.githubusercontent.com/toffeelab/intervuddy/feature/<날짜>/<이름>/.github/screenshots/<파일명>)`
-4. squash merge 시 develop에는 스크린샷이 포함되지 않음
-5. feature 브랜치 삭제 전까지 PR에서 이미지 확인 가능 (30일 보관)
-
-**스크린샷 캡션 필수:** 이미지만 첨부하지 말고, 각 스크린샷 위에 캡션을 작성할 것:
-
-- 어떤 페이지/화면인지 (예: `/study` — 학습 페이지)
-- 무엇을 확인했는지 (예: 테마 토글 노출, 인라인 편집 동작, active state 적용 등)
-
-```markdown
-### `/페이지경로` — 페이지 설명
-
-확인 내용을 1~2문장으로 서술. 어떤 기능이 정상 동작하는지, 무엇을 검증했는지 기록.
-
-![alt text](스크린샷 URL)
-```
-
-### 병렬 작업 및 Worktree 관리
-
-독립적인 태스크가 2개 이상일 때 superpowers 스킬로 병렬 처리:
-
-- `using-git-worktrees`: worktree 생성 및 격리 환경 설정
-- `dispatching-parallel-agents`: 독립 태스크 병렬 실행
-- dev 서버 포트 충돌 방지: `--port 3001`, `--port 3002` 등
-- worktree에서 에이전트 실행 시 `node_modules` 심링크 필요: `ln -s <메인>/node_modules ./node_modules`
-
-**Worktree 생명주기:**
-
-1. feature 브랜치 생성 → worktree 생성 (격리 환경)
-2. 구현 + 테스트 + 커밋 (worktree 내에서)
-3. push + PR 생성
-4. **PR push 완료 후 즉시 worktree 정리**: `git worktree remove <path>`
-5. 이후 PR 수정이 필요하면 feature 브랜치를 직접 체크아웃하여 작업
-
-### Serena MCP 활용
-
-코드베이스 탐색 및 편집 시 Serena의 심볼릭 도구를 우선 활용:
-
-- **탐색**: `get_symbols_overview` → `find_symbol`(name_path + include_body) 순서로 점진적 탐색
-- **편집**: 심볼 단위 수정은 `replace_symbol_body`, 부분 수정은 `replace_content` (정규식 지원)
-- **참조 추적**: `find_referencing_symbols`로 변경 영향 범위 파악 후 편집
-- **검색**: 심볼명 불확실 시 `search_for_pattern`으로 후보 탐색 → 심볼릭 도구로 진입
-- 파일 전체 읽기보다 심볼 단위 읽기를 우선 — 컨텍스트 효율화
-- **메모리**: 프로젝트 진행 상황, 작업 컨텍스트를 `write_memory`로 `.serena/memories/`에 저장. 다른 PC에서 `read_memory`로 복원 가능. 세션 간 컨텍스트 공유에 활용
+| 문서                 | 경로                                             | 언제 참조                                          |
+| -------------------- | ------------------------------------------------ | -------------------------------------------------- |
+| 검증 체크리스트      | `docs/agent_docs/verification-checklist.md`      | 구현 완료 → PR 전 (E2E, 스크린샷 캡션 포함)        |
+| 병렬 작업 가이드     | `docs/agent_docs/parallel-worktree-guide.md`     | 독립 태스크 2+ 병렬 처리 시                        |
+| Serena MCP 가이드    | `docs/agent_docs/serena-mcp-guide.md`            | 코드베이스 심볼릭 탐색/편집 시                     |
+| Workflow 수정 가이드 | `docs/agent_docs/workflow-modification-guide.md` | .github/workflows/ 수정 시                         |
+| 샘플 시드 데이터     | `data/seed.sample.ts`                            | E2E 검증용 (스키마 변경 시 동기화 필수)            |
+| 테스트 헬퍼          | `src/test/helpers/db.ts`                         | 테스트용 DB seed 함수 (스키마 변경 시 동기화 필수) |
 
 ## 금지 사항
 

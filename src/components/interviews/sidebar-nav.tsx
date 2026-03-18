@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const isJdSection = pathname === '/interviews' || pathname.startsWith('/interviews/jobs');
   const isQuestions = pathname.startsWith('/interviews/questions');
 
   return (
@@ -15,7 +16,7 @@ export function SidebarNav() {
         href="/interviews"
         className={cn(
           'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
-          !isQuestions
+          isJdSection
             ? 'bg-iv-accent/10 text-iv-accent'
             : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
         )}
