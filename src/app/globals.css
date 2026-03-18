@@ -98,15 +98,15 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* Intervuddy custom properties */
-  --iv-bg: #0d0f14;
-  --iv-bg2: #13161d;
-  --iv-bg3: #1a1e28;
-  --iv-border: rgba(255, 255, 255, 0.07);
-  --iv-border2: rgba(255, 255, 255, 0.13);
-  --iv-text: #e8eaf0;
-  --iv-text2: #8b90a0;
-  --iv-text3: #555b6e;
+  /* Intervuddy custom properties — light mode */
+  --iv-bg: #ffffff;
+  --iv-bg2: #f3f4f6;
+  --iv-bg3: #e5e7eb;
+  --iv-border: rgba(0, 0, 0, 0.08);
+  --iv-border2: rgba(0, 0, 0, 0.15);
+  --iv-text: #1a1a2e;
+  --iv-text2: #4b5563;
+  --iv-text3: #9ca3af;
   --iv-accent: #4f8ef7;
   --iv-accent2: #7c6cf0;
   --iv-green: #3ecf8e;
@@ -148,6 +148,23 @@
   --sidebar-accent-foreground: #e8eaf0;
   --sidebar-border: rgba(255, 255, 255, 0.07);
   --sidebar-ring: #4f8ef7;
+
+  /* Intervuddy custom properties — dark mode */
+  --iv-bg: #0d0f14;
+  --iv-bg2: #13161d;
+  --iv-bg3: #1a1e28;
+  --iv-border: rgba(255, 255, 255, 0.07);
+  --iv-border2: rgba(255, 255, 255, 0.13);
+  --iv-text: #e8eaf0;
+  --iv-text2: #8b90a0;
+  --iv-text3: #555b6e;
+  --iv-accent: #4f8ef7;
+  --iv-accent2: #7c6cf0;
+  --iv-green: #3ecf8e;
+  --iv-amber: #f59e0b;
+  --iv-red: #f87171;
+  --iv-pink: #e879a0;
+  --iv-jd: #22d3ee;
 }
 
 @layer base {
@@ -161,7 +178,7 @@
     @apply font-sans;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar — light mode */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -170,16 +187,29 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.15);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  /* Firefox scrollbar — light mode */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  }
+
+  /* Custom scrollbar — dark mode */
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
   }
 
-  /* Firefox scrollbar */
-  * {
-    scrollbar-width: thin;
+  /* Firefox scrollbar — dark mode */
+  .dark * {
     scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
   }
 }

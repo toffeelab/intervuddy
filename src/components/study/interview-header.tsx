@@ -2,6 +2,7 @@
 
 import { LogoDot } from '@/components/shared/logo-dot';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { useStudyStore } from '@/stores/study-store';
 
 interface InterviewHeaderProps {
@@ -40,6 +41,7 @@ export function InterviewHeader({ totalCount, allItemIds }: InterviewHeaderProps
         >
           {allExpanded ? '전체 접기' : '전체 펼치기'}
         </Button>
+        <ThemeToggle />
       </div>
     </header>
   );
