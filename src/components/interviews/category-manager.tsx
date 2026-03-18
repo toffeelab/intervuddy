@@ -33,17 +33,23 @@ function CategoryRow({ category }: CategoryRowProps) {
   const [editName, setEditName] = useState(category.name);
   const [editDisplayLabel, setEditDisplayLabel] = useState(category.displayLabel);
   const [editIcon, setEditIcon] = useState(category.icon);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleSave() {
     startTransition(async () => {
-      await updateCategoryAction(category.id, {
-        name: editName,
-        displayLabel: editDisplayLabel,
-        icon: editIcon,
-        slug: slugify(editName),
-      });
-      setEditing(false);
+      try {
+        await updateCategoryAction(category.id, {
+          name: editName,
+          displayLabel: editDisplayLabel,
+          icon: editIcon,
+          slug: slugify(editName),
+        });
+        setError(null);
+        setEditing(false);
+      } catch {
+        setError('저장에 실패했습니다');
+      }
     });
   }
 
@@ -57,7 +63,11 @@ function CategoryRow({ category }: CategoryRowProps) {
   function handleDelete() {
     if (!confirm(`"${category.displayLabel}" 카테고리를 삭제하시겠습니까?\n질문이 ${category.questionCount}개 있습니다.`)) return;
     startTransition(async () => {
-      await deleteCategoryAction(category.id);
+      try {
+        await deleteCategoryAction(category.id);
+      } catch {
+        setError('삭제에 실패했습니다');
+      }
     });
   }
 
@@ -105,7 +115,9 @@ function CategoryRow({ category }: CategoryRowProps) {
   }
 
   return (
-    <div className="group flex items-center gap-3 px-4 py-3 border-b border-iv-border last:border-b-0 hover:bg-iv-bg3 transition-colors">
+    <div className="group flex flex-col border-b border-iv-border last:border-b-0">
+      {error && <p className="px-4 pt-2 text-xs text-iv-red">{error}</p>}
+      <div className="flex items-center gap-3 px-4 py-3 hover:bg-iv-bg3 transition-colors">
       <span className="text-base w-8 text-center shrink-0">{category.icon}</span>
       <span className="text-sm text-iv-text flex-1">{category.displayLabel}</span>
       <span className="text-xs text-iv-text3 font-mono">{category.slug}</span>
@@ -131,6 +143,7 @@ function CategoryRow({ category }: CategoryRowProps) {
           <Trash2 className="size-3.5" />
         </Button>
       </div>
+      </div>
     </div>
   );
 }
@@ -139,25 +152,33 @@ function AddCategoryForm() {
   const [name, setName] = useState('');
   const [displayLabel, setDisplayLabel] = useState('');
   const [icon, setIcon] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleAdd() {
     if (!name.trim() || !displayLabel.trim()) return;
     startTransition(async () => {
-      await createCategoryAction({
-        name: name.trim(),
-        slug: slugify(name.trim()),
-        displayLabel: displayLabel.trim(),
-        icon: icon.trim() || '📁',
-      });
-      setName('');
-      setDisplayLabel('');
-      setIcon('');
+      try {
+        await createCategoryAction({
+          name: name.trim(),
+          slug: slugify(name.trim()),
+          displayLabel: displayLabel.trim(),
+          icon: icon.trim() || '📁',
+        });
+        setName('');
+        setDisplayLabel('');
+        setIcon('');
+        setError(null);
+      } catch {
+        setError('카테고리 추가에 실패했습니다');
+      }
     });
   }
 
   return (
-    <div className={cn('flex items-center gap-2 px-4 py-3 border-t border-iv-border bg-iv-bg2 rounded-b-lg')}>
+    <div className={cn('flex flex-col gap-2 px-4 py-3 border-t border-iv-border bg-iv-bg2 rounded-b-lg')}>
+      {error && <p className="text-xs text-iv-red">{error}</p>}
+      <div className="flex items-center gap-2">
       <Input
         value={icon}
         onChange={(e) => setIcon(e.target.value)}
@@ -187,6 +208,7 @@ function AddCategoryForm() {
         <Plus className="size-3.5" />
         추가
       </Button>
+      </div>
     </div>
   );
 }

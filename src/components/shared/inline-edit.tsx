@@ -27,6 +27,7 @@ export function InlineEdit({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
 
   // Keep editValue in sync with prop when not editing
@@ -39,6 +40,7 @@ export function InlineEdit({
   const handleStartEdit = useCallback(() => {
     if (disabled || isSaving) return;
     setEditValue(value);
+    setError(null);
     setIsEditing(true);
   }, [disabled, isSaving, value]);
 
@@ -64,9 +66,12 @@ export function InlineEdit({
     }
 
     setIsSaving(true);
+    setError(null);
     try {
       await onSave(trimmed);
       setIsEditing(false);
+    } catch {
+      setError('저장에 실패했습니다');
     } finally {
       setIsSaving(false);
     }
@@ -157,6 +162,9 @@ export function InlineEdit({
           {...sharedProps}
           ref={inputRef as React.Ref<HTMLInputElement>}
         />
+      )}
+      {error && (
+        <p className="mt-1 text-xs text-iv-red">{error}</p>
       )}
       <p className="mt-1 text-xs text-iv-text3">
         {isSaving

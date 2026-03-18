@@ -184,6 +184,7 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
   const [formCategoryId, setFormCategoryId] = useState<number>(0);
   const [formKeywords, setFormKeywords] = useState<string[]>([]);
   const [formFollowups, setFormFollowups] = useState<FollowupFormItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (question) {
@@ -205,44 +206,60 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
   async function handleSave() {
     if (!question) return;
 
+    // Validate required fields
+    if (!formQuestion.trim() || !formAnswer.trim()) {
+      setError('질문과 답변은 필수 입력입니다');
+      return;
+    }
+
+    // Filter out empty followups
+    const validFollowups = formFollowups.filter(
+      (f) => f.question.trim() && f.answer.trim()
+    );
+
     startTransition(async () => {
-      // Update question fields (including categoryId if changed)
-      await updateQuestionAction({
-        id: question.id,
-        ...(formCategoryId !== question.categoryId && { categoryId: formCategoryId }),
-        question: formQuestion,
-        answer: formAnswer,
-        tip: formTip || null,
-      });
+      try {
+        // Update question fields (including categoryId if changed)
+        await updateQuestionAction({
+          id: question.id,
+          ...(formCategoryId !== question.categoryId && { categoryId: formCategoryId }),
+          question: formQuestion.trim(),
+          answer: formAnswer.trim(),
+          tip: formTip.trim() || null,
+        });
 
-      // Save keywords
-      await updateQuestionKeywordsAction(question.id, formKeywords);
+        // Save keywords
+        await updateQuestionKeywordsAction(question.id, formKeywords);
 
-      // Handle followups: sync existing and new
-      const originalFollowupIds = new Set(question.followups.map((f) => f.id));
-      const keepIds = new Set(formFollowups.filter((f) => f.id).map((f) => f.id as number));
+        // Handle followups: sync existing and new
+        const originalFollowupIds = new Set(question.followups.map((f) => f.id));
+        const keepIds = new Set(validFollowups.filter((f) => f.id).map((f) => f.id as number));
 
-      // Delete removed followups
-      for (const f of question.followups) {
-        if (!keepIds.has(f.id)) {
-          await deleteFollowupAction(f.id);
+        // Delete removed followups
+        for (const f of question.followups) {
+          if (!keepIds.has(f.id)) {
+            await deleteFollowupAction(f.id);
+          }
         }
-      }
 
-      // Update or create followups
-      for (const f of formFollowups) {
-        if (f.id && originalFollowupIds.has(f.id)) {
-          await updateFollowupAction({ id: f.id, question: f.question, answer: f.answer });
-        } else if (!f.id) {
-          await createFollowupAction({
-            questionId: question.id,
-            question: f.question,
-            answer: f.answer,
-          });
+        // Update or create followups
+        for (const f of validFollowups) {
+          if (f.id && originalFollowupIds.has(f.id)) {
+            await updateFollowupAction({ id: f.id, question: f.question.trim(), answer: f.answer.trim() });
+          } else if (!f.id) {
+            await createFollowupAction({
+              questionId: question.id,
+              question: f.question.trim(),
+              answer: f.answer.trim(),
+            });
+          }
         }
-      }
 
-      closeDrawer();
+        setError(null);
+        closeDrawer();
+      } catch {
+        setError('저장에 실패했습니다. 다시 시도해주세요.');
+      }
     });
   }
 
@@ -322,6 +339,7 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
         </div>
 
         <DrawerFooter className="border-t border-iv-border px-5 py-4">
+          {error && <p className="text-xs text-iv-red mb-2">{error}</p>}
           <div className="flex gap-2 justify-end">
             <Button variant="outline" size="sm" onClick={closeDrawer} disabled={isPending}
               className="border-iv-border text-iv-text2">

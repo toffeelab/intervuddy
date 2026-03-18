@@ -18,6 +18,7 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
   const [isOpen, setIsOpen] = useState(false);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const isFollowupMode = questionId !== undefined;
@@ -29,15 +30,20 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
     if (!trimmedQ || !trimmedA) return;
 
     startTransition(async () => {
-      if (isFollowupMode) {
-        await createFollowupAction({ questionId: questionId!, question: trimmedQ, answer: trimmedA });
-      } else {
-        await createQuestionAction({ categoryId, jdId: jdId ?? null, question: trimmedQ, answer: trimmedA });
+      try {
+        if (isFollowupMode) {
+          await createFollowupAction({ questionId: questionId!, question: trimmedQ, answer: trimmedA });
+        } else {
+          await createQuestionAction({ categoryId, jdId: jdId ?? null, question: trimmedQ, answer: trimmedA });
+        }
+        setQuestion('');
+        setAnswer('');
+        setError(null);
+        setIsOpen(false);
+        onAdded?.();
+      } catch {
+        setError('추가에 실패했습니다. 다시 시도해주세요.');
       }
-      setQuestion('');
-      setAnswer('');
-      setIsOpen(false);
-      onAdded?.();
     });
   };
 
@@ -102,6 +108,7 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
           'disabled:opacity-50'
         )}
       />
+      {error && <p className="text-xs text-iv-red">{error}</p>}
       <div className="flex items-center gap-2 justify-end">
         <button
           type="button"

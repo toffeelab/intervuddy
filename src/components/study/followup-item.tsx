@@ -39,6 +39,7 @@ export function FollowupItem({ item }: FollowupItemProps) {
             multiline={false}
             textClassName="text-[12px] text-[#a89ff5] font-medium"
             placeholder="꼬리 질문을 입력하세요"
+            disabled={isPending}
           />
         </div>
         <button
@@ -62,6 +63,7 @@ export function FollowupItem({ item }: FollowupItemProps) {
           multiline
           textClassName="text-[12px] text-iv-text3 leading-[1.75] whitespace-pre-line"
           placeholder="답변을 입력하세요"
+          disabled={isPending}
         />
       </div>
     </div>

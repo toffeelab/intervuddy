@@ -41,6 +41,7 @@ export function QAAnswer({ item }: QAAnswerProps) {
         multiline
         textClassName="whitespace-pre-line text-[13px] text-iv-text2 leading-[1.85]"
         placeholder="답변을 입력하세요"
+        disabled={isDeleting}
       />
 
       {item.keywords.length > 0 && <KeywordBox keywords={item.keywords} />}
@@ -55,6 +56,7 @@ export function QAAnswer({ item }: QAAnswerProps) {
             multiline
             textClassName="text-[12px] leading-[1.75] whitespace-pre-line text-iv-amber/80"
             placeholder="팁을 입력하세요"
+            disabled={isDeleting}
           />
         </div>
       )}

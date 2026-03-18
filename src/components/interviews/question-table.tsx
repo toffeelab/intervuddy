@@ -39,17 +39,24 @@ function groupByCategory(questions: InterviewQuestion[]): GroupedQuestions[] {
 
 function QuestionRow({ question }: { question: InterviewQuestion }) {
   const { openDrawer } = useEditStore();
+  const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   function handleDelete() {
     if (!confirm(`"${question.question.slice(0, 40)}..." 질문을 삭제하시겠습니까?`)) return;
     startTransition(async () => {
-      await deleteQuestionAction(question.id);
+      try {
+        await deleteQuestionAction(question.id);
+      } catch {
+        setError('삭제에 실패했습니다');
+      }
     });
   }
 
   return (
-    <div className="group flex items-start gap-3 px-4 py-3 border-b border-iv-border last:border-b-0 hover:bg-iv-bg3 transition-colors">
+    <div className="group flex flex-col border-b border-iv-border last:border-b-0 hover:bg-iv-bg3 transition-colors">
+      {error && <p className="px-4 pt-2 text-xs text-iv-red">{error}</p>}
+      <div className="flex items-start gap-3 px-4 py-3">
       <div className="flex-1 min-w-0">
         <p className="text-sm text-iv-text leading-relaxed line-clamp-2">{question.question}</p>
         {question.answer && (
@@ -93,6 +100,7 @@ function QuestionRow({ question }: { question: InterviewQuestion }) {
         >
           <Trash2 className="size-3.5" />
         </Button>
+      </div>
       </div>
     </div>
   );
