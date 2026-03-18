@@ -211,6 +211,10 @@ export function updateQuestion(input: UpdateQuestionInput): void {
   const fields: string[] = [];
   const values: unknown[] = [];
 
+  if (input.categoryId !== undefined) {
+    fields.push('category_id = ?');
+    values.push(input.categoryId);
+  }
   if (input.question !== undefined) {
     fields.push('question = ?');
     values.push(input.question);
@@ -228,6 +232,20 @@ export function updateQuestion(input: UpdateQuestionInput): void {
 
   values.push(input.id);
   db.prepare(`UPDATE interview_questions SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+}
+
+export function updateQuestionKeywords(questionId: number, keywords: string[]): void {
+  const db = getDb();
+  const deleteStmt = db.prepare('DELETE FROM question_keywords WHERE question_id = ?');
+  const insertStmt = db.prepare('INSERT INTO question_keywords (question_id, keyword) VALUES (?, ?)');
+
+  const updateAll = db.transaction(() => {
+    deleteStmt.run(questionId);
+    for (const keyword of keywords) {
+      insertStmt.run(questionId, keyword);
+    }
+  });
+  updateAll();
 }
 
 export function softDeleteQuestion(id: number): void {

@@ -65,6 +65,7 @@ export interface CreateQuestionInput {
 
 export interface UpdateQuestionInput {
   id: number;
+  categoryId?: number;
   question?: string;
   answer?: string;
   tip?: string | null;
