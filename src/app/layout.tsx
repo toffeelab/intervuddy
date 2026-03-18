@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR, JetBrains_Mono } from "next/font/google";
+import { ThemeScript } from "@/components/shared/theme-script";
+import { ThemeProvider } from "@/components/shared/theme-provider";
 import "./globals.css";
 
 const notoSansKR = Noto_Sans_KR({
@@ -28,11 +30,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="dark">
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body
         className={`${notoSansKR.variable} ${jetbrainsMono.variable} antialiased min-h-screen bg-iv-bg text-iv-text`}
       >
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

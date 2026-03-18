@@ -121,6 +121,7 @@ Draft PR에서는 Claude 자동 리뷰가 스킵된다. 리뷰 피드백 반영 
 - **finishing-a-development-branch**: 브랜치 마무리 (merge/PR 결정)
 
 도메인별 구현 에이전트 (superpowers가 필요 시 활용):
+- **frontend-design**: 독창적이고 완성도 높은 프론트엔드 UI 구현
 - **frontend-developer**: React 컴포넌트, 레이아웃, 클라이언트 상태
 - **simplify**: 리팩토링 및 코드 품질 개선
 
@@ -133,9 +134,9 @@ Draft PR에서는 Claude 자동 리뷰가 스킵된다. 리뷰 피드백 반영 
 5. **코드 리뷰** → `requesting-code-review`로 품질 확인
 6. **완료** → `finishing-a-development-branch`로 PR 생성 (`--base develop`)
 
-### E2E 검증 (커밋 전 필수)
+### E2E 검증 (화면 개발 시 필수)
 
-구현 완료 후, 커밋 전에 Playwright MCP를 통해 실제 동작을 검증:
+화면(UI) 변경이 포함된 구현 완료 후, Playwright MCP를 통해 실제 동작을 검증 (데이터 레이어만 변경된 경우 불필요):
 
 1. `pnpm dev`로 개발 서버 실행
 2. `browser_navigate`로 해당 페이지 접근
