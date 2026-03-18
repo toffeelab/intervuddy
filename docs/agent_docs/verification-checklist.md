@@ -66,6 +66,18 @@ git commit -m "chore: E2E 스크린샷 첨부"
 # ![설명](https://raw.githubusercontent.com/toffeelab/intervuddy/<branch>/.github/screenshots/<파일명>)
 ```
 
+### 스크린샷 캡션 규칙
+
+이미지만 첨부하지 말고, 각 스크린샷 위에 캡션을 작성할 것:
+
+```markdown
+### `/페이지경로` — 페이지 설명
+
+확인 내용을 1~2문장으로 서술. 어떤 기능이 정상 동작하는지, 무엇을 검증했는지 기록.
+
+![alt text](스크린샷 URL)
+```
+
 ## 4. 검증 결과 보고 형식
 
 ```markdown
