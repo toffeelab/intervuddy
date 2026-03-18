@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useEditStore } from '@/stores/edit-store';
-import { updateQuestionAction } from '@/actions/question-actions';
+import { updateQuestionAction, updateQuestionKeywordsAction } from '@/actions/question-actions';
 import {
   createFollowupAction,
   updateFollowupAction,
@@ -206,13 +206,17 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
     if (!question) return;
 
     startTransition(async () => {
-      // Update question fields
+      // Update question fields (including categoryId if changed)
       await updateQuestionAction({
         id: question.id,
+        ...(formCategoryId !== question.categoryId && { categoryId: formCategoryId }),
         question: formQuestion,
         answer: formAnswer,
         tip: formTip || null,
       });
+
+      // Save keywords
+      await updateQuestionKeywordsAction(question.id, formKeywords);
 
       // Handle followups: sync existing and new
       const originalFollowupIds = new Set(question.followups.map((f) => f.id));
