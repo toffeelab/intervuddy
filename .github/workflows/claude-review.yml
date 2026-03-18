@@ -118,24 +118,32 @@ jobs:
             - 리뷰 본문 마지막에 포함: 📊 **토큰 사용량**: 입력 토큰 약 N개 / 출력 토큰 약 N개
 
       - name: Parse review result
-        if: github.event_name == 'pull_request' && steps.claude-review.outputs.execution_file != ''
+        if: github.event_name == 'pull_request'
         id: parse-review
         env:
           EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
         run: |
-          REVIEW_RESULT=$(cat "$EXECUTION_FILE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('result',''))" 2>/dev/null || echo "")
-          if [ -z "$REVIEW_RESULT" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            exit 0
+          if [ -z "$EXECUTION_FILE" ] || [ ! -f "$EXECUTION_FILE" ]; then
+            echo "::error::Claude Code Action의 execution_file output이 없습니다"
+            exit 1
           fi
-          # result를 파일에 저장 (shell escaping 문제 방지)
+
+          REVIEW_RESULT=$(python3 -c "import sys,json; print(json.load(sys.stdin).get('result',''))" < "$EXECUTION_FILE" 2>/dev/null || echo "")
+          if [ -z "$REVIEW_RESULT" ]; then
+            echo "::error::execution_file에서 리뷰 결과(result)를 파싱할 수 없습니다"
+            cat "$EXECUTION_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print('keys:', list(d.keys())); print('is_error:', d.get('is_error'))" 2>/dev/null || true
+            exit 1
+          fi
+
           echo "$REVIEW_RESULT" > /tmp/review-body.md
           VERDICT=$(echo "$REVIEW_RESULT" | grep -oP 'VERDICT: \K\w+' | tail -1 || echo "")
+          if [ -z "$VERDICT" ]; then
+            echo "::warning::VERDICT 태그를 찾을 수 없습니다. 코멘트로 게시합니다."
+          fi
           echo "verdict=$VERDICT" >> $GITHUB_OUTPUT
-          echo "skip=false" >> $GITHUB_OUTPUT
 
       - name: Submit review decision
-        if: steps.parse-review.outputs.skip == 'false'
+        if: github.event_name == 'pull_request'
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GH_TOKEN: ${{ github.token }}
