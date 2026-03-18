@@ -1,9 +1,18 @@
 'use client';
 
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Briefcase } from 'lucide-react';
 import { KeywordTags } from '@/components/study/keyword-tags';
 import { StatGrid } from '@/components/study/stat-grid';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { InterviewCategory } from '@/data-access/types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import type { InterviewCategory, JobDescription } from '@/data-access/types';
 import { CATEGORY_ALL, CATEGORY_ICON_BG } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useStudyStore } from '@/stores/study-store';
@@ -17,13 +26,21 @@ const JD_DISPLAY_NAMES: Record<string, string> = {
   'JD-컬처핏': '컬처핏/영어',
 };
 
+const LIBRARY_VALUE = 'library';
+
 interface SidebarProps {
   categories: InterviewCategory[];
+  jobs: JobDescription[];
 }
 
-export function Sidebar({ categories }: SidebarProps) {
+export function Sidebar({ categories, jobs }: SidebarProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const activeCategory = useStudyStore((s) => s.activeCategory);
   const setActiveCategory = useStudyStore((s) => s.setActiveCategory);
+
+  const currentJdId = searchParams.get('jdId');
+  const selectValue = currentJdId ?? LIBRARY_VALUE;
 
   const commonCategories = categories.filter((c) => c.jdId === null);
   const jdCategories = categories.filter((c) => c.jdId !== null);
@@ -31,10 +48,41 @@ export function Sidebar({ categories }: SidebarProps) {
 
   const isActive = (name: string) => activeCategory === name;
 
+  function handleJdChange(value: string | null) {
+    if (value === null) return;
+    setActiveCategory(CATEGORY_ALL);
+    if (value === LIBRARY_VALUE) {
+      router.push('/study');
+    } else {
+      router.push(`/study?jdId=${value}`);
+    }
+  }
+
   return (
     <aside className="border-iv-border bg-iv-bg2 border-r">
       <ScrollArea className="sticky top-[57px] h-[calc(100vh-57px)]">
         <div className="space-y-1 p-3">
+          {/* JD Selector */}
+          <div className="pb-2">
+            <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
+              📂 학습 범위
+            </p>
+            <Select value={selectValue} onValueChange={handleJdChange}>
+              <SelectTrigger className="w-full">
+                <Briefcase className="text-iv-text3 size-3.5" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start" alignItemWithTrigger={false}>
+                <SelectItem value={LIBRARY_VALUE}>공통 라이브러리</SelectItem>
+                {jobs.map((job) => (
+                  <SelectItem key={job.id} value={String(job.id)}>
+                    {job.companyName} — {job.positionTitle}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* All category */}
           <button
             onClick={() => setActiveCategory(CATEGORY_ALL)}
