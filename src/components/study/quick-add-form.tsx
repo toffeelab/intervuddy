@@ -50,6 +50,7 @@ export function QuickAddForm({ categoryId, jdId, questionId, onAdded }: QuickAdd
   const handleCancel = () => {
     setQuestion('');
     setAnswer('');
+    setError(null);
     setIsOpen(false);
   };
 
