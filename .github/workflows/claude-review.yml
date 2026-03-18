@@ -25,6 +25,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch develop branch
+        run: git fetch origin develop:refs/remotes/origin/develop || true
+
       - name: Determine review context
         id: context
         run: |
@@ -37,29 +40,33 @@ jobs:
           fi
 
       - name: Claude Code Action
+        id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: "--model claude-haiku-4-5-20251001"
           show_full_output: true
-          pr_number: ${{ github.event.pull_request.number || github.event.issue.number }}
           prompt: |
-            PR #${{ github.event.pull_request.number || github.event.issue.number }}을 코드 리뷰하세요.
+            이 PR을 코드 리뷰하세요.
             리뷰 모드: ${{ steps.context.outputs.is_incremental == 'true' && '증분 리뷰' || '전체 리뷰' }}
             ${{ steps.context.outputs.is_incremental == 'true' && format('이전 커밋 SHA: {0}', steps.context.outputs.before_sha) || '' }}
 
             ---
 
             ## 전체 리뷰 모드 (리뷰 모드가 "전체 리뷰"인 경우)
-            1. `gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }} --stat`으로 변경 파일 목록 확인
-            2. lock 파일(pnpm-lock.yaml), .claude/, docs/ 제외
-            3. src/ 파일만 `git diff develop -- <파일>`로 개별 읽기
+            1. `git diff origin/develop --name-only`으로 변경 파일 목록 확인
+            2. 다음 파일/디렉토리는 리뷰에서 제외:
+               - `pnpm-lock.yaml`, `package.json`
+               - `.github/screenshots/*`, `.github/workflows/*`
+               - `src/components/ui/*` (shadcn/ui 보일러플레이트)
+               - `.claude/`, `docs/`
+            3. 필터링된 파일만 `git diff origin/develop -- <파일>`로 개별 읽기
             4. 전체 diff를 한번에 읽지 말 것
 
             ## 증분 리뷰 모드 (리뷰 모드가 "증분 리뷰"인 경우)
-            1. `git diff ${{ steps.context.outputs.before_sha }}..HEAD --stat`으로 새 변경 파일 확인
-            2. src/ 파일만 `git diff ${{ steps.context.outputs.before_sha }}..HEAD -- <파일>`로 개별 읽기
-            3. `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number || github.event.issue.number }}/reviews --jq '.[-1].body'`로 가장 최근 리뷰 본문 조회
+            1. `git diff ${{ steps.context.outputs.before_sha }}..HEAD --name-only`으로 새 변경 파일 확인
+            2. 위와 동일한 제외 목록을 적용한 뒤, `git diff ${{ steps.context.outputs.before_sha }}..HEAD -- <파일>`로 개별 읽기
+            3. `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --jq '.[-1].body'`로 가장 최근 리뷰 본문 조회
             4. 이전 리뷰에서 지적된 이슈가 이번 커밋에서 해결되었는지 검증
             5. 새 코드에서 추가 이슈 확인
             6. `git diff` 실패 시 전체 리뷰 모드로 fallback
@@ -92,21 +99,37 @@ jobs:
             - 발견한 이슈는 반드시 `파일명:라인` 형식으로 위치 명시
             - 🔵만 있으면 APPROVE, 🔴가 하나라도 있으면 CHANGES REQUESTED
 
-            ## 판정 및 게시 (필수)
-
-            - APPROVED:
-              `gh pr review ${{ github.event.pull_request.number || github.event.issue.number }} --approve --body "리뷰 내용"`
-
-            - CHANGES REQUESTED:
-              `gh pr review ${{ github.event.pull_request.number || github.event.issue.number }} --request-changes --body "리뷰 내용"`
-
-            반드시 `gh pr review`를 실행해야 합니다 — `gh pr comment`가 아닙니다.
+            ## 출력
+            리뷰 결과를 위 형식에 맞게 텍스트로 출력하세요.
+            판정 섹션의 마지막 줄은 반드시 다음 중 하나여야 합니다:
+            - `VERDICT: APPROVED`
+            - `VERDICT: CHANGES_REQUESTED`
+            gh pr review, gh pr comment 등 직접 게시 명령을 실행하지 마세요.
 
             ## 금지 사항
             - 메모리 저장/설정 작업 금지
             - 전체 diff를 한번에 읽기 금지
-            - `gh pr comment` 사용 금지
+            - `gh pr review`, `gh pr comment` 등 직접 게시 명령 실행 금지
+            - `src/components/ui/*` 파일 리뷰 금지 (shadcn/ui 보일러플레이트)
+            - `.github/screenshots/*` 파일 읽기 금지 (바이너리)
 
             ## 응답 규칙
             - 한국어 작성 (기술 용어/코드 식별자는 원문 유지)
             - 리뷰 본문 마지막에 포함: 📊 **토큰 사용량**: 입력 토큰 약 N개 / 출력 토큰 약 N개
+
+      - name: Submit review decision
+        if: github.event_name == 'pull_request' && steps.claude-review.outputs.result != ''
+        env:
+          REVIEW_RESULT: ${{ steps.claude-review.outputs.result }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERDICT=$(echo "$REVIEW_RESULT" | grep -oP 'VERDICT: \K\w+' | tail -1)
+
+          if [ "$VERDICT" = "APPROVED" ]; then
+            gh pr review "$PR_NUMBER" --approve --body "$REVIEW_RESULT"
+          elif [ "$VERDICT" = "CHANGES_REQUESTED" ]; then
+            gh pr review "$PR_NUMBER" --request-changes --body "$REVIEW_RESULT"
+          else
+            gh pr comment "$PR_NUMBER" --body "$REVIEW_RESULT"
+          fi
