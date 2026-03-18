@@ -2,17 +2,17 @@ import Database from 'better-sqlite3';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { getAllJobs, getJobById } from '@/data-access/jobs';
 import { createTestDb, cleanupTestDb, seedTestJobDescription } from '@/test/helpers/db';
-
-const { mockRevalidatePath } = vi.hoisted(() => ({
-  mockRevalidatePath: vi.fn(),
-}));
-vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
 import {
   createJobAction,
   updateJobAction,
   updateJobStatusAction,
   deleteJobAction,
 } from './job-actions';
+
+const { mockRevalidatePath } = vi.hoisted(() => ({
+  mockRevalidatePath: vi.fn(),
+}));
+vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
 
 let db: Database.Database;
 

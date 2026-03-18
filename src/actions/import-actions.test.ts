@@ -7,12 +7,12 @@ import {
   seedTestQuestions,
   seedTestJobDescription,
 } from '@/test/helpers/db';
+import { importQuestionsAction } from './import-actions';
 
 const { mockRevalidatePath } = vi.hoisted(() => ({
   mockRevalidatePath: vi.fn(),
 }));
 vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
-import { importQuestionsAction } from './import-actions';
 
 let db: Database.Database;
 
