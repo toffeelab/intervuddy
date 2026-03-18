@@ -5,6 +5,7 @@ import {
   cleanupTestDb,
   seedTestJobDescription,
   seedTestCategories,
+  seedTestQuestions,
 } from '@/test/helpers/db';
 import {
   getAllJobs,
@@ -15,7 +16,10 @@ import {
   softDeleteJob,
   restoreJob,
   getDeletedJobs,
+  softDeleteJobWithQuestions,
+  restoreJobWithQuestions,
 } from './jobs';
+import { getQuestionsByJdId, getDeletedQuestions } from './questions';
 
 describe('jobs data-access', () => {
   let db: Database.Database;
@@ -129,6 +133,35 @@ describe('jobs data-access', () => {
     it('활성 JD는 포함하지 않는다', () => {
       seedTestJobDescription(db);
       expect(getDeletedJobs()).toEqual([]);
+    });
+  });
+
+  describe('softDeleteJobWithQuestions', () => {
+    it('JD 삭제 시 하위 질문도 함께 소프트 삭제', () => {
+      seedTestQuestions(db);
+      seedTestJobDescription(db);
+      db.prepare('UPDATE interview_questions SET jd_id = 1 WHERE id = 1').run();
+
+      softDeleteJobWithQuestions(1);
+
+      expect(getAllJobs()).toHaveLength(0);
+      expect(getDeletedJobs()).toHaveLength(1);
+      expect(getQuestionsByJdId(1)).toHaveLength(0);
+      expect(getDeletedQuestions(1)).toHaveLength(1);
+    });
+  });
+
+  describe('restoreJobWithQuestions', () => {
+    it('JD 복구 시 함께 삭제된 질문도 복구', () => {
+      seedTestQuestions(db);
+      seedTestJobDescription(db);
+      db.prepare('UPDATE interview_questions SET jd_id = 1 WHERE id = 1').run();
+
+      softDeleteJobWithQuestions(1);
+      restoreJobWithQuestions(1);
+
+      expect(getAllJobs()).toHaveLength(1);
+      expect(getQuestionsByJdId(1)).toHaveLength(1);
     });
   });
 });

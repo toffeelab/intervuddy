@@ -122,6 +122,37 @@ export function restoreJob(id: number): void {
   db.prepare(`UPDATE job_descriptions SET deleted_at = NULL WHERE id = ?`).run(id);
 }
 
+export function softDeleteJobWithQuestions(id: number): void {
+  const db = getDb();
+  const transaction = db.transaction(() => {
+    db.prepare(`UPDATE job_descriptions SET deleted_at = datetime('now') WHERE id = ?`).run(id);
+    db.prepare(
+      `UPDATE interview_questions SET deleted_at = datetime('now') WHERE jd_id = ? AND deleted_at IS NULL`
+    ).run(id);
+  });
+  transaction();
+}
+
+export function restoreJobWithQuestions(id: number): void {
+  const db = getDb();
+  const transaction = db.transaction(() => {
+    const job = db.prepare(`SELECT deleted_at FROM job_descriptions WHERE id = ?`).get(id) as
+      | { deleted_at: string | null }
+      | undefined;
+
+    db.prepare(`UPDATE job_descriptions SET deleted_at = NULL WHERE id = ?`).run(id);
+
+    if (job?.deleted_at) {
+      db.prepare(
+        `UPDATE interview_questions SET deleted_at = NULL
+         WHERE jd_id = ? AND deleted_at IS NOT NULL
+         AND abs(julianday(deleted_at) - julianday(?)) < (1.0 / 86400.0)`
+      ).run(id, job.deleted_at);
+    }
+  });
+  transaction();
+}
+
 export function getDeletedJobs(): JobDescription[] {
   const db = getDb();
   const rows = db
