@@ -69,6 +69,8 @@ export function createCategory(input: CreateCategoryInput): number {
   const db = getDb();
   const result = db.prepare(`
     INSERT INTO interview_categories (jd_id, name, slug, display_label, icon, display_order)
+    -- display_order: 같은 jd_id 그룹 내 최대값 + 1, 없으면 0부터 시작
+    -- CASE WHEN: jdId가 NULL이면 글로벌 카테고리, 아니면 해당 JD의 카테고리만 조회
     VALUES (?, ?, ?, ?, ?, COALESCE(
       (SELECT MAX(display_order) + 1 FROM interview_categories WHERE
         CASE WHEN ? IS NULL THEN jd_id IS NULL ELSE jd_id = ? END
