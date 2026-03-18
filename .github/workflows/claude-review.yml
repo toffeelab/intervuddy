@@ -101,9 +101,8 @@ jobs:
 
             ## 출력
             리뷰 결과를 위 형식에 맞게 텍스트로 출력하세요.
-            판정 섹션의 마지막 줄은 반드시 다음 중 하나여야 합니다:
-            - `VERDICT: APPROVED`
-            - `VERDICT: CHANGES_REQUESTED`
+            판정 섹션에는 반드시 "APPROVED" 또는 "CHANGES REQUESTED" 영문 키워드를 포함해야 합니다.
+            (예: "✅ APPROVED", "❌ CHANGES REQUESTED — 사유")
             gh pr review, gh pr comment 등 직접 게시 명령을 실행하지 마세요.
 
             ## 금지 사항
@@ -117,60 +116,57 @@ jobs:
             - 한국어 작성 (기술 용어/코드 식별자는 원문 유지)
             - 리뷰 본문 마지막에 포함: 📊 **토큰 사용량**: 입력 토큰 약 N개 / 출력 토큰 약 N개
 
-      - name: Parse review result
+      - name: Submit review decision
         if: github.event_name == 'pull_request'
-        id: parse-review
         env:
           EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ -z "$EXECUTION_FILE" ] || [ ! -f "$EXECUTION_FILE" ]; then
             echo "::error::Claude Code Action의 execution_file output이 없습니다"
             exit 1
           fi
 
-          # JSON에서 result를 파일로 직접 추출 (쉘 변수 할당 시 개행/특수문자 손실 방지)
-          python3 -c "
+          # python 스크립트로 result 추출 + verdict 판정
+          cat > /tmp/parse_review.py << 'PYEOF'
           import json, sys
-          with open('$EXECUTION_FILE') as f:
-              data = json.load(f)
-          result = data.get('result', '')
-          if not result:
-              print('::error::execution_file에서 리뷰 결과(result)가 비어있습니다')
-              print(f'keys: {list(data.keys())}')
-              print(f'is_error: {data.get(\"is_error\")}')
-              sys.exit(1)
-          with open('/tmp/review-body.md', 'w') as out:
-              out.write(result)
-          # VERDICT 추출
-          verdict = ''
-          for line in result.split('\n'):
-              if 'VERDICT:' in line:
-                  parts = line.split('VERDICT:')
-                  if len(parts) > 1:
-                      verdict = parts[-1].strip()
-          print(f'verdict={verdict}')
-          " >> $GITHUB_OUTPUT
 
+          with open(sys.argv[1]) as f:
+              data = json.load(f)
+
+          # list인 경우 마지막 result 항목 찾기
+          if isinstance(data, list):
+              for item in reversed(data):
+                  if isinstance(item, dict) and item.get("result"):
+                      data = item
+                      break
+              else:
+                  print("::error::execution_file에서 result를 찾을 수 없습니다", file=sys.stderr)
+                  sys.exit(1)
+
+          result = data.get("result", "") if isinstance(data, dict) else ""
+          if not result:
+              print("::error::리뷰 결과(result)가 비어있습니다", file=sys.stderr)
+              sys.exit(1)
+
+          with open("/tmp/review-body.md", "w") as out:
+              out.write(result)
+
+          if "CHANGES_REQUESTED" in result or "CHANGES REQUESTED" in result:
+              print("CHANGES_REQUESTED")
+          elif "APPROVED" in result:
+              print("APPROVED")
+          else:
+              print("COMMENT")
+          PYEOF
+
+          VERDICT=$(python3 /tmp/parse_review.py "$EXECUTION_FILE")
           if [ $? -ne 0 ]; then
             exit 1
           fi
 
-          VERDICT=$(grep 'verdict=' $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
-          if [ -z "$VERDICT" ]; then
-            echo "::warning::VERDICT 태그를 찾을 수 없습니다. 코멘트로 게시합니다."
-          fi
-
-      - name: Submit review decision
-        if: github.event_name == 'pull_request'
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          GH_TOKEN: ${{ github.token }}
-          VERDICT: ${{ steps.parse-review.outputs.verdict }}
-        run: |
-          if [ ! -f /tmp/review-body.md ]; then
-            echo "::error::리뷰 본문 파일이 없습니다"
-            exit 1
-          fi
+          echo "Verdict: $VERDICT"
 
           if [ "$VERDICT" = "APPROVED" ]; then
             gh pr review "$PR_NUMBER" --approve --body-file /tmp/review-body.md
