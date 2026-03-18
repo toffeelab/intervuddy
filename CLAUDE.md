@@ -145,9 +145,15 @@ Draft PR에서는 Claude 자동 리뷰가 스킵된다. 리뷰 피드백 반영 
 1. **요구사항 분석** → `brainstorming` 스킬로 의도/요구사항/설계 탐색
 2. **계획 수립** → `writing-plans`로 구현 계획 작성 (복잡한 작업 시)
 3. **TDD 개발** → `test-driven-development`로 red-green-refactor 사이클
-4. **검증** → `verification-before-completion` + Playwright E2E (아래 참조)
+4. **검증** → `verification-before-completion` + Playwright E2E → **[검증 체크리스트](docs/agent_docs/verification-checklist.md)** 참조
 5. **코드 리뷰** → `requesting-code-review`로 품질 확인
 6. **완료** → `finishing-a-development-branch`로 PR 생성 (`--base develop`)
+
+### 참조 문서
+
+| 문서            | 경로                                        | 용도                             |
+| --------------- | ------------------------------------------- | -------------------------------- |
+| 검증 체크리스트 | `docs/agent_docs/verification-checklist.md` | 구현 완료 → PR 전 필수 검증 절차 |
 
 ### E2E 검증 (화면 개발 시 필수)
 
