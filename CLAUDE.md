@@ -71,6 +71,13 @@ pnpm format:check     # Prettier 포매팅 검사
 - 파라미터 바인딩 필수 (SQL injection 방지)
 - data-access 레이어를 통해 접근 (db 직접 import 금지)
 
+### 시드 데이터
+
+- **샘플 시드**: `data/seed.sample.ts` — E2E 검증 및 개발 시 사용 (`pnpm db:seed:sample`)
+- **개인 시드**: `data/seed.ts` — .gitignore 대상, 커밋 금지
+- **시드 업데이트 필요 시점**: DB 스키마(`src/db/schema.ts`) 변경, 테이블 추가/컬럼 변경, 시드 스크립트(`src/db/seed.ts`)의 INSERT 구문에 영향을 주는 변경이 발생하면 `data/seed.sample.ts`도 함께 업데이트할 것
+- **테스트 헬퍼**: `src/test/helpers/db.ts`의 seed 함수(`seedTestCategories`, `seedTestQuestions`, `seedTestJobDescription`)도 스키마 변경 시 동기화 필요
+
 ### Import 경로
 
 - 절대 경로 사용: `@/components/...`, `@/lib/...`, `@/stores/...`
@@ -151,9 +158,11 @@ Draft PR에서는 Claude 자동 리뷰가 스킵된다. 리뷰 피드백 반영 
 
 ### 참조 문서
 
-| 문서            | 경로                                        | 용도                             |
-| --------------- | ------------------------------------------- | -------------------------------- |
-| 검증 체크리스트 | `docs/agent_docs/verification-checklist.md` | 구현 완료 → PR 전 필수 검증 절차 |
+| 문서             | 경로                                        | 용도                                                    |
+| ---------------- | ------------------------------------------- | ------------------------------------------------------- |
+| 검증 체크리스트  | `docs/agent_docs/verification-checklist.md` | 구현 완료 → PR 전 필수 검증 절차                        |
+| 샘플 시드 데이터 | `data/seed.sample.ts`                       | E2E 검증용 샘플 데이터 (스키마 변경 시 동기화 필수)     |
+| 테스트 헬퍼      | `src/test/helpers/db.ts`                    | 테스트용 DB 생성/시드 함수 (스키마 변경 시 동기화 필수) |
 
 ### E2E 검증 (화면 개발 시 필수)
 
