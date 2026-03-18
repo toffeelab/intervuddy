@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Intervuddy -- 면접 준비 도우미",
+  title: "Intervuddy — 면접 준비 도우미",
   description:
     "AI 기반 면접 준비 도우미. 자기소개서 분석, 예상 질문 생성, 모의 면접 연습으로 체계적인 면접 준비를 도와드립니다.",
 };

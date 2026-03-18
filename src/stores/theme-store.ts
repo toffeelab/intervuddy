@@ -16,8 +16,11 @@ function resolveTheme(mode: ThemeMode): 'dark' | 'light' {
 
 function persistMode(mode: ThemeMode): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('iv-theme', mode);
-  document.cookie = `iv-theme=${mode};path=/;max-age=31536000;SameSite=Lax`;
+  try {
+    localStorage.setItem('iv-theme', mode);
+  } catch {
+    // localStorage 접근 불가 시 (SecurityError 등) 무시
+  }
 }
 
 function applyTheme(resolved: 'dark' | 'light'): void {

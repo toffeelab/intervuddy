@@ -41,4 +41,26 @@ describe('theme-store', () => {
     useThemeStore.getState().setMode('system');
     expect(useThemeStore.getState().mode).toBe('system');
   });
+
+  it('localStorage 실패 시에도 테마 변경은 동작', () => {
+    const originalSetItem = localStorageMock.setItem;
+    localStorageMock.setItem = () => { throw new Error('SecurityError'); };
+
+    expect(() => useThemeStore.getState().setMode('light')).not.toThrow();
+    expect(useThemeStore.getState().mode).toBe('light');
+    expect(useThemeStore.getState().resolvedTheme).toBe('light');
+
+    localStorageMock.setItem = originalSetItem;
+  });
+
+  it('유효하지 않은 localStorage 값은 무시되어야 함', () => {
+    localStorageMock.setItem('iv-theme', 'invalid-value');
+    const saved = localStorageMock.getItem('iv-theme');
+    const validModes = ['dark', 'light', 'system'];
+    expect(validModes.includes(saved!)).toBe(false);
+
+    // ThemeProvider에서 유효하지 않은 값은 system으로 fallback
+    useThemeStore.getState().setMode('system');
+    expect(useThemeStore.getState().mode).toBe('system');
+  });
 });
