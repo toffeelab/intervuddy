@@ -12,6 +12,7 @@
 - **State Management**: Zustand (UI 상태 전용)
 - **Database**: SQLite (better-sqlite3) — 서버 재시작 후에도 데이터 유지
 - **Font**: Noto Sans KR + JetBrains Mono
+- **Code Quality**: ESLint 9 + Prettier
 
 ## 프로젝트 구조
 
