@@ -117,19 +117,34 @@ jobs:
             - 한국어 작성 (기술 용어/코드 식별자는 원문 유지)
             - 리뷰 본문 마지막에 포함: 📊 **토큰 사용량**: 입력 토큰 약 N개 / 출력 토큰 약 N개
 
-      - name: Submit review decision
-        if: github.event_name == 'pull_request' && steps.claude-review.outputs.result != ''
+      - name: Parse review result
+        if: github.event_name == 'pull_request' && steps.claude-review.outputs.execution_file != ''
+        id: parse-review
         env:
-          REVIEW_RESULT: ${{ steps.claude-review.outputs.result }}
+          EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
+        run: |
+          REVIEW_RESULT=$(cat "$EXECUTION_FILE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('result',''))" 2>/dev/null || echo "")
+          if [ -z "$REVIEW_RESULT" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          # result를 파일에 저장 (shell escaping 문제 방지)
+          echo "$REVIEW_RESULT" > /tmp/review-body.md
+          VERDICT=$(echo "$REVIEW_RESULT" | grep -oP 'VERDICT: \K\w+' | tail -1 || echo "")
+          echo "verdict=$VERDICT" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+      - name: Submit review decision
+        if: steps.parse-review.outputs.skip == 'false'
+        env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GH_TOKEN: ${{ github.token }}
+          VERDICT: ${{ steps.parse-review.outputs.verdict }}
         run: |
-          VERDICT=$(echo "$REVIEW_RESULT" | grep -oP 'VERDICT: \K\w+' | tail -1)
-
           if [ "$VERDICT" = "APPROVED" ]; then
-            gh pr review "$PR_NUMBER" --approve --body "$REVIEW_RESULT"
+            gh pr review "$PR_NUMBER" --approve --body-file /tmp/review-body.md
           elif [ "$VERDICT" = "CHANGES_REQUESTED" ]; then
-            gh pr review "$PR_NUMBER" --request-changes --body "$REVIEW_RESULT"
+            gh pr review "$PR_NUMBER" --request-changes --body-file /tmp/review-body.md
           else
-            gh pr comment "$PR_NUMBER" --body "$REVIEW_RESULT"
+            gh pr comment "$PR_NUMBER" --body-file /tmp/review-body.md
           fi
