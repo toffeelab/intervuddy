@@ -13,6 +13,7 @@ import {
   getQuestionsByCategory,
   createQuestion,
   updateQuestion,
+  updateQuestionKeywords,
   softDeleteQuestion,
   restoreQuestion,
   getDeletedQuestions,
@@ -136,6 +137,57 @@ describe('questions data-access', () => {
       const questions = getLibraryQuestions();
       expect(questions[0].answer).toBe('수정된 답변');
       expect(questions[0].question).toBe('자기소개를 해주세요'); // 변경 안 됨
+    });
+  });
+
+  describe('updateQuestion - categoryId 변경', () => {
+    it('질문의 카테고리를 변경하면 새 카테고리에서 조회된다', () => {
+      seedTestQuestions(db);
+      // 초기에는 category_id = 1 (self-intro)
+      expect(getQuestionsByCategory(1)).toHaveLength(1);
+      expect(getQuestionsByCategory(2)).toHaveLength(0);
+
+      updateQuestion({ id: 1, categoryId: 2 });
+
+      expect(getQuestionsByCategory(1)).toHaveLength(0);
+      expect(getQuestionsByCategory(2)).toHaveLength(1);
+      expect(getQuestionsByCategory(2)[0].categoryId).toBe(2);
+    });
+
+    it('categoryId 변경 시 다른 필드는 유지된다', () => {
+      seedTestQuestions(db);
+      updateQuestion({ id: 1, categoryId: 2, answer: '수정된 답변' });
+      const questions = getQuestionsByCategory(2);
+      expect(questions).toHaveLength(1);
+      expect(questions[0].question).toBe('자기소개를 해주세요'); // 변경 안 됨
+      expect(questions[0].answer).toBe('수정된 답변');
+      expect(questions[0].categoryId).toBe(2);
+    });
+  });
+
+  describe('updateQuestionKeywords', () => {
+    it('기존 키워드를 새 키워드 목록으로 교체한다', () => {
+      seedTestQuestions(db);
+      // seedTestQuestions는 ['자기소개', '경력'] 키워드를 삽입
+      updateQuestionKeywords(1, ['소통', '리더십', '성장']);
+      const questions = getLibraryQuestions();
+      expect(questions[0].keywords).toHaveLength(3);
+      expect(questions[0].keywords).toEqual(expect.arrayContaining(['소통', '리더십', '성장']));
+      expect(questions[0].keywords).not.toContain('자기소개');
+    });
+
+    it('빈 배열로 업데이트하면 키워드가 모두 삭제된다', () => {
+      seedTestQuestions(db);
+      updateQuestionKeywords(1, []);
+      const questions = getLibraryQuestions();
+      expect(questions[0].keywords).toEqual([]);
+    });
+
+    it('키워드 변경 결과가 getLibraryQuestions()에 반영된다', () => {
+      seedTestQuestions(db);
+      updateQuestionKeywords(1, ['신규키워드']);
+      const questions = getLibraryQuestions();
+      expect(questions[0].keywords).toEqual(['신규키워드']);
     });
   });
 
