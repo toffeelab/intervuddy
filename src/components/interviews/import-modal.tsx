@@ -51,12 +51,17 @@ export function ImportModal({
 
   function toggleAll() {
     const availableItems = filtered.filter((q) => !importedOriginIds.has(q.id));
+    const availableIds = new Set(availableItems.map((q) => q.id));
     const allSelected =
       availableItems.length > 0 && availableItems.every((q) => selectedIds.has(q.id));
     if (allSelected) {
-      setSelectedIds(new Set());
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        for (const id of availableIds) next.delete(id);
+        return next;
+      });
     } else {
-      setSelectedIds(new Set(availableItems.map((q) => q.id)));
+      setSelectedIds((prev) => new Set([...prev, ...availableIds]));
     }
   }
 
