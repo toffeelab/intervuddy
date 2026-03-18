@@ -5,6 +5,7 @@ import { useStudyStore } from '@/stores/study-store';
 import { CATEGORY_ALL } from '@/lib/constants';
 import { QACard } from '@/components/study/qa-card';
 import { EmptyState } from '@/components/study/empty-state';
+import { QuickAddForm } from '@/components/study/quick-add-form';
 import type { InterviewQuestion } from '@/data-access/types';
 
 interface QAListProps {
@@ -63,6 +64,10 @@ export function QAList({ items }: QAListProps) {
       {Array.from(grouped.entries()).map(([categoryName, groupItems]) => {
         const isJd = groupItems[0]?.jdId !== null;
 
+        const firstItem = groupItems[0];
+        const categoryId = firstItem?.categoryId ?? 0;
+        const jdId = firstItem?.jdId ?? null;
+
         return (
           <div key={categoryName} className="space-y-2">
             {showHeaders && (
@@ -76,6 +81,9 @@ export function QAList({ items }: QAListProps) {
               globalIndex += 1;
               return <QACard key={item.id} item={item} index={globalIndex} />;
             })}
+            {!searchQuery.trim() && (
+              <QuickAddForm categoryId={categoryId} jdId={jdId} />
+            )}
           </div>
         );
       })}
