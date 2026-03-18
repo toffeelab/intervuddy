@@ -23,10 +23,6 @@ interface QuestionRow {
   updated_at: string;
 }
 
-interface KeywordRow {
-  keyword: string;
-}
-
 interface FollowupRow {
   id: number;
   question_id: number;
@@ -36,39 +32,6 @@ interface FollowupRow {
   deleted_at: string | null;
   created_at: string;
   updated_at: string;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function loadKeywords(db: ReturnType<typeof getDb>, questionId: number): string[] {
-  const rows = db
-    .prepare(`SELECT keyword FROM question_keywords WHERE question_id = ?`)
-    .all(questionId) as KeywordRow[];
-  return rows.map((r) => r.keyword);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function loadFollowups(db: ReturnType<typeof getDb>, questionId: number): FollowupQuestion[] {
-  const rows = db
-    .prepare(
-      `
-    SELECT id, question_id, question, answer, display_order, deleted_at, created_at, updated_at
-    FROM followup_questions
-    WHERE question_id = ? AND deleted_at IS NULL
-    ORDER BY display_order
-  `
-    )
-    .all(questionId) as FollowupRow[];
-
-  return rows.map((r) => ({
-    id: r.id,
-    questionId: r.question_id,
-    question: r.question,
-    answer: r.answer,
-    displayOrder: r.display_order,
-    deletedAt: r.deleted_at,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-  }));
 }
 
 function mapRow(
