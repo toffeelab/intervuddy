@@ -54,6 +54,7 @@ jobs:
             ---
 
             ## 전체 리뷰 모드 (리뷰 모드가 "전체 리뷰"인 경우)
+            0. `gh pr view ${{ github.event.pull_request.number }} --json title,body --jq '"\(.title)\n\(.body)"'`로 PR 제목과 본문을 읽고, 변경의 목적과 맥락을 파악
             1. `git diff origin/develop --name-only`으로 변경 파일 목록 확인
             2. 다음 파일/디렉토리는 리뷰에서 제외:
                - `pnpm-lock.yaml`, `package.json`
