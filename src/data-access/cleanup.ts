@@ -47,5 +47,12 @@ export function purgeExpiredItems(retentionDays: number = DEFAULT_RETENTION_DAYS
 
   transaction();
 
+  const total = questions + followups + categories + jobs;
+  if (total > 0) {
+    console.warn(
+      `[cleanup] purged ${total} expired items (jobs: ${jobs}, questions: ${questions}, followups: ${followups}, categories: ${categories})`
+    );
+  }
+
   return { questions, followups, categories, jobs };
 }

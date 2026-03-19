@@ -22,10 +22,10 @@ interface TrashSectionProps {
 }
 
 function getRemainingDays(deletedAt: string, retentionDays: number): number {
-  // SQLite datetime('now') stores UTC without 'Z' suffix
-  const deletedDate = new Date(deletedAt + 'Z');
-  const now = new Date();
-  const elapsed = Math.floor((now.getTime() - deletedDate.getTime()) / (1000 * 60 * 60 * 24));
+  // SQLite datetime('now')는 UTC이지만 'Z' 접미사가 없으므로 추가
+  const deletedMs = new Date(deletedAt + 'Z').getTime();
+  const nowMs = Date.now();
+  const elapsed = Math.floor((nowMs - deletedMs) / (1000 * 60 * 60 * 24));
   return Math.max(0, retentionDays - elapsed);
 }
 
@@ -69,6 +69,7 @@ function TrashItemRow({
             <span className="text-iv-red">곧 영구 삭제됨</span>
           )}
         </p>
+        {error && <p className="text-iv-red mt-1 text-xs">{error}</p>}
       </div>
       <Button
         variant="outline"
@@ -80,7 +81,6 @@ function TrashItemRow({
         <RotateCcw className="size-3.5" />
         {isPending ? '복구 중...' : '복구'}
       </Button>
-      {error && <p className="text-iv-red text-xs">{error}</p>}
     </div>
   );
 }
