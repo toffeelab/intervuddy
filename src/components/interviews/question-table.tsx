@@ -1,10 +1,16 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Pencil, Trash2, ChevronDown, ChevronRight, Lightbulb } from 'lucide-react';
+import { Pencil, Trash2, ChevronDown, ChevronRight, Lightbulb, MoreHorizontal } from 'lucide-react';
 import { deleteQuestionAction } from '@/actions/question-actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import type { InterviewQuestion } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 import { useEditStore } from '@/stores/edit-store';
@@ -54,7 +60,7 @@ function QuestionRow({ question }: { question: InterviewQuestion }) {
   }
 
   return (
-    <div className="group border-iv-border hover:bg-iv-bg3 flex flex-col border-b transition-colors last:border-b-0">
+    <div className="border-iv-border hover:bg-iv-bg3 flex flex-col border-b transition-colors last:border-b-0">
       {error && <p className="text-iv-red px-4 pt-2 text-xs">{error}</p>}
       <div className="flex items-start gap-3 px-4 py-3">
         <div className="min-w-0 flex-1">
@@ -81,25 +87,25 @@ function QuestionRow({ question }: { question: InterviewQuestion }) {
             )}
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => openDrawer(question.id)}
-            title="편집"
-          >
-            <Pencil className="size-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={handleDelete}
-            title="삭제"
-            className="hover:text-iv-red hover:bg-iv-red/10"
-          >
-            <Trash2 className="size-3.5" />
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="ghost" size="icon-sm" title="더보기">
+                <MoreHorizontal className="size-3.5" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => openDrawer(question.id)}>
+              <Pencil className="size-3.5" />
+              편집
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onClick={handleDelete}>
+              <Trash2 className="size-3.5" />
+              삭제
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
