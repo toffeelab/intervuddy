@@ -2,10 +2,16 @@
 
 import { useTransition, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Trash2, FileText } from 'lucide-react';
+import { Trash2, FileText, MoreHorizontal } from 'lucide-react';
 import { deleteJobAction } from '@/actions/job-actions';
 import { JobStatusBadge } from '@/components/interviews/job-status-badge';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import type { JobDescription } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
@@ -18,8 +24,7 @@ export function JobCard({ job }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function handleDelete(e: React.MouseEvent) {
-    e.stopPropagation();
+  function handleDelete() {
     if (!confirm(`"${job.companyName} — ${job.positionTitle}" JD를 삭제하시겠습니까?`)) return;
     startTransition(async () => {
       try {
@@ -42,7 +47,7 @@ export function JobCard({ job }: Props) {
         }
       }}
       className={cn(
-        'group border-iv-border bg-iv-bg hover:bg-iv-bg3 cursor-pointer rounded-lg border p-4 transition-colors',
+        'border-iv-border bg-iv-bg hover:bg-iv-bg3 cursor-pointer rounded-lg border p-4 transition-colors',
         isPending && 'pointer-events-none opacity-50'
       )}
     >
@@ -54,15 +59,26 @@ export function JobCard({ job }: Props) {
           </div>
           <p className="text-iv-text2 mt-1 truncate text-xs">{job.positionTitle}</p>
         </div>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={handleDelete}
-          title="삭제"
-          className="hover:text-iv-red hover:bg-iv-red/10 opacity-0 group-hover:opacity-100"
-        >
-          <Trash2 className="size-3.5" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                title="더보기"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal className="size-3.5" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem variant="destructive" onClick={handleDelete}>
+              <Trash2 className="size-3.5" />
+              삭제
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="text-iv-text3 mt-3 flex items-center gap-3 text-xs">
         <span className="flex items-center gap-1">
