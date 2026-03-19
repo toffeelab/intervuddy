@@ -147,14 +147,15 @@ describe('category-actions', () => {
       expect(row.deleted_at).not.toBeNull();
     });
 
-    it('revalidatePath를 /study와 /interviews/questions 경로로 호출한다', async () => {
+    it('revalidatePath를 /study와 /interviews/questions, /interviews/trash 경로로 호출한다', async () => {
       seedTestCategories(db);
 
       await deleteCategoryAction(1);
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
       expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/trash');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -184,7 +185,7 @@ describe('category-actions', () => {
       expect(row.deleted_at).toBeNull();
     });
 
-    it('revalidatePath를 /study와 /interviews/questions 경로로 호출한다', async () => {
+    it('revalidatePath를 /study와 /interviews/questions, /interviews/trash 경로로 호출한다', async () => {
       seedTestCategories(db);
       db.exec(`UPDATE interview_categories SET deleted_at = datetime('now') WHERE id = 1`);
 
@@ -192,7 +193,8 @@ describe('category-actions', () => {
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
       expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
-      expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/trash');
+      expect(mockRevalidatePath).toHaveBeenCalledTimes(3);
     });
   });
 });
