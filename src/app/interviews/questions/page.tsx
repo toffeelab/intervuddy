@@ -4,9 +4,8 @@ import { QuestionTable } from '@/components/interviews/question-table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { getGlobalCategories, getLibraryQuestions } from '@/data-access';
 
-export default function InterviewQuestionsPage() {
-  const categories = getGlobalCategories();
-  const questions = getLibraryQuestions();
+export default async function InterviewQuestionsPage() {
+  const [categories, questions] = await Promise.all([getGlobalCategories(), getLibraryQuestions()]);
 
   return (
     <div className="p-6">

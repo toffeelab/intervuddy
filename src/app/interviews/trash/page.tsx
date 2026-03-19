@@ -7,16 +7,18 @@ import { getDeletedJobs } from '@/data-access/jobs';
 import { getDeletedQuestions } from '@/data-access/questions';
 import { DEFAULT_RETENTION_DAYS } from '@/lib/retention-policy';
 
-export default function TrashPage() {
-  const deletedJobs = getDeletedJobs();
-  const deletedQuestions = getDeletedQuestions();
+export default async function TrashPage() {
+  const [deletedJobs, deletedQuestions] = await Promise.all([
+    getDeletedJobs(),
+    getDeletedQuestions(),
+  ]);
 
   const jobItems: TrashItem[] = deletedJobs.map((j) => ({
     id: j.id,
     type: 'job' as const,
     title: j.companyName,
     subtitle: j.positionTitle,
-    deletedAt: j.deletedAt!,
+    deletedAt: j.deletedAt!.toISOString(),
   }));
 
   const questionItems: TrashItem[] = deletedQuestions.map((q) => ({
@@ -24,7 +26,7 @@ export default function TrashPage() {
     type: 'question' as const,
     title: q.question,
     subtitle: q.categoryDisplayLabel,
-    deletedAt: q.deletedAt!,
+    deletedAt: q.deletedAt!.toISOString(),
   }));
 
   const isEmpty = jobItems.length === 0 && questionItems.length === 0;

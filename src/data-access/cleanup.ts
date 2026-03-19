@@ -1,4 +1,11 @@
+import { and, isNotNull, sql } from 'drizzle-orm';
 import { getDb } from '@/db/index';
+import {
+  jobDescriptions,
+  interviewCategories,
+  interviewQuestions,
+  followupQuestions,
+} from '@/db/schema';
 import { DEFAULT_RETENTION_DAYS } from '@/lib/retention-policy';
 
 interface PurgeResult {
@@ -8,51 +15,72 @@ interface PurgeResult {
   jobs: number;
 }
 
-export function purgeExpiredItems(retentionDays: number = DEFAULT_RETENTION_DAYS): PurgeResult {
-  const db = getDb();
-  const param = `-${retentionDays} days`;
+export async function purgeExpiredItems(
+  retentionDays: number = DEFAULT_RETENTION_DAYS
+): Promise<PurgeResult> {
+  let followupsCount = 0;
+  let questionsCount = 0;
+  let categoriesCount = 0;
+  let jobsCount = 0;
 
-  let followups = 0;
-  let questions = 0;
-  let categories = 0;
-  let jobs = 0;
-
-  const transaction = db.transaction(() => {
+  await getDb().transaction(async (tx) => {
     // 순서 중요: FK 의존성 (자식 → 부모)
-    // question_keywords는 ON DELETE CASCADE로 자동 삭제
-    followups = db
-      .prepare(
-        "DELETE FROM followup_questions WHERE deleted_at IS NOT NULL AND deleted_at < datetime('now', ?)"
+    const deletedFollowups = await tx
+      .delete(followupQuestions)
+      .where(
+        and(
+          isNotNull(followupQuestions.deletedAt),
+          sql`${followupQuestions.deletedAt} < NOW() - INTERVAL '1 day' * ${retentionDays}`
+        )
       )
-      .run(param).changes;
+      .returning({ id: followupQuestions.id });
+    followupsCount = deletedFollowups.length;
 
-    questions = db
-      .prepare(
-        "DELETE FROM interview_questions WHERE deleted_at IS NOT NULL AND deleted_at < datetime('now', ?)"
+    const deletedQuestions = await tx
+      .delete(interviewQuestions)
+      .where(
+        and(
+          isNotNull(interviewQuestions.deletedAt),
+          sql`${interviewQuestions.deletedAt} < NOW() - INTERVAL '1 day' * ${retentionDays}`
+        )
       )
-      .run(param).changes;
+      .returning({ id: interviewQuestions.id });
+    questionsCount = deletedQuestions.length;
 
-    categories = db
-      .prepare(
-        "DELETE FROM interview_categories WHERE deleted_at IS NOT NULL AND deleted_at < datetime('now', ?)"
+    const deletedCategories = await tx
+      .delete(interviewCategories)
+      .where(
+        and(
+          isNotNull(interviewCategories.deletedAt),
+          sql`${interviewCategories.deletedAt} < NOW() - INTERVAL '1 day' * ${retentionDays}`
+        )
       )
-      .run(param).changes;
+      .returning({ id: interviewCategories.id });
+    categoriesCount = deletedCategories.length;
 
-    jobs = db
-      .prepare(
-        "DELETE FROM job_descriptions WHERE deleted_at IS NOT NULL AND deleted_at < datetime('now', ?)"
+    const deletedJobs = await tx
+      .delete(jobDescriptions)
+      .where(
+        and(
+          isNotNull(jobDescriptions.deletedAt),
+          sql`${jobDescriptions.deletedAt} < NOW() - INTERVAL '1 day' * ${retentionDays}`
+        )
       )
-      .run(param).changes;
+      .returning({ id: jobDescriptions.id });
+    jobsCount = deletedJobs.length;
   });
 
-  transaction();
-
-  const total = questions + followups + categories + jobs;
+  const total = questionsCount + followupsCount + categoriesCount + jobsCount;
   if (total > 0) {
     console.warn(
-      `[cleanup] purged ${total} expired items (jobs: ${jobs}, questions: ${questions}, followups: ${followups}, categories: ${categories})`
+      `[cleanup] purged ${total} expired items (jobs: ${jobsCount}, questions: ${questionsCount}, followups: ${followupsCount}, categories: ${categoriesCount})`
     );
   }
 
-  return { questions, followups, categories, jobs };
+  return {
+    questions: questionsCount,
+    followups: followupsCount,
+    categories: categoriesCount,
+    jobs: jobsCount,
+  };
 }

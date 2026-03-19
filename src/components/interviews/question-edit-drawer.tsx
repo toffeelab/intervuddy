@@ -7,7 +7,7 @@ import {
   updateFollowupAction,
   deleteFollowupAction,
 } from '@/actions/followup-actions';
-import { updateQuestionAction, updateQuestionKeywordsAction } from '@/actions/question-actions';
+import { updateQuestionAction } from '@/actions/question-actions';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -215,17 +215,15 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
 
     startTransition(async () => {
       try {
-        // Update question fields (including categoryId if changed)
+        // Update question fields (including categoryId and keywords if changed)
         await updateQuestionAction({
           id: question.id,
           ...(formCategoryId !== question.categoryId && { categoryId: formCategoryId }),
           question: formQuestion.trim(),
           answer: formAnswer.trim(),
           tip: formTip.trim() || null,
+          keywords: formKeywords,
         });
-
-        // Save keywords
-        await updateQuestionKeywordsAction(question.id, formKeywords);
 
         // Handle followups: sync existing and new
         const originalFollowupIds = new Set(question.followups.map((f) => f.id));

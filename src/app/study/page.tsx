@@ -11,17 +11,15 @@ export default async function StudyPage({ searchParams }: StudyPageProps) {
   const { jdId } = await searchParams;
   const jdIdNum = jdId ? Number(jdId) : null;
 
-  const items =
+  const [items, categories, jobs] = await Promise.all([
     jdIdNum !== null && !Number.isNaN(jdIdNum)
       ? getQuestionsByJdId(jdIdNum)
-      : getLibraryQuestions();
-
-  const categories =
+      : getLibraryQuestions(),
     jdIdNum !== null && !Number.isNaN(jdIdNum)
       ? getCategoriesByJdId(jdIdNum)
-      : getGlobalCategories();
-
-  const jobs = getAllJobs();
+      : getGlobalCategories(),
+    getAllJobs(),
+  ]);
   const allItemIds = items.map((item) => item.id);
 
   return (

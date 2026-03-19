@@ -15,14 +15,15 @@ interface Props {
 
 export default async function JobDetailPage({ params }: Props) {
   const { id } = await params;
-  const job = getJobById(Number(id));
+  const job = await getJobById(Number(id));
   if (!job) notFound();
 
-  const jdQuestions = getQuestionsByJdId(job.id);
-  const jdCategories = getCategoriesByJdId(job.id);
-
-  const libraryQuestions = getLibraryQuestions();
-  const globalCategories = getGlobalCategories();
+  const [jdQuestions, jdCategories, libraryQuestions, globalCategories] = await Promise.all([
+    getQuestionsByJdId(job.id),
+    getCategoriesByJdId(job.id),
+    getLibraryQuestions(),
+    getGlobalCategories(),
+  ]);
   const importedOriginIds = jdQuestions
     .filter((q) => q.originQuestionId !== null)
     .map((q) => q.originQuestionId as number);
