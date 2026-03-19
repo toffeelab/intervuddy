@@ -14,7 +14,7 @@ export default async function EditJobPage({ params }: Props) {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-iv-text text-lg font-medium">JD 수정</h2>
+        <h2 className="text-iv-text text-lg font-medium">공고 수정</h2>
         <p className="text-iv-text3 mt-1 text-sm">
           {job.companyName} — {job.positionTitle}
         </p>

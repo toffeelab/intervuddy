@@ -13,7 +13,7 @@ export default function InterviewQuestionsPage() {
       <div className="mb-6">
         <h2 className="text-iv-text text-lg font-medium">공통 라이브러리</h2>
         <p className="text-iv-text3 mt-1 text-sm">
-          모든 JD에 공통으로 사용되는 질문과 카테고리를 관리합니다.
+          모든 면접에 공통으로 사용되는 질문과 카테고리를 관리합니다.
         </p>
       </div>
 

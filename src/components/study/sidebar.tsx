@@ -143,7 +143,7 @@ function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentPr
         <>
           <div className="border-iv-border my-2 border-t" />
           <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
-            🟡 JD 맞춤
+            🟡 맞춤 질문
           </p>
         </>
       )}

@@ -33,7 +33,7 @@ export function SidebarNav({ className, onNavigate }: SidebarNavProps) {
         )}
       >
         <FolderOpen className="size-4 shrink-0" />
-        <span>JD 관리</span>
+        <span>채용공고</span>
       </Link>
       <Link
         href="/interviews/questions"

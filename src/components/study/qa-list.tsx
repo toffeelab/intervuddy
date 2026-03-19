@@ -70,7 +70,7 @@ export function QAList({ items }: QAListProps) {
           <div key={categoryName} className="space-y-2">
             {showHeaders && (
               <h2 className="text-iv-text2 mt-6 mb-2 text-[13px] font-semibold first:mt-0">
-                {isJd ? `🟡 JD 맞춤 — ${categoryName.replace('JD-', '')}` : `🔵 ${categoryName}`}
+                {isJd ? `🟡 맞춤 — ${categoryName.replace('JD-', '')}` : `🔵 ${categoryName}`}
               </h2>
             )}
             {groupItems.map((item) => {

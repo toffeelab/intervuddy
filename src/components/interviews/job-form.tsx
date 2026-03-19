@@ -85,7 +85,7 @@ export function JobForm({ job }: Props) {
         <Textarea
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
-          placeholder="JD에 대한 메모"
+          placeholder="공고에 대한 메모"
           rows={3}
           disabled={isPending}
           className="bg-iv-bg2 border-iv-border resize-none"

@@ -17,16 +17,15 @@ export default async function InterviewsPage({ searchParams }: Props) {
     <div className="p-4 md:p-6">
       <div className="mb-6 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-iv-text text-lg font-medium">JD 관리</h2>
-          <p className="text-iv-text3 mt-1 text-sm">
-            면접 대상 JD를 관리하고 질문을 맞춤 구성합니다.
-          </p>
+          <h2 className="text-iv-text text-lg font-medium">채용공고</h2>
+          <p className="text-iv-text3 mt-1 text-sm">채용공고를 관리하고 질문을 맞춤 구성합니다.</p>
         </div>
         <Link
           href="/interviews/jobs/new"
           className="bg-iv-accent text-iv-accent-foreground hover:bg-iv-accent/90 inline-flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors"
         >
-          <Plus className="size-4" />새 JD
+          <Plus className="size-4" />
+          공고 추가
         </Link>
       </div>
 
@@ -34,8 +33,8 @@ export default async function InterviewsPage({ searchParams }: Props) {
 
       {jobs.length === 0 ? (
         <div className="text-iv-text3 flex flex-col items-center justify-center py-16 text-sm">
-          <p>등록된 JD가 없습니다.</p>
-          <p className="mt-1 text-xs">새 JD를 추가하여 면접을 준비하세요.</p>
+          <p>등록된 채용공고가 없습니다.</p>
+          <p className="mt-1 text-xs">공고를 추가하여 면접 준비를 시작하세요.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

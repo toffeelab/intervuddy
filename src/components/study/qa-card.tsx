@@ -49,7 +49,7 @@ export function QACard({ item, index }: QACardProps) {
           <div className="flex flex-wrap items-center gap-1.5 pl-10">
             {item.jdId !== null && (
               <span className="bg-iv-jd/10 text-iv-jd border-iv-jd/20 rounded border px-1.5 py-0.5 font-mono text-[9px]">
-                JD
+                맞춤
               </span>
             )}
             {item.followups.length > 0 && (

@@ -28,8 +28,8 @@ export function JobCard({ job }: Props) {
 
   function handleDelete() {
     confirm({
-      title: 'JD 삭제',
-      description: `"${job.companyName} — ${job.positionTitle}" JD를 삭제하시겠습니까?`,
+      title: '공고 삭제',
+      description: `"${job.companyName} — ${job.positionTitle}" 공고를 삭제하시겠습니까?`,
       confirmLabel: '삭제',
       onConfirm: () => {
         startTransition(async () => {
