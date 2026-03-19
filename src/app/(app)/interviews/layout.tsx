@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { SidebarNav } from '@/components/interviews/sidebar-nav';
+import { PageHeader } from '@/components/nav/page-header';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 
@@ -11,8 +12,8 @@ export default function InterviewsLayout({ children }: { children: React.ReactNo
 
   return (
     <>
-      {/* Mobile sub-nav header */}
-      <header className="border-iv-border bg-iv-bg2 flex items-center gap-3 border-b px-3 py-2 md:hidden">
+      {/* Mobile header */}
+      <header className="border-iv-border bg-iv-bg/80 sticky top-0 z-30 flex items-center gap-3 border-b px-3 py-2 backdrop-blur-md md:hidden">
         <Button
           variant="ghost"
           size="icon-sm"
@@ -21,8 +22,11 @@ export default function InterviewsLayout({ children }: { children: React.ReactNo
         >
           <Menu className="size-5" />
         </Button>
-        <h1 className="text-iv-text text-sm font-medium">면접 관리</h1>
+        <h1 className="text-iv-text text-sm font-medium">채용공고 관리</h1>
       </header>
+
+      {/* Desktop header */}
+      <PageHeader title="채용공고 관리" />
 
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop Sidebar */}

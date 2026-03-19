@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Briefcase } from 'lucide-react';
+import { Briefcase, LayoutList, Target } from 'lucide-react';
+import { CategoryIcon } from '@/components/study/category-icon';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -12,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { InterviewCategory, JobDescription } from '@/data-access/types';
-import { CATEGORY_ALL, CATEGORY_ICON_BG } from '@/lib/constants';
+import { CATEGORY_ALL } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useStudyStore } from '@/stores/study-store';
 
@@ -100,9 +101,7 @@ function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentPr
             : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
         )}
       >
-        <span className="bg-iv-accent/[0.07] flex h-5 w-5 items-center justify-center rounded text-[11px]">
-          📋
-        </span>
+        <CategoryIcon categoryName={CATEGORY_ALL} emojiIcon="📋" />
         <span className="flex-1 text-left font-medium">전체</span>
         <span className="text-iv-text3 font-mono text-[10px]">{totalCount}</span>
       </button>
@@ -111,8 +110,9 @@ function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentPr
       <div className="border-iv-border my-2 border-t" />
 
       {/* Common categories section */}
-      <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
-        🔵 공통 질문
+      <p className="text-iv-text3 flex items-center gap-1.5 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
+        <LayoutList className="size-3" />
+        공통 질문
       </p>
       {commonCategories.map((cat) => (
         <button
@@ -125,14 +125,7 @@ function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentPr
               : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
           )}
         >
-          <span
-            className={cn(
-              'flex h-5 w-5 items-center justify-center rounded text-[11px]',
-              CATEGORY_ICON_BG[cat.name] ?? 'bg-iv-bg3'
-            )}
-          >
-            {cat.icon}
-          </span>
+          <CategoryIcon categoryName={cat.name} emojiIcon={cat.icon} />
           <span className="flex-1 text-left">{cat.name}</span>
           <span className="text-iv-text3 font-mono text-[10px]">{cat.questionCount}</span>
         </button>
@@ -142,8 +135,9 @@ function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentPr
       {jdCategories.length > 0 && (
         <>
           <div className="border-iv-border my-2 border-t" />
-          <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
-            🟡 맞춤 질문
+          <p className="text-iv-text3 flex items-center gap-1.5 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
+            <Target className="size-3" />
+            맞춤 질문
           </p>
         </>
       )}
@@ -158,14 +152,7 @@ function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentPr
               : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
           )}
         >
-          <span
-            className={cn(
-              'flex h-5 w-5 items-center justify-center rounded text-[11px]',
-              CATEGORY_ICON_BG[cat.name] ?? 'bg-iv-bg3'
-            )}
-          >
-            {cat.icon}
-          </span>
+          <CategoryIcon categoryName={cat.name} emojiIcon={cat.icon} />
           <span className="flex-1 text-left">
             {JD_DISPLAY_NAMES[cat.name] ?? cat.name.replace('JD-', '')}
           </span>
@@ -178,8 +165,8 @@ function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentPr
 
 export function Sidebar({ categories, jobs }: SidebarProps) {
   return (
-    <aside className="border-iv-border bg-iv-bg2 border-r">
-      <ScrollArea className="sticky top-[57px] h-[calc(100vh-57px)]">
+    <aside className="border-iv-border bg-iv-bg2 h-full border-r">
+      <ScrollArea className="h-full">
         <SidebarContent categories={categories} jobs={jobs} />
       </ScrollArea>
     </aside>

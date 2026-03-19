@@ -2,7 +2,7 @@
 
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMediaQuery } from '@/lib/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/stores/sidebar-store';
@@ -23,18 +23,22 @@ export function AppSidebar() {
     <TooltipProvider>
       <aside
         className={cn(
-          'border-iv-border bg-iv-bg2 hidden flex-col border-r transition-[width] duration-200 md:flex',
+          'border-iv-border bg-iv-bg hidden flex-col border-r transition-[width] duration-200 md:flex',
           isCollapsed ? 'w-[60px]' : 'w-[240px]'
         )}
       >
         {/* Logo + Toggle */}
         <div
           className={cn(
-            'border-iv-border flex border-b px-3 py-3',
-            isCollapsed ? 'flex-col items-center gap-2' : 'items-center justify-between'
+            'border-iv-border flex h-[53px] items-center border-b px-3',
+            isCollapsed ? 'justify-center' : 'justify-between'
           )}
         >
-          {!isCollapsed && (
+          {isCollapsed ? (
+            <div className="bg-iv-accent flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-bold text-white">
+              IV
+            </div>
+          ) : (
             <div className="flex items-center gap-2">
               <div className="bg-iv-accent flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-bold text-white">
                 IV
@@ -42,28 +46,36 @@ export function AppSidebar() {
               <span className="text-iv-text text-sm font-semibold">Intervuddy</span>
             </div>
           )}
-          {isCollapsed && (
-            <div className="bg-iv-accent flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-bold text-white">
-              IV
-            </div>
-          )}
-          {showToggle && (
+          {showToggle && !isCollapsed && (
             <button
               onClick={toggleCollapsed}
               className="text-iv-text3 hover:text-iv-text hover:bg-iv-bg3 rounded-md p-1 transition-colors"
-              aria-label={isCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
+              aria-label="사이드바 접기"
             >
-              {isCollapsed ? (
-                <PanelLeftOpen className="size-4" />
-              ) : (
-                <PanelLeftClose className="size-4" />
-              )}
+              <PanelLeftClose className="size-4" />
             </button>
           )}
         </div>
 
         {/* Nav Items */}
         <nav aria-label="메인 메뉴" className="flex-1 overflow-y-auto p-2">
+          {showToggle && isCollapsed && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    onClick={toggleCollapsed}
+                    className="text-iv-text3 hover:text-iv-text hover:bg-iv-bg3 mb-1 flex w-full items-center justify-center rounded-md p-1.5 transition-colors"
+                  />
+                }
+              >
+                <PanelLeftOpen className="size-4" />
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>
+                사이드바 펼치기
+              </TooltipContent>
+            </Tooltip>
+          )}
           {navGroups.map((group, groupIdx) => {
             const groupItems = navItems.filter((item) => item.group === group.key);
             return (

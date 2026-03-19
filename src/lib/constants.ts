@@ -57,6 +57,20 @@ export const TAG_COLORS: Record<string, { bg: string; text: string; border: stri
   },
 };
 
+/**
+ * Maps category names to Lucide icon names for consistent sidebar rendering.
+ * Falls back to the DB emoji icon if no mapping exists.
+ */
+export const CATEGORY_LUCIDE_ICON: Record<string, string> = {
+  전체: 'LayoutList',
+  '자기소개/커리어': 'UserRound',
+  기술역량: 'Cog',
+  '리더십/팀': 'Handshake',
+  '프로젝트 심화': 'FlaskConical',
+  '커리어 방향성': 'Rocket',
+  '조직/문화핏': 'Sprout',
+};
+
 export const CATEGORY_ICON_BG: Record<string, string> = {
   '자기소개/커리어': 'bg-iv-accent2/[0.07]',
   기술역량: 'bg-iv-accent/[0.07]',

@@ -20,8 +20,8 @@ const badgeStyles: Record<string, string> = {
 
 export function PageHeader({ title, badges, actions, children }: PageHeaderProps) {
   return (
-    <header className="border-iv-border bg-iv-bg/80 sticky top-0 z-30 hidden border-b px-6 py-3 backdrop-blur-md md:block">
-      <div className="flex items-center justify-between">
+    <header className="border-iv-border bg-iv-bg/80 sticky top-0 z-30 hidden h-[53px] items-center border-b px-6 backdrop-blur-md md:flex">
+      <div className="flex flex-1 items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-iv-text text-base font-semibold">{title}</h1>
           {badges?.map((badge) => (

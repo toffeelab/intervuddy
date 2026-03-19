@@ -24,7 +24,7 @@ export function StudyClientShell({ items, categories, jobs, allItemIds }: Props)
         allItemIds={allItemIds}
         onMenuClick={() => setSidebarOpen(true)}
       />
-      <div className="min-h-[calc(100vh-57px)] md:grid md:grid-cols-[230px_1fr]">
+      <div className="flex flex-1 overflow-hidden">
         {/* Desktop sidebar */}
         <div className="hidden md:block">
           <Sidebar categories={categories} jobs={jobs} />
@@ -38,7 +38,7 @@ export function StudyClientShell({ items, categories, jobs, allItemIds }: Props)
           jobs={jobs}
         />
 
-        <main className="overflow-y-auto p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <SearchInput />
           <QAList items={items} />
         </main>

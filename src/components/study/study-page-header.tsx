@@ -53,10 +53,7 @@ export function StudyPageHeader({ totalCount, allItemIds, onMenuClick }: StudyPa
       {/* Desktop header */}
       <PageHeader
         title="Q&A 학습"
-        badges={[
-          { label: '📌 JD 맞춤 질문 포함', variant: 'muted' },
-          { label: `총 ${totalCount}문항`, variant: 'accent' },
-        ]}
+        badges={[{ label: `총 ${totalCount}문항`, variant: 'accent' }]}
         actions={
           <Button
             variant="ghost"
