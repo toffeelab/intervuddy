@@ -2,8 +2,6 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Briefcase } from 'lucide-react';
-import { KeywordTags } from '@/components/study/keyword-tags';
-import { StatGrid } from '@/components/study/stat-grid';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -140,13 +138,15 @@ function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentPr
         </button>
       ))}
 
-      {/* Divider */}
-      <div className="border-iv-border my-2 border-t" />
-
-      {/* JD categories section */}
-      <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
-        🟡 JD 맞춤
-      </p>
+      {/* JD categories section — only show when JD categories exist */}
+      {jdCategories.length > 0 && (
+        <>
+          <div className="border-iv-border my-2 border-t" />
+          <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
+            🟡 JD 맞춤
+          </p>
+        </>
+      )}
       {jdCategories.map((cat) => (
         <button
           key={cat.id}
@@ -172,18 +172,6 @@ function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentPr
           <span className="text-iv-text3 font-mono text-[10px]">{cat.questionCount}</span>
         </button>
       ))}
-
-      {/* Divider */}
-      <div className="border-iv-border my-2 border-t" />
-
-      {/* Stats */}
-      <StatGrid />
-
-      {/* Divider */}
-      <div className="border-iv-border my-2 border-t" />
-
-      {/* JD Keywords */}
-      <KeywordTags />
     </div>
   );
 }

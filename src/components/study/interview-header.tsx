@@ -39,9 +39,6 @@ export function InterviewHeader({ totalCount, allItemIds, onMenuClick }: Intervi
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5 md:gap-2.5">
-        <span className="bg-iv-jd/12 text-iv-jd border-iv-jd/25 hidden items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[11px] md:inline-flex">
-          📌 JD 맞춤 질문 포함
-        </span>
         <span className="bg-iv-accent/12 text-iv-accent border-iv-accent/25 inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-mono text-[10px] md:px-2.5 md:py-1 md:text-[11px]">
           {totalCount}문항
         </span>
