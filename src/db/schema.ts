@@ -1,104 +1,241 @@
-import db from './index';
+import { relations, sql } from 'drizzle-orm';
+import {
+  integer,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uniqueIndex,
+  type AnyPgColumn,
+} from 'drizzle-orm/pg-core';
 
-export function initializeDatabase(): void {
-  db.exec(`
-    PRAGMA journal_mode = WAL;
-    PRAGMA foreign_keys = ON;
+// ─── users ───────────────────────────────────────────────────────────────────
 
-    CREATE TABLE IF NOT EXISTS job_descriptions (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
-        company_name    TEXT    NOT NULL,
-        position_title  TEXT    NOT NULL,
-        status          TEXT    NOT NULL DEFAULT 'in_progress'
-                        CHECK (status IN ('in_progress', 'completed', 'archived')),
-        memo            TEXT,
-        deleted_at      TEXT,
-        created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
-        updated_at      TEXT    NOT NULL DEFAULT (datetime('now'))
-    );
+export const users = pgTable('users', {
+  id: text('id').primaryKey(),
+  name: text('name'),
+  email: text('email').unique().notNull(),
+  emailVerified: timestamp('email_verified', { withTimezone: true }),
+  image: text('image'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
-    CREATE INDEX IF NOT EXISTS idx_job_descriptions_status
-        ON job_descriptions (status) WHERE deleted_at IS NULL;
-    CREATE INDEX IF NOT EXISTS idx_job_descriptions_deleted_at
-        ON job_descriptions (deleted_at) WHERE deleted_at IS NOT NULL;
+// ─── accounts ────────────────────────────────────────────────────────────────
 
-    CREATE TABLE IF NOT EXISTS interview_categories (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
-        jd_id           INTEGER REFERENCES job_descriptions (id) ON DELETE CASCADE,
-        name            TEXT    NOT NULL,
-        slug            TEXT    NOT NULL,
-        display_label   TEXT    NOT NULL,
-        icon            TEXT    NOT NULL,
-        display_order   INTEGER NOT NULL DEFAULT 0,
-        deleted_at      TEXT,
-        created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
-        UNIQUE (jd_id, name)
-    );
+export const accounts = pgTable(
+  'accounts',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    provider: text('provider').notNull(),
+    providerAccountId: text('provider_account_id').notNull(),
+    type: text('type').notNull(),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    expiresAt: integer('expires_at'),
+    tokenType: text('token_type'),
+    scope: text('scope'),
+    idToken: text('id_token'),
+  },
+  (table) => [
+    uniqueIndex('accounts_provider_account_unique').on(table.provider, table.providerAccountId),
+  ]
+);
 
-    CREATE INDEX IF NOT EXISTS idx_interview_categories_jd_id
-        ON interview_categories (jd_id) WHERE deleted_at IS NULL;
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_interview_categories_global_slug
-        ON interview_categories (slug) WHERE jd_id IS NULL AND deleted_at IS NULL;
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_interview_categories_global_name
-        ON interview_categories (name) WHERE jd_id IS NULL AND deleted_at IS NULL;
+// ─── verificationTokens ───────────────────────────────────────────────────────
 
-    CREATE TABLE IF NOT EXISTS interview_questions (
-        id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-        category_id         INTEGER NOT NULL REFERENCES interview_categories (id) ON DELETE CASCADE,
-        jd_id               INTEGER REFERENCES job_descriptions (id) ON DELETE CASCADE,
-        origin_question_id  INTEGER REFERENCES interview_questions (id) ON DELETE SET NULL,
-        question            TEXT    NOT NULL,
-        answer              TEXT    NOT NULL DEFAULT '',
-        tip                 TEXT,
-        display_order       INTEGER NOT NULL DEFAULT 0,
-        deleted_at          TEXT,
-        created_at          TEXT    NOT NULL DEFAULT (datetime('now')),
-        updated_at          TEXT    NOT NULL DEFAULT (datetime('now'))
-    );
+export const verificationTokens = pgTable(
+  'verification_tokens',
+  {
+    identifier: text('identifier').notNull(),
+    token: text('token').unique().notNull(),
+    expires: timestamp('expires', { withTimezone: true }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.identifier, table.token] })]
+);
 
-    CREATE INDEX IF NOT EXISTS idx_interview_questions_category_order
-        ON interview_questions (category_id, display_order) WHERE deleted_at IS NULL;
-    CREATE INDEX IF NOT EXISTS idx_interview_questions_jd_id
-        ON interview_questions (jd_id, category_id, display_order) WHERE deleted_at IS NULL;
-    CREATE INDEX IF NOT EXISTS idx_interview_questions_deleted_at
-        ON interview_questions (deleted_at) WHERE deleted_at IS NOT NULL;
-    CREATE INDEX IF NOT EXISTS idx_interview_questions_origin
-        ON interview_questions (origin_question_id) WHERE origin_question_id IS NOT NULL;
+// ─── jobDescriptions ─────────────────────────────────────────────────────────
 
-    CREATE TABLE IF NOT EXISTS followup_questions (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
-        question_id     INTEGER NOT NULL REFERENCES interview_questions (id) ON DELETE CASCADE,
-        question        TEXT    NOT NULL,
-        answer          TEXT    NOT NULL DEFAULT '',
-        display_order   INTEGER NOT NULL DEFAULT 0,
-        deleted_at      TEXT,
-        created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
-        updated_at      TEXT    NOT NULL DEFAULT (datetime('now'))
-    );
+export const jobDescriptions = pgTable('job_descriptions', {
+  id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  companyName: text('company_name').notNull(),
+  positionTitle: text('position_title').notNull(),
+  status: text('status').notNull().default('in_progress'),
+  memo: text('memo'),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
-    CREATE INDEX IF NOT EXISTS idx_followup_questions_parent_order
-        ON followup_questions (question_id, display_order) WHERE deleted_at IS NULL;
+// ─── interviewCategories ──────────────────────────────────────────────────────
 
-    CREATE TABLE IF NOT EXISTS question_keywords (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
-        question_id     INTEGER NOT NULL REFERENCES interview_questions (id) ON DELETE CASCADE,
-        keyword         TEXT    NOT NULL,
-        UNIQUE (question_id, keyword)
-    );
+export const interviewCategories = pgTable('interview_categories', {
+  id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  jdId: integer('jd_id').references(() => jobDescriptions.id, { onDelete: 'cascade' }),
+  sourceCategoryId: integer('source_category_id').references(
+    (): AnyPgColumn => interviewCategories.id,
+    { onDelete: 'set null' }
+  ),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+  displayLabel: text('display_label').notNull(),
+  icon: text('icon').notNull(),
+  displayOrder: integer('display_order').notNull().default(0),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
-    CREATE INDEX IF NOT EXISTS idx_question_keywords_keyword ON question_keywords (keyword);
+// ─── interviewQuestions ───────────────────────────────────────────────────────
 
-    -- Triggers for updated_at auto-update
-    CREATE TRIGGER IF NOT EXISTS trg_job_descriptions_updated_at
-        AFTER UPDATE ON job_descriptions FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
-    BEGIN UPDATE job_descriptions SET updated_at = datetime('now') WHERE id = NEW.id; END;
+export const interviewQuestions = pgTable('interview_questions', {
+  id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  categoryId: integer('category_id')
+    .notNull()
+    .references(() => interviewCategories.id, { onDelete: 'cascade' }),
+  jdId: integer('jd_id').references(() => jobDescriptions.id, { onDelete: 'cascade' }),
+  originQuestionId: integer('origin_question_id').references(
+    (): AnyPgColumn => interviewQuestions.id,
+    { onDelete: 'set null' }
+  ),
+  question: text('question').notNull(),
+  answer: text('answer').notNull().default(''),
+  tip: text('tip'),
+  keywords: text('keywords')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  displayOrder: integer('display_order').notNull().default(0),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
-    CREATE TRIGGER IF NOT EXISTS trg_interview_questions_updated_at
-        AFTER UPDATE ON interview_questions FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
-    BEGIN UPDATE interview_questions SET updated_at = datetime('now') WHERE id = NEW.id; END;
+// ─── followupQuestions ────────────────────────────────────────────────────────
 
-    CREATE TRIGGER IF NOT EXISTS trg_followup_questions_updated_at
-        AFTER UPDATE ON followup_questions FOR EACH ROW WHEN NEW.updated_at = OLD.updated_at
-    BEGIN UPDATE followup_questions SET updated_at = datetime('now') WHERE id = NEW.id; END;
-  `);
-}
+export const followupQuestions = pgTable('followup_questions', {
+  id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  questionId: integer('question_id')
+    .notNull()
+    .references(() => interviewQuestions.id, { onDelete: 'cascade' }),
+  question: text('question').notNull(),
+  answer: text('answer').notNull().default(''),
+  displayOrder: integer('display_order').notNull().default(0),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ─── Relations ────────────────────────────────────────────────────────────────
+
+export const usersRelations = relations(users, ({ many }) => ({
+  jobDescriptions: many(jobDescriptions),
+  interviewCategories: many(interviewCategories),
+  interviewQuestions: many(interviewQuestions),
+  followupQuestions: many(followupQuestions),
+  accounts: many(accounts),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const jobDescriptionsRelations = relations(jobDescriptions, ({ one, many }) => ({
+  user: one(users, {
+    fields: [jobDescriptions.userId],
+    references: [users.id],
+  }),
+  interviewCategories: many(interviewCategories),
+  interviewQuestions: many(interviewQuestions),
+}));
+
+export const interviewCategoriesRelations = relations(interviewCategories, ({ one, many }) => ({
+  user: one(users, {
+    fields: [interviewCategories.userId],
+    references: [users.id],
+  }),
+  jobDescription: one(jobDescriptions, {
+    fields: [interviewCategories.jdId],
+    references: [jobDescriptions.id],
+  }),
+  sourceCategory: one(interviewCategories, {
+    fields: [interviewCategories.sourceCategoryId],
+    references: [interviewCategories.id],
+    relationName: 'categorySource',
+  }),
+  derivedCategories: many(interviewCategories, {
+    relationName: 'categorySource',
+  }),
+  interviewQuestions: many(interviewQuestions),
+}));
+
+export const interviewQuestionsRelations = relations(interviewQuestions, ({ one, many }) => ({
+  user: one(users, {
+    fields: [interviewQuestions.userId],
+    references: [users.id],
+  }),
+  category: one(interviewCategories, {
+    fields: [interviewQuestions.categoryId],
+    references: [interviewCategories.id],
+  }),
+  jobDescription: one(jobDescriptions, {
+    fields: [interviewQuestions.jdId],
+    references: [jobDescriptions.id],
+  }),
+  originQuestion: one(interviewQuestions, {
+    fields: [interviewQuestions.originQuestionId],
+    references: [interviewQuestions.id],
+    relationName: 'questionOrigin',
+  }),
+  derivedQuestions: many(interviewQuestions, {
+    relationName: 'questionOrigin',
+  }),
+  followupQuestions: many(followupQuestions),
+}));
+
+export const followupQuestionsRelations = relations(followupQuestions, ({ one }) => ({
+  user: one(users, {
+    fields: [followupQuestions.userId],
+    references: [users.id],
+  }),
+  question: one(interviewQuestions, {
+    fields: [followupQuestions.questionId],
+    references: [interviewQuestions.id],
+  }),
+}));
+
+// ─── Schema export ────────────────────────────────────────────────────────────
+
+export const schema = {
+  users,
+  accounts,
+  verificationTokens,
+  jobDescriptions,
+  interviewCategories,
+  interviewQuestions,
+  followupQuestions,
+  usersRelations,
+  accountsRelations,
+  jobDescriptionsRelations,
+  interviewCategoriesRelations,
+  interviewQuestionsRelations,
+  followupQuestionsRelations,
+};
