@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { Pencil, Trash2, ChevronDown, ChevronRight, Lightbulb, MoreHorizontal } from 'lucide-react';
 import { deleteQuestionAction } from '@/actions/question-actions';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,15 +48,22 @@ function QuestionRow({ question }: { question: InterviewQuestion }) {
   const { openDrawer } = useEditStore();
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  const { confirm, dialog } = useConfirmDialog();
 
   function handleDelete() {
-    if (!confirm(`"${question.question.slice(0, 40)}..." 질문을 삭제하시겠습니까?`)) return;
-    startTransition(async () => {
-      try {
-        await deleteQuestionAction(question.id);
-      } catch {
-        setError('삭제에 실패했습니다');
-      }
+    confirm({
+      title: '질문 삭제',
+      description: `"${question.question.slice(0, 40)}..." 질문을 삭제하시겠습니까?`,
+      confirmLabel: '삭제',
+      onConfirm: () => {
+        startTransition(async () => {
+          try {
+            await deleteQuestionAction(question.id);
+          } catch {
+            setError('삭제에 실패했습니다');
+          }
+        });
+      },
     });
   }
 
@@ -107,6 +115,7 @@ function QuestionRow({ question }: { question: InterviewQuestion }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {dialog}
     </div>
   );
 }

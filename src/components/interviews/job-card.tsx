@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Trash2, FileText, MoreHorizontal } from 'lucide-react';
 import { deleteJobAction } from '@/actions/job-actions';
 import { JobStatusBadge } from '@/components/interviews/job-status-badge';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -23,15 +24,22 @@ export function JobCard({ job }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { confirm, dialog } = useConfirmDialog();
 
   function handleDelete() {
-    if (!confirm(`"${job.companyName} — ${job.positionTitle}" JD를 삭제하시겠습니까?`)) return;
-    startTransition(async () => {
-      try {
-        await deleteJobAction(job.id);
-      } catch {
-        setError('삭제에 실패했습니다');
-      }
+    confirm({
+      title: 'JD 삭제',
+      description: `"${job.companyName} — ${job.positionTitle}" JD를 삭제하시겠습니까?`,
+      confirmLabel: '삭제',
+      onConfirm: () => {
+        startTransition(async () => {
+          try {
+            await deleteJobAction(job.id);
+          } catch {
+            setError('삭제에 실패했습니다');
+          }
+        });
+      },
     });
   }
 
@@ -88,6 +96,7 @@ export function JobCard({ job }: Props) {
         <span>{new Date(job.createdAt).toLocaleDateString('ko-KR')}</span>
       </div>
       {error && <p className="text-iv-red mt-2 text-xs">{error}</p>}
+      {dialog}
     </div>
   );
 }

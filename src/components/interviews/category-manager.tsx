@@ -7,6 +7,7 @@ import {
   updateCategoryAction,
   deleteCategoryAction,
 } from '@/actions/category-actions';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -41,6 +42,7 @@ function CategoryRow({ category }: CategoryRowProps) {
   const [editIcon, setEditIcon] = useState(category.icon);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { confirm, dialog } = useConfirmDialog();
 
   function handleSave() {
     startTransition(async () => {
@@ -67,18 +69,19 @@ function CategoryRow({ category }: CategoryRowProps) {
   }
 
   function handleDelete() {
-    if (
-      !confirm(
-        `"${category.displayLabel}" 카테고리를 삭제하시겠습니까?\n질문이 ${category.questionCount}개 있습니다.`
-      )
-    )
-      return;
-    startTransition(async () => {
-      try {
-        await deleteCategoryAction(category.id);
-      } catch {
-        setError('삭제에 실패했습니다');
-      }
+    confirm({
+      title: '카테고리 삭제',
+      description: `"${category.displayLabel}" 카테고리를 삭제하시겠습니까? 질문이 ${category.questionCount}개 있습니다.`,
+      confirmLabel: '삭제',
+      onConfirm: () => {
+        startTransition(async () => {
+          try {
+            await deleteCategoryAction(category.id);
+          } catch {
+            setError('삭제에 실패했습니다');
+          }
+        });
+      },
     });
   }
 
@@ -161,6 +164,7 @@ function CategoryRow({ category }: CategoryRowProps) {
           </span>
         </div>
       </div>
+      {dialog}
     </div>
   );
 }
