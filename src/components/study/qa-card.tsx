@@ -31,11 +31,13 @@ export function QACard({ item, index }: QACardProps) {
       <button
         type="button"
         onClick={() => toggleCard(item.id)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left"
+        className="flex w-full flex-col gap-2 px-4 py-3 text-left md:flex-row md:items-center md:gap-3"
       >
-        <span className="text-iv-text3 w-7 shrink-0 font-mono text-[11px]">Q{index}</span>
-        <span className="text-iv-text flex-1 text-[13px] leading-snug">{item.question}</span>
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex items-center gap-3 md:flex-1">
+          <span className="text-iv-text3 w-7 shrink-0 font-mono text-[11px]">Q{index}</span>
+          <span className="text-iv-text flex-1 text-[13px] leading-snug">{item.question}</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5 pl-10 md:shrink-0 md:pl-0">
           {item.jdId !== null && (
             <span className="bg-iv-jd/10 text-iv-jd border-iv-jd/20 rounded border px-1.5 py-0.5 font-mono text-[9px]">
               JD
