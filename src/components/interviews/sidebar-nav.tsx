@@ -5,15 +5,26 @@ import { usePathname } from 'next/navigation';
 import { FolderOpen, LayoutList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export function SidebarNav() {
+interface SidebarNavProps {
+  className?: string;
+  onNavigate?: () => void;
+}
+
+export function SidebarNav({ className, onNavigate }: SidebarNavProps) {
   const pathname = usePathname();
   const isJdSection = pathname === '/interviews' || pathname.startsWith('/interviews/jobs');
   const isQuestions = pathname.startsWith('/interviews/questions');
 
   return (
-    <nav className="border-iv-border bg-iv-bg2 flex w-52 shrink-0 flex-col gap-1 border-r p-3">
+    <nav
+      className={cn(
+        'border-iv-border bg-iv-bg2 flex w-52 shrink-0 flex-col gap-1 border-r p-3',
+        className
+      )}
+    >
       <Link
         href="/interviews"
+        onClick={onNavigate}
         className={cn(
           'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
           isJdSection
@@ -26,6 +37,7 @@ export function SidebarNav() {
       </Link>
       <Link
         href="/interviews/questions"
+        onClick={onNavigate}
         className={cn(
           'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
           isQuestions
