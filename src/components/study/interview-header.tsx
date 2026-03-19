@@ -20,7 +20,13 @@ export function InterviewHeader({ totalCount, allItemIds, onMenuClick }: Intervi
     <header className="bg-iv-bg/80 border-iv-border sticky top-0 z-50 flex h-[57px] items-center justify-between border-b px-5 backdrop-blur-md">
       <div className="flex items-center gap-3">
         {onMenuClick && (
-          <Button variant="ghost" size="icon-sm" onClick={onMenuClick} className="md:hidden">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onMenuClick}
+            className="md:hidden"
+            aria-label="메뉴 열기"
+          >
             <Menu className="size-5" />
           </Button>
         )}

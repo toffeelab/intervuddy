@@ -18,6 +18,7 @@ export default function InterviewsLayout({ children }: { children: React.ReactNo
           size="icon-sm"
           onClick={() => setSidebarOpen(true)}
           className="md:hidden"
+          aria-label="메뉴 열기"
         >
           <Menu className="size-5" />
         </Button>
@@ -38,7 +39,7 @@ export default function InterviewsLayout({ children }: { children: React.ReactNo
 
         {/* Mobile Sidebar Drawer */}
         <Drawer open={sidebarOpen} onOpenChange={setSidebarOpen} direction="left">
-          <DrawerContent className="bg-iv-bg2 w-[240px] p-0">
+          <DrawerContent className="bg-iv-bg2 w-[min(240px,85vw)] p-0">
             <DrawerHeader className="border-iv-border border-b px-3 py-3">
               <DrawerTitle className="text-iv-text text-sm">메뉴</DrawerTitle>
             </DrawerHeader>

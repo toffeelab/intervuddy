@@ -206,7 +206,7 @@ interface MobileSidebarProps extends SidebarProps {
 export function MobileSidebar({ open, onOpenChange, ...props }: MobileSidebarProps) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="left">
-      <DrawerContent className="bg-iv-bg2 w-[280px] p-0">
+      <DrawerContent className="bg-iv-bg2 w-[min(280px,85vw)] p-0">
         <DrawerHeader className="border-iv-border border-b px-3 py-3">
           <DrawerTitle className="text-iv-text text-sm">카테고리</DrawerTitle>
         </DrawerHeader>

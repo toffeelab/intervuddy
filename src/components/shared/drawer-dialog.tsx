@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { useMediaQuery } from '@/lib/hooks/use-media-query';
+import { cn } from '@/lib/utils';
 
 interface DrawerDialogProps {
   open: boolean;
@@ -39,7 +40,7 @@ export function DrawerDialog({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className={drawerClassName ?? 'max-h-[85vh]'}>
+      <DrawerContent className={cn('max-h-[85vh]', drawerClassName)}>
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
