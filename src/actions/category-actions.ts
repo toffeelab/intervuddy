@@ -26,10 +26,12 @@ export async function deleteCategoryAction(id: number) {
   softDeleteCategory(id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
+  revalidatePath('/interviews/trash');
 }
 
 export async function restoreCategoryAction(id: number) {
   restoreCategory(id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
+  revalidatePath('/interviews/trash');
 }

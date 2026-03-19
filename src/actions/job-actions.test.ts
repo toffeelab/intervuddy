@@ -1,12 +1,18 @@
 import Database from 'better-sqlite3';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getAllJobs, getJobById } from '@/data-access/jobs';
-import { createTestDb, cleanupTestDb, seedTestJobDescription } from '@/test/helpers/db';
+import { getAllJobs, getJobById, softDeleteJobWithQuestions } from '@/data-access/jobs';
+import {
+  createTestDb,
+  cleanupTestDb,
+  seedTestJobDescription,
+  seedTestQuestions,
+} from '@/test/helpers/db';
 import {
   createJobAction,
   updateJobAction,
   updateJobStatusAction,
   deleteJobAction,
+  restoreJobAction,
 } from './job-actions';
 
 const { mockRevalidatePath } = vi.hoisted(() => ({
@@ -71,6 +77,24 @@ describe('deleteJobAction', () => {
     const jobs = getAllJobs();
     await deleteJobAction(jobs[0].id);
     expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews');
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/trash');
     expect(getAllJobs()).toHaveLength(0);
+  });
+});
+
+describe('restoreJobAction', () => {
+  it('JD + 하위 질문 복구 + revalidate', async () => {
+    seedTestQuestions(db);
+    seedTestJobDescription(db);
+    db.prepare('UPDATE interview_questions SET jd_id = 1 WHERE id = 1').run();
+
+    softDeleteJobWithQuestions(1);
+    expect(getAllJobs()).toHaveLength(0);
+
+    await restoreJobAction(1);
+
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews');
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/trash');
+    expect(getAllJobs()).toHaveLength(1);
   });
 });

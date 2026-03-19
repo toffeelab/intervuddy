@@ -1,7 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createJob, updateJob, updateJobStatus, softDeleteJob } from '@/data-access/jobs';
+import {
+  createJob,
+  updateJob,
+  updateJobStatus,
+  softDeleteJobWithQuestions,
+  restoreJobWithQuestions,
+} from '@/data-access/jobs';
 import type { CreateJobInput, UpdateJobInput, JobDescriptionStatus } from '@/data-access/types';
 
 export async function createJobAction(input: CreateJobInput) {
@@ -23,6 +29,14 @@ export async function updateJobStatusAction(id: number, status: JobDescriptionSt
 }
 
 export async function deleteJobAction(id: number) {
-  softDeleteJob(id);
+  softDeleteJobWithQuestions(id);
   revalidatePath('/interviews');
+  revalidatePath('/interviews/trash');
+}
+
+export async function restoreJobAction(id: number) {
+  restoreJobWithQuestions(id);
+  revalidatePath('/interviews');
+  revalidatePath('/interviews/trash');
+  revalidatePath(`/interviews/jobs/${id}`);
 }
