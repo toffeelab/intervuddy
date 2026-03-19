@@ -37,8 +37,8 @@ export function SidebarNavItem({ item, isCollapsed }: SidebarNavItemProps) {
 
   if (isCollapsed) {
     return (
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild>{content}</TooltipTrigger>
+      <Tooltip>
+        <TooltipTrigger render={content} />
         <TooltipContent side="right" sideOffset={8}>
           {item.label}
         </TooltipContent>
