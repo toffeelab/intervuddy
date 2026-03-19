@@ -3,16 +3,10 @@
 import { useState, useTransition } from 'react';
 import { Download, Check } from 'lucide-react';
 import { importQuestionsAction } from '@/actions/import-actions';
+import { DrawerDialog } from '@/components/shared/drawer-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import type { InterviewQuestion, InterviewCategory } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
@@ -86,20 +80,23 @@ export function ImportModal({
   const allSelected = available.length > 0 && available.every((q) => selectedIds.has(q.id));
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button variant="outline" size="sm" className="border-iv-border text-iv-text2">
-            <Download className="size-4" />
-            질문 가져오기
-          </Button>
-        }
-      />
-      <DialogContent className="bg-iv-bg border-iv-border flex max-h-[80vh] max-w-2xl flex-col overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="text-iv-text">공통 라이브러리에서 질문 가져오기</DialogTitle>
-        </DialogHeader>
-
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        className="border-iv-border text-iv-text2"
+        onClick={() => setOpen(true)}
+      >
+        <Download className="size-4" />
+        질문 가져오기
+      </Button>
+      <DrawerDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="공통 라이브러리에서 질문 가져오기"
+        dialogClassName="bg-iv-bg border-iv-border flex max-h-[80vh] max-w-2xl flex-col overflow-hidden"
+        drawerClassName="bg-iv-bg max-h-[85vh]"
+      >
         {/* Category filter */}
         <div className="flex flex-wrap gap-1.5 py-2">
           <button
@@ -189,7 +186,7 @@ export function ImportModal({
             {isPending ? '가져오는 중...' : `${selectedIds.size}개 가져오기`}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </DrawerDialog>
+    </>
   );
 }
