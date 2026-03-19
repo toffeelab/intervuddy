@@ -14,9 +14,9 @@ export default async function InterviewsPage({ searchParams }: Props) {
   const jobs = status ? allJobs.filter((j) => j.status === status) : allJobs;
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
+    <div className="p-4 md:p-6">
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="text-iv-text text-lg font-medium">JD 관리</h2>
           <p className="text-iv-text3 mt-1 text-sm">
             면접 대상 JD를 관리하고 질문을 맞춤 구성합니다.
@@ -24,7 +24,7 @@ export default async function InterviewsPage({ searchParams }: Props) {
         </div>
         <Link
           href="/interviews/jobs/new"
-          className="bg-iv-accent text-iv-accent-foreground hover:bg-iv-accent/90 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+          className="bg-iv-accent text-iv-accent-foreground hover:bg-iv-accent/90 inline-flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors"
         >
           <Plus className="size-4" />새 JD
         </Link>
