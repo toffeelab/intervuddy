@@ -67,10 +67,11 @@ jobs:
             ## 증분 리뷰 모드 (리뷰 모드가 "증분 리뷰"인 경우)
             1. `git diff ${{ steps.context.outputs.before_sha }}..HEAD --name-only`으로 새 변경 파일 확인
             2. 위와 동일한 제외 목록을 적용한 뒤, `git diff ${{ steps.context.outputs.before_sha }}..HEAD -- <파일>`로 개별 읽기
-            3. `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --jq '.[-1].body'`로 가장 최근 리뷰 본문 조회
-            4. 이전 리뷰에서 지적된 이슈 중 **이번 diff에 포함된 파일의 이슈만** 해결 여부 검증. diff에 포함되지 않은 파일의 이슈는 "해당 파일 미변경"으로 표기
-            5. **반드시 diff에 포함된 파일만 리뷰**. diff 외 파일을 읽거나 리뷰하지 말 것
-            6. `git diff` 실패 시 전체 리뷰 모드로 fallback
+            3. `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --jq '.[-1]'`로 가장 최근 리뷰의 본문(`body`)과 작성 시각(`submitted_at`) 조회
+            4. `gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments --jq '[.[] | select(.created_at > "LAST_REVIEW_SUBMITTED_AT")]'`로 마지막 리뷰 이후 PR 코멘트 조회. 코멘트가 있으면 사용자의 반박/설명으로 간주하고 리뷰에 반영
+            5. 이전 리뷰에서 지적된 이슈 중 **이번 diff에 포함된 파일의 이슈만** 해결 여부 검증. diff에 포함되지 않은 파일의 이슈는 "해당 파일 미변경"으로 표기. 사용자가 코멘트로 반박한 이슈는 반박 내용을 검토하여 수용 여부 판단
+            6. **반드시 diff에 포함된 파일만 리뷰**. diff 외 파일을 읽거나 리뷰하지 말 것
+            7. `git diff` 실패 시 전체 리뷰 모드로 fallback
 
             ## 리뷰 본문 형식 (반드시 이 템플릿을 따를 것)
 
