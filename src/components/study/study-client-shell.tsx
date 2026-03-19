@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { StudyPageHeader } from '@/components/study/study-page-header';
 import { QAList } from '@/components/study/qa-list';
 import { SearchInput } from '@/components/study/search-input';
 import { MobileSidebar, Sidebar } from '@/components/study/sidebar';
+import { StudyPageHeader } from '@/components/study/study-page-header';
 import type { InterviewCategory, InterviewQuestion, JobDescription } from '@/data-access/types';
 
 interface Props {

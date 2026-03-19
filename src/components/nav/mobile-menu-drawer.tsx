@@ -33,24 +33,32 @@ export function MobileMenuDrawer({ open, onOpenChange }: MobileMenuDrawerProps) 
                   {groupItems.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                     const Icon = item.icon;
+
+                    if (item.disabled) {
+                      return (
+                        <span
+                          key={item.href}
+                          role="link"
+                          aria-disabled="true"
+                          tabIndex={-1}
+                          className="bg-iv-bg2 text-iv-text2 flex items-center gap-2 rounded-lg p-3 text-sm opacity-40"
+                        >
+                          <Icon className="size-4 shrink-0" />
+                          <span>{item.label}</span>
+                        </span>
+                      );
+                    }
+
                     return (
                       <Link
                         key={item.href}
-                        href={item.disabled ? '#' : item.href}
-                        aria-disabled={item.disabled}
-                        onClick={(e) => {
-                          if (item.disabled) {
-                            e.preventDefault();
-                            return;
-                          }
-                          onOpenChange(false);
-                        }}
+                        href={item.href}
+                        onClick={() => onOpenChange(false)}
                         className={cn(
                           'flex items-center gap-2 rounded-lg p-3 text-sm transition-colors',
                           isActive
                             ? 'bg-iv-accent/10 text-iv-accent font-medium'
-                            : 'bg-iv-bg2 text-iv-text2',
-                          item.disabled && 'pointer-events-none opacity-40'
+                            : 'bg-iv-bg2 text-iv-text2'
                         )}
                       >
                         <Icon className="size-4 shrink-0" />

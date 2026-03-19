@@ -3,6 +3,7 @@
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { useMediaQuery } from '@/lib/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/stores/sidebar-store';
 import { navGroups, navItems, settingsItem } from './nav-config';
@@ -10,8 +11,13 @@ import { SidebarNavGroup } from './sidebar-nav-group';
 import { SidebarNavItem } from './sidebar-nav-item';
 
 export function AppSidebar() {
-  const isCollapsed = useSidebarStore((s) => s.isCollapsed);
+  const userCollapsed = useSidebarStore((s) => s.isCollapsed);
   const toggleCollapsed = useSidebarStore((s) => s.toggleCollapsed);
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
+
+  // Tablet (md~lg): always collapsed. Desktop (lg+): user preference.
+  const isCollapsed = isDesktop ? userCollapsed : true;
+  const showToggle = isDesktop;
 
   return (
     <TooltipProvider>
@@ -24,8 +30,8 @@ export function AppSidebar() {
         {/* Logo + Toggle */}
         <div
           className={cn(
-            'border-iv-border flex items-center border-b px-3 py-3',
-            isCollapsed ? 'justify-center' : 'justify-between'
+            'border-iv-border flex border-b px-3 py-3',
+            isCollapsed ? 'flex-col items-center gap-2' : 'items-center justify-between'
           )}
         >
           {!isCollapsed && (
@@ -41,24 +47,23 @@ export function AppSidebar() {
               IV
             </div>
           )}
-          <button
-            onClick={toggleCollapsed}
-            className={cn(
-              'text-iv-text3 hover:text-iv-text hover:bg-iv-bg3 rounded-md p-1 transition-colors',
-              isCollapsed && 'mt-2'
-            )}
-            aria-label={isCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
-          >
-            {isCollapsed ? (
-              <PanelLeftOpen className="size-4" />
-            ) : (
-              <PanelLeftClose className="size-4" />
-            )}
-          </button>
+          {showToggle && (
+            <button
+              onClick={toggleCollapsed}
+              className="text-iv-text3 hover:text-iv-text hover:bg-iv-bg3 rounded-md p-1 transition-colors"
+              aria-label={isCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
+            >
+              {isCollapsed ? (
+                <PanelLeftOpen className="size-4" />
+              ) : (
+                <PanelLeftClose className="size-4" />
+              )}
+            </button>
+          )}
         </div>
 
         {/* Nav Items */}
-        <nav className="flex-1 overflow-y-auto p-2">
+        <nav aria-label="메인 메뉴" className="flex-1 overflow-y-auto p-2">
           {navGroups.map((group, groupIdx) => {
             const groupItems = navItems.filter((item) => item.group === group.key);
             return (

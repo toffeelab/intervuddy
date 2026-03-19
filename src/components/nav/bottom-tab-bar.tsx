@@ -14,21 +14,36 @@ export function BottomTabBar() {
 
   return (
     <>
-      <nav className="border-iv-border bg-iv-bg fixed inset-x-0 bottom-0 z-50 flex border-t md:hidden">
+      <nav
+        aria-label="하단 탭"
+        className="border-iv-border bg-iv-bg fixed inset-x-0 bottom-0 z-50 flex border-t md:hidden"
+      >
         {bottomTabItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           const Icon = item.icon;
 
+          if (item.disabled) {
+            return (
+              <span
+                key={item.href}
+                role="link"
+                aria-disabled="true"
+                tabIndex={-1}
+                className="text-iv-text3 flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] opacity-40"
+              >
+                <Icon className="size-5" />
+                <span>{item.label}</span>
+              </span>
+            );
+          }
+
           return (
             <Link
               key={item.href}
-              href={item.disabled ? '#' : item.href}
-              aria-disabled={item.disabled}
-              onClick={item.disabled ? (e) => e.preventDefault() : undefined}
+              href={item.href}
               className={cn(
                 'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px]',
-                isActive ? 'text-iv-accent' : 'text-iv-text3',
-                item.disabled && 'opacity-40'
+                isActive ? 'text-iv-accent' : 'text-iv-text3'
               )}
             >
               <Icon className="size-5" />
