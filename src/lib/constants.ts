@@ -22,38 +22,38 @@ export const JD_KEYWORDS = [
 export const TAG_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   intro: {
     bg: 'bg-iv-accent2/12',
-    text: 'text-[#a89ff5]',
-    border: 'border-iv-accent2/20',
+    text: 'text-[#6c5ce7] dark:text-[#a89ff5]',
+    border: 'border-iv-accent2/25 dark:border-iv-accent2/20',
   },
   tech: {
     bg: 'bg-iv-accent/12',
-    text: 'text-[#7ab4f8]',
-    border: 'border-iv-accent/20',
+    text: 'text-[#2b7de9] dark:text-[#7ab4f8]',
+    border: 'border-iv-accent/25 dark:border-iv-accent/20',
   },
   lead: {
     bg: 'bg-iv-green/10',
-    text: 'text-[#5dd4a3]',
-    border: 'border-iv-green/20',
+    text: 'text-[#0d9e6d] dark:text-[#5dd4a3]',
+    border: 'border-iv-green/25 dark:border-iv-green/20',
   },
   proj: {
     bg: 'bg-iv-amber/10',
-    text: 'text-[#f9c74f]',
-    border: 'border-iv-amber/20',
+    text: 'text-[#c99a2e] dark:text-[#f9c74f]',
+    border: 'border-iv-amber/25 dark:border-iv-amber/20',
   },
   career: {
     bg: 'bg-iv-red/10',
-    text: 'text-[#fca5a5]',
-    border: 'border-iv-red/20',
+    text: 'text-[#dc2626] dark:text-[#fca5a5]',
+    border: 'border-iv-red/25 dark:border-iv-red/20',
   },
   culture: {
     bg: 'bg-iv-pink/10',
-    text: 'text-[#f0a3c0]',
-    border: 'border-iv-pink/20',
+    text: 'text-[#c0437f] dark:text-[#f0a3c0]',
+    border: 'border-iv-pink/25 dark:border-iv-pink/20',
   },
   jd: {
     bg: 'bg-iv-jd/10',
-    text: 'text-iv-jd',
-    border: 'border-iv-jd/20',
+    text: 'text-[#b45309] dark:text-iv-jd',
+    border: 'border-iv-jd/25 dark:border-iv-jd/20',
   },
 };
 

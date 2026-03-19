@@ -53,7 +53,7 @@ export function QACard({ item, index }: QACardProps) {
               </span>
             )}
             {item.followups.length > 0 && (
-              <span className="bg-iv-accent2/10 border-iv-accent2/20 rounded border px-1.5 py-0.5 font-mono text-[9px] text-[#a89ff5]">
+              <span className="bg-iv-accent2/10 border-iv-accent2/20 rounded border px-1.5 py-0.5 font-mono text-[9px] text-[#6c5ce7] dark:text-[#a89ff5]">
                 꼬리질문
               </span>
             )}
