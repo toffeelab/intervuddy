@@ -27,12 +27,14 @@ export async function deleteQuestionAction(id: number) {
   dbDelete(id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
+  revalidatePath('/interviews/trash');
 }
 
 export async function restoreQuestionAction(id: number) {
   dbRestore(id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
+  revalidatePath('/interviews/trash');
 }
 
 export async function updateQuestionKeywordsAction(questionId: number, keywords: string[]) {
