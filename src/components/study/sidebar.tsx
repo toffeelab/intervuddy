@@ -2,8 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Briefcase } from 'lucide-react';
-import { KeywordTags } from '@/components/study/keyword-tags';
-import { StatGrid } from '@/components/study/stat-grid';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
@@ -33,7 +32,11 @@ interface SidebarProps {
   jobs: JobDescription[];
 }
 
-export function Sidebar({ categories, jobs }: SidebarProps) {
+interface SidebarContentProps extends SidebarProps {
+  onCategorySelect?: () => void;
+}
+
+function SidebarContent({ categories, jobs, onCategorySelect }: SidebarContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = useStudyStore((s) => s.activeCategory);
@@ -48,9 +51,15 @@ export function Sidebar({ categories, jobs }: SidebarProps) {
 
   const isActive = (name: string) => activeCategory === name;
 
+  function handleCategoryClick(name: string) {
+    setActiveCategory(name);
+    onCategorySelect?.();
+  }
+
   function handleJdChange(value: string | null) {
     if (value === null) return;
     setActiveCategory(CATEGORY_ALL);
+    onCategorySelect?.();
     if (value === LIBRARY_VALUE) {
       router.push('/study');
     } else {
@@ -59,124 +68,140 @@ export function Sidebar({ categories, jobs }: SidebarProps) {
   }
 
   return (
-    <aside className="border-iv-border bg-iv-bg2 border-r">
-      <ScrollArea className="sticky top-[57px] h-[calc(100vh-57px)]">
-        <div className="space-y-1 p-3">
-          {/* JD Selector */}
-          <div className="pb-2">
-            <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
-              📂 학습 범위
-            </p>
-            <Select value={selectValue} onValueChange={handleJdChange}>
-              <SelectTrigger className="w-full">
-                <Briefcase className="text-iv-text3 size-3.5" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent align="start" alignItemWithTrigger={false}>
-                <SelectItem value={LIBRARY_VALUE}>공통 라이브러리</SelectItem>
-                {jobs.map((job) => (
-                  <SelectItem key={job.id} value={String(job.id)}>
-                    {job.companyName} — {job.positionTitle}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+    <div className="space-y-1 p-3">
+      {/* JD Selector */}
+      <div className="pb-2">
+        <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
+          📂 학습 범위
+        </p>
+        <Select value={selectValue} onValueChange={handleJdChange}>
+          <SelectTrigger className="w-full">
+            <Briefcase className="text-iv-text3 size-3.5" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="start" alignItemWithTrigger={false}>
+            <SelectItem value={LIBRARY_VALUE}>공통 라이브러리</SelectItem>
+            {jobs.map((job) => (
+              <SelectItem key={job.id} value={String(job.id)}>
+                {job.companyName} — {job.positionTitle}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-          {/* All category */}
-          <button
-            onClick={() => setActiveCategory(CATEGORY_ALL)}
+      {/* All category */}
+      <button
+        onClick={() => handleCategoryClick(CATEGORY_ALL)}
+        className={cn(
+          'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] transition-colors',
+          isActive(CATEGORY_ALL)
+            ? 'bg-iv-accent/10 text-iv-accent'
+            : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
+        )}
+      >
+        <span className="bg-iv-accent/[0.07] flex h-5 w-5 items-center justify-center rounded text-[11px]">
+          📋
+        </span>
+        <span className="flex-1 text-left font-medium">전체</span>
+        <span className="text-iv-text3 font-mono text-[10px]">{totalCount}</span>
+      </button>
+
+      {/* Divider */}
+      <div className="border-iv-border my-2 border-t" />
+
+      {/* Common categories section */}
+      <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
+        🔵 공통 질문
+      </p>
+      {commonCategories.map((cat) => (
+        <button
+          key={cat.id}
+          onClick={() => handleCategoryClick(cat.name)}
+          className={cn(
+            'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] transition-colors',
+            isActive(cat.name)
+              ? 'bg-iv-accent/10 text-iv-accent'
+              : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
+          )}
+        >
+          <span
             className={cn(
-              'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] transition-colors',
-              isActive(CATEGORY_ALL)
-                ? 'bg-iv-accent/10 text-iv-accent'
-                : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
+              'flex h-5 w-5 items-center justify-center rounded text-[11px]',
+              CATEGORY_ICON_BG[cat.name] ?? 'bg-iv-bg3'
             )}
           >
-            <span className="bg-iv-accent/[0.07] flex h-5 w-5 items-center justify-center rounded text-[11px]">
-              📋
-            </span>
-            <span className="flex-1 text-left font-medium">전체</span>
-            <span className="text-iv-text3 font-mono text-[10px]">{totalCount}</span>
-          </button>
+            {cat.icon}
+          </span>
+          <span className="flex-1 text-left">{cat.name}</span>
+          <span className="text-iv-text3 font-mono text-[10px]">{cat.questionCount}</span>
+        </button>
+      ))}
 
-          {/* Divider */}
+      {/* JD categories section — only show when JD categories exist */}
+      {jdCategories.length > 0 && (
+        <>
           <div className="border-iv-border my-2 border-t" />
-
-          {/* Common categories section */}
           <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
-            🔵 공통 질문
+            🟡 맞춤 질문
           </p>
-          {commonCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.name)}
-              className={cn(
-                'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] transition-colors',
-                isActive(cat.name)
-                  ? 'bg-iv-accent/10 text-iv-accent'
-                  : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
-              )}
-            >
-              <span
-                className={cn(
-                  'flex h-5 w-5 items-center justify-center rounded text-[11px]',
-                  CATEGORY_ICON_BG[cat.name] ?? 'bg-iv-bg3'
-                )}
-              >
-                {cat.icon}
-              </span>
-              <span className="flex-1 text-left">{cat.name}</span>
-              <span className="text-iv-text3 font-mono text-[10px]">{cat.questionCount}</span>
-            </button>
-          ))}
+        </>
+      )}
+      {jdCategories.map((cat) => (
+        <button
+          key={cat.id}
+          onClick={() => handleCategoryClick(cat.name)}
+          className={cn(
+            'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] transition-colors',
+            isActive(cat.name)
+              ? 'bg-iv-jd/8 text-iv-jd'
+              : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
+          )}
+        >
+          <span
+            className={cn(
+              'flex h-5 w-5 items-center justify-center rounded text-[11px]',
+              CATEGORY_ICON_BG[cat.name] ?? 'bg-iv-bg3'
+            )}
+          >
+            {cat.icon}
+          </span>
+          <span className="flex-1 text-left">
+            {JD_DISPLAY_NAMES[cat.name] ?? cat.name.replace('JD-', '')}
+          </span>
+          <span className="text-iv-text3 font-mono text-[10px]">{cat.questionCount}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
-          {/* Divider */}
-          <div className="border-iv-border my-2 border-t" />
-
-          {/* JD categories section */}
-          <p className="text-iv-text3 px-2.5 pt-1 pb-1.5 font-mono text-[10px] tracking-wider uppercase">
-            🟡 JD 맞춤
-          </p>
-          {jdCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.name)}
-              className={cn(
-                'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] transition-colors',
-                isActive(cat.name)
-                  ? 'bg-iv-jd/[0.08] text-iv-jd'
-                  : 'text-iv-text2 hover:bg-iv-bg3 hover:text-iv-text'
-              )}
-            >
-              <span
-                className={cn(
-                  'flex h-5 w-5 items-center justify-center rounded text-[11px]',
-                  CATEGORY_ICON_BG[cat.name] ?? 'bg-iv-bg3'
-                )}
-              >
-                {cat.icon}
-              </span>
-              <span className="flex-1 text-left">
-                {JD_DISPLAY_NAMES[cat.name] ?? cat.name.replace('JD-', '')}
-              </span>
-              <span className="text-iv-text3 font-mono text-[10px]">{cat.questionCount}</span>
-            </button>
-          ))}
-
-          {/* Divider */}
-          <div className="border-iv-border my-2 border-t" />
-
-          {/* Stats */}
-          <StatGrid />
-
-          {/* Divider */}
-          <div className="border-iv-border my-2 border-t" />
-
-          {/* JD Keywords */}
-          <KeywordTags />
-        </div>
+export function Sidebar({ categories, jobs }: SidebarProps) {
+  return (
+    <aside className="border-iv-border bg-iv-bg2 border-r">
+      <ScrollArea className="sticky top-[57px] h-[calc(100vh-57px)]">
+        <SidebarContent categories={categories} jobs={jobs} />
       </ScrollArea>
     </aside>
+  );
+}
+
+interface MobileSidebarProps extends SidebarProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function MobileSidebar({ open, onOpenChange, ...props }: MobileSidebarProps) {
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange} direction="left">
+      <DrawerContent className="bg-iv-bg2 w-[min(280px,85vw)] p-0">
+        <DrawerHeader className="border-iv-border border-b px-3 py-3">
+          <DrawerTitle className="text-iv-text text-sm">카테고리</DrawerTitle>
+        </DrawerHeader>
+        <div className="flex-1 overflow-y-auto">
+          <SidebarContent {...props} onCategorySelect={() => onOpenChange(false)} />
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }

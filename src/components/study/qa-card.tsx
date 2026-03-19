@@ -31,42 +31,46 @@ export function QACard({ item, index }: QACardProps) {
       <button
         type="button"
         onClick={() => toggleCard(item.id)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left"
+        className="flex w-full flex-col gap-1.5 px-4 py-3 text-left"
       >
-        <span className="text-iv-text3 w-7 shrink-0 font-mono text-[11px]">Q{index}</span>
-        <span className="text-iv-text flex-1 text-[13px] leading-snug">{item.question}</span>
-        <div className="flex shrink-0 items-center gap-1.5">
-          {item.jdId !== null && (
-            <span className="bg-iv-jd/10 text-iv-jd border-iv-jd/20 rounded border px-1.5 py-0.5 font-mono text-[9px]">
-              JD
-            </span>
-          )}
-          {item.followups.length > 0 && (
-            <span className="bg-iv-accent2/10 border-iv-accent2/20 rounded border px-1.5 py-0.5 font-mono text-[9px] text-[#a89ff5]">
-              꼬리질문
-            </span>
-          )}
-          {tagColor && (
-            <span
-              className={cn(
-                'rounded border px-1.5 py-0.5 font-mono text-[9px]',
-                tagColor.bg,
-                tagColor.text,
-                tagColor.border
-              )}
-            >
-              {item.categoryDisplayLabel}
-            </span>
-          )}
+        <div className="flex items-center gap-3">
+          <span className="text-iv-text3 w-7 shrink-0 font-mono text-[11px]">Q{index}</span>
+          <span className="text-iv-text flex-1 text-[13px] leading-snug">{item.question}</span>
           <span
             className={cn(
-              'text-[11px] transition-transform duration-200',
+              'shrink-0 text-[11px] transition-transform duration-200',
               isOpen ? 'text-iv-accent rotate-180' : 'text-iv-text3'
             )}
           >
             ▼
           </span>
         </div>
+        {(item.jdId !== null || item.followups.length > 0 || tagColor) && (
+          <div className="flex flex-wrap items-center gap-1.5 pl-10">
+            {item.jdId !== null && (
+              <span className="bg-iv-jd/10 text-iv-jd border-iv-jd/20 rounded border px-1.5 py-0.5 font-mono text-[9px]">
+                맞춤
+              </span>
+            )}
+            {item.followups.length > 0 && (
+              <span className="bg-iv-accent2/10 border-iv-accent2/20 rounded border px-1.5 py-0.5 font-mono text-[9px] text-[#6c5ce7] dark:text-[#a89ff5]">
+                꼬리질문
+              </span>
+            )}
+            {tagColor && (
+              <span
+                className={cn(
+                  'rounded border px-1.5 py-0.5 font-mono text-[9px]',
+                  tagColor.bg,
+                  tagColor.text,
+                  tagColor.border
+                )}
+              >
+                {item.categoryDisplayLabel}
+              </span>
+            )}
+          </div>
+        )}
       </button>
 
       {isOpen && (

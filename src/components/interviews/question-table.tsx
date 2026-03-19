@@ -1,10 +1,17 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Pencil, Trash2, ChevronDown, ChevronRight, Lightbulb } from 'lucide-react';
+import { Pencil, Trash2, ChevronDown, ChevronRight, Lightbulb, MoreHorizontal } from 'lucide-react';
 import { deleteQuestionAction } from '@/actions/question-actions';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import type { InterviewQuestion } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 import { useEditStore } from '@/stores/edit-store';
@@ -41,20 +48,27 @@ function QuestionRow({ question }: { question: InterviewQuestion }) {
   const { openDrawer } = useEditStore();
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  const { confirm, dialog } = useConfirmDialog();
 
   function handleDelete() {
-    if (!confirm(`"${question.question.slice(0, 40)}..." 질문을 삭제하시겠습니까?`)) return;
-    startTransition(async () => {
-      try {
-        await deleteQuestionAction(question.id);
-      } catch {
-        setError('삭제에 실패했습니다');
-      }
+    confirm({
+      title: '질문 삭제',
+      description: `"${question.question.slice(0, 40)}..." 질문을 삭제하시겠습니까?`,
+      confirmLabel: '삭제',
+      onConfirm: () => {
+        startTransition(async () => {
+          try {
+            await deleteQuestionAction(question.id);
+          } catch {
+            setError('삭제에 실패했습니다');
+          }
+        });
+      },
     });
   }
 
   return (
-    <div className="group border-iv-border hover:bg-iv-bg3 flex flex-col border-b transition-colors last:border-b-0">
+    <div className="border-iv-border hover:bg-iv-bg3 flex flex-col border-b transition-colors last:border-b-0">
       {error && <p className="text-iv-red px-4 pt-2 text-xs">{error}</p>}
       <div className="flex items-start gap-3 px-4 py-3">
         <div className="min-w-0 flex-1">
@@ -81,26 +95,27 @@ function QuestionRow({ question }: { question: InterviewQuestion }) {
             )}
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => openDrawer(question.id)}
-            title="편집"
-          >
-            <Pencil className="size-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={handleDelete}
-            title="삭제"
-            className="hover:text-iv-red hover:bg-iv-red/10"
-          >
-            <Trash2 className="size-3.5" />
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="ghost" size="icon-sm" title="더보기">
+                <MoreHorizontal className="size-3.5" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => openDrawer(question.id)}>
+              <Pencil className="size-3.5" />
+              편집
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onClick={handleDelete}>
+              <Trash2 className="size-3.5" />
+              삭제
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
+      {dialog}
     </div>
   );
 }

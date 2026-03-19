@@ -2,7 +2,7 @@ const features = [
   {
     icon: '📋',
     title: '카테고리별 Q&A',
-    description: '공통 질문부터 JD 맞춤 질문까지 체계적으로 분류',
+    description: '공통 질문부터 맞춤 질문까지 체계적으로 분류',
   },
   {
     icon: '🔗',

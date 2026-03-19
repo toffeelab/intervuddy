@@ -28,9 +28,9 @@ export default async function JobDetailPage({ params }: Props) {
     .map((q) => q.originQuestionId as number);
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-start justify-between">
-        <div>
+    <div className="p-4 md:p-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="text-iv-text text-lg font-medium">{job.companyName}</h2>
             <JobStatusBadge status={job.status} />
@@ -38,7 +38,7 @@ export default async function JobDetailPage({ params }: Props) {
           <p className="text-iv-text2 mt-1 text-sm">{job.positionTitle}</p>
           {job.memo && <p className="text-iv-text3 mt-2 text-xs">{job.memo}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <ImportModal
             jdId={job.id}
             libraryQuestions={libraryQuestions}
@@ -47,7 +47,7 @@ export default async function JobDetailPage({ params }: Props) {
           />
           <Link
             href={`/interviews/jobs/${job.id}/edit`}
-            className="border-iv-border text-iv-text2 hover:bg-iv-bg3 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors"
+            className="border-iv-border text-iv-text2 hover:bg-iv-bg3 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm whitespace-nowrap transition-colors"
           >
             <Pencil className="size-4" />
             수정
