@@ -198,9 +198,9 @@ export function MobileSidebar({ open, onOpenChange, ...props }: MobileSidebarPro
         <DrawerHeader className="border-iv-border border-b px-3 py-3">
           <DrawerTitle className="text-iv-text text-sm">카테고리</DrawerTitle>
         </DrawerHeader>
-        <ScrollArea className="h-[calc(100vh-57px)]">
+        <div className="flex-1 overflow-y-auto">
           <SidebarContent {...props} onCategorySelect={() => onOpenChange(false)} />
-        </ScrollArea>
+        </div>
       </DrawerContent>
     </Drawer>
   );
