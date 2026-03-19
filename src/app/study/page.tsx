@@ -1,7 +1,4 @@
-import { InterviewHeader } from '@/components/study/interview-header';
-import { QAList } from '@/components/study/qa-list';
-import { SearchInput } from '@/components/study/search-input';
-import { Sidebar } from '@/components/study/sidebar';
+import { StudyClientShell } from '@/components/study/study-client-shell';
 import { getLibraryQuestions, getGlobalCategories, getAllJobs } from '@/data-access';
 import { getCategoriesByJdId } from '@/data-access/categories';
 import { getQuestionsByJdId } from '@/data-access/questions';
@@ -28,15 +25,6 @@ export default async function StudyPage({ searchParams }: StudyPageProps) {
   const allItemIds = items.map((item) => item.id);
 
   return (
-    <div className="bg-iv-bg text-iv-text min-h-screen">
-      <InterviewHeader totalCount={items.length} allItemIds={allItemIds} />
-      <div className="grid min-h-[calc(100vh-57px)] grid-cols-[230px_1fr]">
-        <Sidebar categories={categories} jobs={jobs} />
-        <main className="overflow-y-auto p-6">
-          <SearchInput />
-          <QAList items={items} />
-        </main>
-      </div>
-    </div>
+    <StudyClientShell items={items} categories={categories} jobs={jobs} allItemIds={allItemIds} />
   );
 }
