@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { InterviewHeader } from '@/components/study/interview-header';
+import { StudyPageHeader } from '@/components/study/study-page-header';
 import { QAList } from '@/components/study/qa-list';
 import { SearchInput } from '@/components/study/search-input';
 import { MobileSidebar, Sidebar } from '@/components/study/sidebar';
@@ -18,8 +18,8 @@ export function StudyClientShell({ items, categories, jobs, allItemIds }: Props)
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="bg-iv-bg text-iv-text min-h-screen">
-      <InterviewHeader
+    <>
+      <StudyPageHeader
         totalCount={items.length}
         allItemIds={allItemIds}
         onMenuClick={() => setSidebarOpen(true)}
@@ -43,6 +43,6 @@ export function StudyClientShell({ items, categories, jobs, allItemIds }: Props)
           <QAList items={items} />
         </main>
       </div>
-    </div>
+    </>
   );
 }
