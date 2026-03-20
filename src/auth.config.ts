@@ -1,20 +1,21 @@
 import type { NextAuthConfig } from 'next-auth';
 import GitHub from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
-import Resend from 'next-auth/providers/resend';
 
 /**
  * Auth.js 설정 — Edge Runtime 호환 부분
- * DrizzleAdapter는 Node.js 전용이므로 여기에 포함하지 않음.
+ * DrizzleAdapter와 Resend(이메일) provider는 Node.js 전용이므로 여기에 포함하지 않음.
  * proxy.ts(Edge) → auth.config.ts (이 파일)
- * auth.ts(Node.js) → auth.config.ts + DrizzleAdapter
+ * auth.ts(Node.js) → auth.config.ts + DrizzleAdapter + Resend
  */
 export default {
   session: { strategy: 'jwt' },
+  // 동일 이메일로 여러 OAuth provider 연결 허용 (Google + GitHub 동시 사용)
+  allowDangerousEmailAccountLinking: true,
   providers: [
     Google,
     GitHub,
-    Resend({ from: process.env.AUTH_RESEND_FROM ?? 'noreply@intervuddy.com' }),
+    // Resend provider는 adapter 필요 → auth.ts(Node.js)에서만 추가
   ],
   callbacks: {
     jwt({ token, user }) {

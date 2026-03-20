@@ -6,7 +6,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -38,7 +37,7 @@ export function UserMenu() {
       <DropdownMenuContent align="end">
         {session?.user && (
           <>
-            <DropdownMenuLabel>
+            <div className="px-2 py-1.5">
               <div className="flex flex-col gap-0.5">
                 {session.user.name && (
                   <span className="truncate text-sm font-medium">{session.user.name}</span>
@@ -47,7 +46,7 @@ export function UserMenu() {
                   <span className="text-iv-text2 truncate text-xs">{session.user.email}</span>
                 )}
               </div>
-            </DropdownMenuLabel>
+            </div>
             <DropdownMenuSeparator />
           </>
         )}

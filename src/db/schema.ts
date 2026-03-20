@@ -26,7 +26,9 @@ export const users = pgTable('users', {
 export const accounts = pgTable(
   'accounts',
   {
-    id: text('id').primaryKey(),
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
