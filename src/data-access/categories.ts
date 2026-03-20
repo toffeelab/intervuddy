@@ -1,10 +1,9 @@
 import { eq, and, isNull, or, asc, count, sql } from 'drizzle-orm';
-import { DEFAULT_USER_ID } from '@/db/constants';
 import { getDb } from '@/db/index';
 import { interviewCategories, interviewQuestions } from '@/db/schema';
 import type { InterviewCategory, CreateCategoryInput, UpdateCategoryInput } from './types';
 
-export async function getGlobalCategories(): Promise<InterviewCategory[]> {
+export async function getLibraryCategories(userId: string): Promise<InterviewCategory[]> {
   const rows = await getDb()
     .select({
       id: interviewCategories.id,
@@ -29,7 +28,7 @@ export async function getGlobalCategories(): Promise<InterviewCategory[]> {
     )
     .where(
       and(
-        eq(interviewCategories.userId, DEFAULT_USER_ID),
+        eq(interviewCategories.userId, userId),
         isNull(interviewCategories.jdId),
         isNull(interviewCategories.deletedAt)
       )
@@ -40,7 +39,15 @@ export async function getGlobalCategories(): Promise<InterviewCategory[]> {
   return rows.map((row) => ({ ...row, questionCount: Number(row.questionCount) }));
 }
 
-export async function getCategoriesByJdId(jdId: number): Promise<InterviewCategory[]> {
+/** @deprecated Use getLibraryCategories instead */
+export async function getGlobalCategories(userId: string): Promise<InterviewCategory[]> {
+  return getLibraryCategories(userId);
+}
+
+export async function getCategoriesByJdId(
+  userId: string,
+  jdId: number
+): Promise<InterviewCategory[]> {
   const rows = await getDb()
     .select({
       id: interviewCategories.id,
@@ -65,7 +72,7 @@ export async function getCategoriesByJdId(jdId: number): Promise<InterviewCatego
     )
     .where(
       and(
-        eq(interviewCategories.userId, DEFAULT_USER_ID),
+        eq(interviewCategories.userId, userId),
         or(isNull(interviewCategories.jdId), eq(interviewCategories.jdId, jdId)),
         isNull(interviewCategories.deletedAt)
       )
@@ -76,18 +83,18 @@ export async function getCategoriesByJdId(jdId: number): Promise<InterviewCatego
   return rows.map((row) => ({ ...row, questionCount: Number(row.questionCount) }));
 }
 
-export async function createCategory(input: CreateCategoryInput): Promise<number> {
+export async function createCategory(userId: string, input: CreateCategoryInput): Promise<number> {
   const jdId = input.jdId ?? null;
 
   const displayOrderSq =
     jdId === null
-      ? sql`COALESCE((SELECT MAX(${interviewCategories.displayOrder}) + 1 FROM ${interviewCategories} WHERE ${interviewCategories.jdId} IS NULL AND ${interviewCategories.deletedAt} IS NULL AND ${interviewCategories.userId} = ${DEFAULT_USER_ID}), 0)`
-      : sql`COALESCE((SELECT MAX(${interviewCategories.displayOrder}) + 1 FROM ${interviewCategories} WHERE ${interviewCategories.jdId} = ${jdId} AND ${interviewCategories.deletedAt} IS NULL AND ${interviewCategories.userId} = ${DEFAULT_USER_ID}), 0)`;
+      ? sql`COALESCE((SELECT MAX(${interviewCategories.displayOrder}) + 1 FROM ${interviewCategories} WHERE ${interviewCategories.jdId} IS NULL AND ${interviewCategories.deletedAt} IS NULL AND ${interviewCategories.userId} = ${userId}), 0)`
+      : sql`COALESCE((SELECT MAX(${interviewCategories.displayOrder}) + 1 FROM ${interviewCategories} WHERE ${interviewCategories.jdId} = ${jdId} AND ${interviewCategories.deletedAt} IS NULL AND ${interviewCategories.userId} = ${userId}), 0)`;
 
   const [result] = await getDb()
     .insert(interviewCategories)
     .values({
-      userId: DEFAULT_USER_ID,
+      userId,
       jdId,
       name: input.name,
       slug: input.slug,
@@ -101,6 +108,7 @@ export async function createCategory(input: CreateCategoryInput): Promise<number
 }
 
 export async function updateCategory(
+  userId: string,
   id: number,
   input: Omit<UpdateCategoryInput, 'id'>
 ): Promise<void> {
@@ -113,19 +121,22 @@ export async function updateCategory(
 
   if (Object.keys(updates).length === 0) return;
 
-  await getDb().update(interviewCategories).set(updates).where(eq(interviewCategories.id, id));
+  await getDb()
+    .update(interviewCategories)
+    .set(updates)
+    .where(and(eq(interviewCategories.id, id), eq(interviewCategories.userId, userId)));
 }
 
-export async function softDeleteCategory(id: number): Promise<void> {
+export async function softDeleteCategory(userId: string, id: number): Promise<void> {
   await getDb()
     .update(interviewCategories)
     .set({ deletedAt: sql`NOW()` })
-    .where(eq(interviewCategories.id, id));
+    .where(and(eq(interviewCategories.id, id), eq(interviewCategories.userId, userId)));
 }
 
-export async function restoreCategory(id: number): Promise<void> {
+export async function restoreCategory(userId: string, id: number): Promise<void> {
   await getDb()
     .update(interviewCategories)
     .set({ deletedAt: null })
-    .where(eq(interviewCategories.id, id));
+    .where(and(eq(interviewCategories.id, id), eq(interviewCategories.userId, userId)));
 }

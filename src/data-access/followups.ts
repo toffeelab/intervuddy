@@ -1,5 +1,4 @@
 import { eq, and, isNull, sql } from 'drizzle-orm';
-import { DEFAULT_USER_ID } from '@/db/constants';
 import { getDb } from '@/db/index';
 import { followupQuestions } from '@/db/schema';
 import type { FollowupQuestion, CreateFollowupInput, UpdateFollowupInput } from './types';
@@ -23,13 +22,13 @@ export async function getFollowupsByQuestionId(questionId: number): Promise<Foll
   return rows;
 }
 
-export async function createFollowup(input: CreateFollowupInput): Promise<number> {
+export async function createFollowup(userId: string, input: CreateFollowupInput): Promise<number> {
   const questionId = input.questionId;
 
   const [result] = await getDb()
     .insert(followupQuestions)
     .values({
-      userId: DEFAULT_USER_ID,
+      userId,
       questionId,
       question: input.question,
       answer: input.answer,
@@ -40,7 +39,7 @@ export async function createFollowup(input: CreateFollowupInput): Promise<number
   return result.id;
 }
 
-export async function updateFollowup(input: UpdateFollowupInput): Promise<void> {
+export async function updateFollowup(userId: string, input: UpdateFollowupInput): Promise<void> {
   const updates: Partial<typeof followupQuestions.$inferInsert> = {};
 
   if (input.question !== undefined) updates.question = input.question;
@@ -48,19 +47,22 @@ export async function updateFollowup(input: UpdateFollowupInput): Promise<void> 
 
   if (Object.keys(updates).length === 0) return;
 
-  await getDb().update(followupQuestions).set(updates).where(eq(followupQuestions.id, input.id));
+  await getDb()
+    .update(followupQuestions)
+    .set(updates)
+    .where(and(eq(followupQuestions.id, input.id), eq(followupQuestions.userId, userId)));
 }
 
-export async function softDeleteFollowup(id: number): Promise<void> {
+export async function softDeleteFollowup(userId: string, id: number): Promise<void> {
   await getDb()
     .update(followupQuestions)
     .set({ deletedAt: sql`NOW()` })
-    .where(eq(followupQuestions.id, id));
+    .where(and(eq(followupQuestions.id, id), eq(followupQuestions.userId, userId)));
 }
 
-export async function restoreFollowup(id: number): Promise<void> {
+export async function restoreFollowup(userId: string, id: number): Promise<void> {
   await getDb()
     .update(followupQuestions)
     .set({ deletedAt: null })
-    .where(eq(followupQuestions.id, id));
+    .where(and(eq(followupQuestions.id, id), eq(followupQuestions.userId, userId)));
 }

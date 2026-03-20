@@ -1,5 +1,6 @@
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
+import { DEFAULT_USER_ID } from '@/db/constants';
 import * as schema from '@/db/schema';
 import {
   createTestDb,
@@ -27,7 +28,7 @@ describe('followups data-access', () => {
   beforeEach(async () => {
     await truncateAllTables(db);
     await seedTestQuestions(db);
-    const questions = await getLibraryQuestions();
+    const questions = await getLibraryQuestions(DEFAULT_USER_ID);
     questionId = questions[0].id;
   });
 
@@ -45,7 +46,7 @@ describe('followups data-access', () => {
 
     it('삭제된 꼬리질문은 제외한다', async () => {
       const followups = await getFollowupsByQuestionId(questionId);
-      await softDeleteFollowup(followups[0].id);
+      await softDeleteFollowup(DEFAULT_USER_ID, followups[0].id);
       expect(await getFollowupsByQuestionId(questionId)).toEqual([]);
     });
 
@@ -56,7 +57,7 @@ describe('followups data-access', () => {
 
   describe('createFollowup', () => {
     it('꼬리질문을 생성하고 id를 반환한다', async () => {
-      const id = await createFollowup({
+      const id = await createFollowup(DEFAULT_USER_ID, {
         questionId,
         question: '새 꼬리질문',
         answer: '새 답변',
@@ -70,7 +71,7 @@ describe('followups data-access', () => {
   describe('updateFollowup', () => {
     it('꼬리질문을 부분 수정할 수 있다', async () => {
       const followups = await getFollowupsByQuestionId(questionId);
-      await updateFollowup({ id: followups[0].id, answer: '수정된 답변' });
+      await updateFollowup(DEFAULT_USER_ID, { id: followups[0].id, answer: '수정된 답변' });
       const updated = await getFollowupsByQuestionId(questionId);
       expect(updated[0].answer).toBe('수정된 답변');
       expect(updated[0].question).toBe('가장 어려웠던 프로젝트는?');
@@ -81,10 +82,10 @@ describe('followups data-access', () => {
     it('소프트 삭제 후 복원할 수 있다', async () => {
       const followups = await getFollowupsByQuestionId(questionId);
       const followupId = followups[0].id;
-      await softDeleteFollowup(followupId);
+      await softDeleteFollowup(DEFAULT_USER_ID, followupId);
       expect(await getFollowupsByQuestionId(questionId)).toEqual([]);
 
-      await restoreFollowup(followupId);
+      await restoreFollowup(DEFAULT_USER_ID, followupId);
       expect(await getFollowupsByQuestionId(questionId)).toHaveLength(1);
     });
   });

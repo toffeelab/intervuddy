@@ -1,5 +1,4 @@
 import { eq, and, isNull, isNotNull, desc, asc, inArray, sql } from 'drizzle-orm';
-import { DEFAULT_USER_ID } from '@/db/constants';
 import { getDb } from '@/db/index';
 import { interviewQuestions, interviewCategories, followupQuestions } from '@/db/schema';
 import type {
@@ -138,46 +137,70 @@ const questionSelect = {
   updatedAt: interviewQuestions.updatedAt,
 };
 
-export async function getLibraryQuestions(): Promise<InterviewQuestion[]> {
+export async function getLibraryQuestions(userId: string): Promise<InterviewQuestion[]> {
   const rows = await getDb()
     .select(questionSelect)
     .from(interviewQuestions)
     .innerJoin(interviewCategories, eq(interviewCategories.id, interviewQuestions.categoryId))
-    .where(and(isNull(interviewQuestions.jdId), isNull(interviewQuestions.deletedAt)))
+    .where(
+      and(
+        eq(interviewQuestions.userId, userId),
+        isNull(interviewQuestions.jdId),
+        isNull(interviewQuestions.deletedAt)
+      )
+    )
     .orderBy(asc(interviewCategories.displayOrder), asc(interviewQuestions.displayOrder));
 
   return mapRows(rows);
 }
 
-export async function getQuestionsByJdId(jdId: number): Promise<InterviewQuestion[]> {
+export async function getQuestionsByJdId(
+  userId: string,
+  jdId: number
+): Promise<InterviewQuestion[]> {
   const rows = await getDb()
     .select(questionSelect)
     .from(interviewQuestions)
     .innerJoin(interviewCategories, eq(interviewCategories.id, interviewQuestions.categoryId))
-    .where(and(eq(interviewQuestions.jdId, jdId), isNull(interviewQuestions.deletedAt)))
+    .where(
+      and(
+        eq(interviewQuestions.userId, userId),
+        eq(interviewQuestions.jdId, jdId),
+        isNull(interviewQuestions.deletedAt)
+      )
+    )
     .orderBy(asc(interviewCategories.displayOrder), asc(interviewQuestions.displayOrder));
 
   return mapRows(rows);
 }
 
-export async function getQuestionsByCategory(categoryId: number): Promise<InterviewQuestion[]> {
+export async function getQuestionsByCategory(
+  userId: string,
+  categoryId: number
+): Promise<InterviewQuestion[]> {
   const rows = await getDb()
     .select(questionSelect)
     .from(interviewQuestions)
     .innerJoin(interviewCategories, eq(interviewCategories.id, interviewQuestions.categoryId))
-    .where(and(eq(interviewQuestions.categoryId, categoryId), isNull(interviewQuestions.deletedAt)))
+    .where(
+      and(
+        eq(interviewQuestions.userId, userId),
+        eq(interviewQuestions.categoryId, categoryId),
+        isNull(interviewQuestions.deletedAt)
+      )
+    )
     .orderBy(asc(interviewQuestions.displayOrder));
 
   return mapRows(rows);
 }
 
-export async function createQuestion(input: CreateQuestionInput): Promise<number> {
+export async function createQuestion(userId: string, input: CreateQuestionInput): Promise<number> {
   const categoryId = input.categoryId;
 
   const [result] = await getDb()
     .insert(interviewQuestions)
     .values({
-      userId: DEFAULT_USER_ID,
+      userId,
       categoryId,
       jdId: input.jdId ?? null,
       question: input.question,
@@ -191,7 +214,7 @@ export async function createQuestion(input: CreateQuestionInput): Promise<number
   return result.id;
 }
 
-export async function updateQuestion(input: UpdateQuestionInput): Promise<void> {
+export async function updateQuestion(userId: string, input: UpdateQuestionInput): Promise<void> {
   const updates: Partial<typeof interviewQuestions.$inferInsert> = {};
 
   // categoryId 변경은 허용하지 않음 (display_order 계산 로직 깨짐 방지, 생성 시에만 설정)
@@ -202,36 +225,53 @@ export async function updateQuestion(input: UpdateQuestionInput): Promise<void> 
 
   if (Object.keys(updates).length === 0) return;
 
-  await getDb().update(interviewQuestions).set(updates).where(eq(interviewQuestions.id, input.id));
+  await getDb()
+    .update(interviewQuestions)
+    .set(updates)
+    .where(and(eq(interviewQuestions.id, input.id), eq(interviewQuestions.userId, userId)));
 }
 
-export async function updateQuestionKeywords(id: number, keywords: string[]): Promise<void> {
-  await getDb().update(interviewQuestions).set({ keywords }).where(eq(interviewQuestions.id, id));
+export async function updateQuestionKeywords(
+  userId: string,
+  id: number,
+  keywords: string[]
+): Promise<void> {
+  await getDb()
+    .update(interviewQuestions)
+    .set({ keywords })
+    .where(and(eq(interviewQuestions.id, id), eq(interviewQuestions.userId, userId)));
 }
 
-export async function softDeleteQuestion(id: number): Promise<void> {
+export async function softDeleteQuestion(userId: string, id: number): Promise<void> {
   await getDb()
     .update(interviewQuestions)
     .set({ deletedAt: sql`NOW()` })
-    .where(eq(interviewQuestions.id, id));
+    .where(and(eq(interviewQuestions.id, id), eq(interviewQuestions.userId, userId)));
 }
 
-export async function restoreQuestion(id: number): Promise<void> {
+export async function restoreQuestion(userId: string, id: number): Promise<void> {
   await getDb()
     .update(interviewQuestions)
     .set({ deletedAt: null })
-    .where(eq(interviewQuestions.id, id));
+    .where(and(eq(interviewQuestions.id, id), eq(interviewQuestions.userId, userId)));
 }
 
-export async function getDeletedQuestions(jdId?: number): Promise<InterviewQuestion[]> {
+export async function getDeletedQuestions(
+  userId: string,
+  jdId?: number
+): Promise<InterviewQuestion[]> {
   const rows = await getDb()
     .select(questionSelect)
     .from(interviewQuestions)
     .innerJoin(interviewCategories, eq(interviewCategories.id, interviewQuestions.categoryId))
     .where(
       jdId !== undefined
-        ? and(eq(interviewQuestions.jdId, jdId), isNotNull(interviewQuestions.deletedAt))
-        : isNotNull(interviewQuestions.deletedAt)
+        ? and(
+            eq(interviewQuestions.userId, userId),
+            eq(interviewQuestions.jdId, jdId),
+            isNotNull(interviewQuestions.deletedAt)
+          )
+        : and(eq(interviewQuestions.userId, userId), isNotNull(interviewQuestions.deletedAt))
     )
     .orderBy(desc(interviewQuestions.deletedAt));
 
