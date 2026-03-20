@@ -62,7 +62,9 @@ export const verificationTokens = pgTable(
 // ─── jobDescriptions ─────────────────────────────────────────────────────────
 
 export const jobDescriptions = pgTable('job_descriptions', {
-  id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -82,7 +84,7 @@ export const interviewCategories = pgTable('interview_categories', {
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  jdId: integer('jd_id').references(() => jobDescriptions.id, { onDelete: 'cascade' }),
+  jdId: text('jd_id').references(() => jobDescriptions.id, { onDelete: 'cascade' }),
   sourceCategoryId: integer('source_category_id').references(
     (): AnyPgColumn => interviewCategories.id,
     { onDelete: 'set null' }
@@ -100,15 +102,17 @@ export const interviewCategories = pgTable('interview_categories', {
 // ─── interviewQuestions ───────────────────────────────────────────────────────
 
 export const interviewQuestions = pgTable('interview_questions', {
-  id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   categoryId: integer('category_id')
     .notNull()
     .references(() => interviewCategories.id, { onDelete: 'cascade' }),
-  jdId: integer('jd_id').references(() => jobDescriptions.id, { onDelete: 'cascade' }),
-  originQuestionId: integer('origin_question_id').references(
+  jdId: text('jd_id').references(() => jobDescriptions.id, { onDelete: 'cascade' }),
+  originQuestionId: text('origin_question_id').references(
     (): AnyPgColumn => interviewQuestions.id,
     { onDelete: 'set null' }
   ),
@@ -128,11 +132,13 @@ export const interviewQuestions = pgTable('interview_questions', {
 // ─── followupQuestions ────────────────────────────────────────────────────────
 
 export const followupQuestions = pgTable('followup_questions', {
-  id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  questionId: integer('question_id')
+  questionId: text('question_id')
     .notNull()
     .references(() => interviewQuestions.id, { onDelete: 'cascade' }),
   question: text('question').notNull(),
