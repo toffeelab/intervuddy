@@ -1,11 +1,9 @@
-import { sql } from 'drizzle-orm';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { DEFAULT_USER_ID, SYSTEM_USER_ID } from '@/db/constants';
 import { setDb, resetDb } from '@/db/index';
 import * as schema from '@/db/schema';
 import {
-  users,
   interviewCategories,
   interviewQuestions,
   followupQuestions,
@@ -19,11 +17,6 @@ const TEST_DATABASE_URL =
 // Singleton pool shared across all test files in the same process
 let _sharedPool: Pool | null = null;
 let _sharedDb: NodePgDatabase<typeof schema> | null = null;
-
-const BASE_USERS = [
-  { id: SYSTEM_USER_ID, name: 'System', email: 'system@intervuddy.internal' },
-  { id: DEFAULT_USER_ID, name: 'Local User', email: 'local@intervuddy.internal' },
-] as const;
 
 function getSharedPool(): Pool {
   if (!_sharedPool) {
@@ -58,7 +51,7 @@ export async function cleanupTestDb(): Promise<void> {
   // The global-teardown.ts will call closeTestPool() after all tests complete.
 }
 
-export async function truncateAllTables(db: NodePgDatabase<typeof schema>): Promise<void> {
+export async function truncateAllTables(_db: NodePgDatabase<typeof schema>): Promise<void> {
   // Use a PostgreSQL session-level advisory lock to serialize cleanup across concurrent
   // test file setups. Even with singleFork: true, Vitest may overlap beforeAll/beforeEach
   // across test files. The lock ensures only one cleanup + reseed runs at a time,

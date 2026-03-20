@@ -1,4 +1,4 @@
-import { eq, isNotNull } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import { getGlobalCategories } from '@/data-access/categories';

@@ -34,7 +34,7 @@ function getTextarea() {
 // ---------------------------------------------------------------------------
 
 describe('InlineEdit', () => {
-  let onSave: ReturnType<typeof vi.fn>;
+  let onSave: (newValue: string) => Promise<void>;
 
   beforeEach(() => {
     onSave = vi.fn().mockResolvedValue(undefined);

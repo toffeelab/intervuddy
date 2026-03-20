@@ -43,7 +43,7 @@ describe('question-actions', () => {
   describe('createQuestionAction', () => {
     it('질문을 생성하고 { id }를 반환한다', async () => {
       await seedTestCategories(db);
-      const questions = await getLibraryQuestions();
+      await getLibraryQuestions();
       // Need a categoryId - get it from DB
       const { interviewCategories } = await import('@/db/schema');
       const { getDb } = await import('@/db');

@@ -1,4 +1,3 @@
-import { eq, and } from 'drizzle-orm';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import { DEFAULT_USER_ID } from '@/db/constants';

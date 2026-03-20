@@ -55,8 +55,6 @@ async function main() {
 
   console.log(`Inserting ${questions.length} questions...`);
   const orderByCategory = new Map<string, number>();
-  let totalFollowups = 0;
-
   for (const item of questions) {
     const categoryId = categoryMap.get(item.cat);
     if (!categoryId) {
@@ -91,7 +89,6 @@ async function main() {
         answer: followup.a,
         displayOrder: i + 1,
       });
-      totalFollowups++;
     }
   }
 

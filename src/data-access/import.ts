@@ -1,4 +1,4 @@
-import { eq, and, isNull, sql } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { DEFAULT_USER_ID } from '@/db/constants';
 import { getDb } from '@/db/index';
 import { interviewQuestions, followupQuestions } from '@/db/schema';

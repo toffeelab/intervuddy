@@ -3,7 +3,7 @@ import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import { DEFAULT_USER_ID } from '@/db/constants';
 import * as schema from '@/db/schema';
-import { interviewCategories, interviewQuestions, jobDescriptions } from '@/db/schema';
+import { interviewCategories, interviewQuestions } from '@/db/schema';
 import {
   createTestDb,
   cleanupTestDb,
