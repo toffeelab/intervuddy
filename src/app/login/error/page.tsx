@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import { ShieldAlert } from 'lucide-react';
-import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
 
 const ERROR_MESSAGES: Record<string, string> = {
   Configuration: '서버 설정에 문제가 있습니다',
@@ -37,7 +35,10 @@ export default async function AuthErrorPage({
           <CardDescription>{message}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Link href="/login" className={cn(buttonVariants({ variant: 'default' }), 'w-full')}>
+          <Link
+            href="/login"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors"
+          >
             다시 로그인하기
           </Link>
         </CardContent>
