@@ -96,7 +96,7 @@ export async function updateSessionStatus(
   sessionId: string,
   status: SessionStatus
 ): Promise<void> {
-  const updates: Partial<typeof interviewSessions.$inferInsert> = { status };
+  const updates: Record<string, unknown> = { status };
 
   if (status === 'in_progress') {
     updates.startedAt = sql`NOW()`;

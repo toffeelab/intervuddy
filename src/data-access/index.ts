@@ -6,3 +6,7 @@ export * from './followups';
 export * from './import';
 export * from './cleanup';
 export * from './templates';
+export * from './sessions';
+export * from './session-participants';
+export * from './session-invitations';
+export * from './session-records';
