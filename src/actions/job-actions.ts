@@ -9,33 +9,39 @@ import {
   restoreJobWithQuestions,
 } from '@/data-access/jobs';
 import type { CreateJobInput, UpdateJobInput, JobDescriptionStatus } from '@/data-access/types';
+import { getCurrentUserId } from '@/lib/auth';
 
 export async function createJobAction(input: CreateJobInput) {
-  const id = await createJob(input);
+  const userId = await getCurrentUserId();
+  const id = await createJob(userId, input);
   revalidatePath('/interviews');
   return { id };
 }
 
 export async function updateJobAction(input: UpdateJobInput) {
-  await updateJob(input);
+  const userId = await getCurrentUserId();
+  await updateJob(userId, input);
   revalidatePath('/interviews');
   revalidatePath(`/interviews/jobs/${input.id}`);
 }
 
 export async function updateJobStatusAction(id: number, status: JobDescriptionStatus) {
-  await updateJobStatus(id, status);
+  const userId = await getCurrentUserId();
+  await updateJobStatus(userId, id, status);
   revalidatePath('/interviews');
   revalidatePath(`/interviews/jobs/${id}`);
 }
 
 export async function deleteJobAction(id: number) {
-  await softDeleteJobWithQuestions(id);
+  const userId = await getCurrentUserId();
+  await softDeleteJobWithQuestions(userId, id);
   revalidatePath('/interviews');
   revalidatePath('/interviews/trash');
 }
 
 export async function restoreJobAction(id: number) {
-  await restoreJobWithQuestions(id);
+  const userId = await getCurrentUserId();
+  await restoreJobWithQuestions(userId, id);
   revalidatePath('/interviews');
   revalidatePath('/interviews/trash');
   revalidatePath(`/interviews/jobs/${id}`);
