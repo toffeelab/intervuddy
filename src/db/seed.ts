@@ -93,6 +93,21 @@ async function main() {
     }
   });
 
+  // Seed system templates (same categories, no questions needed for templates)
+  console.log('Seeding system templates...');
+  await db.transaction(async (tx) => {
+    for (const cat of categories) {
+      await tx.insert(interviewCategories).values({
+        userId: SYSTEM_USER_ID,
+        name: cat.name,
+        slug: cat.slug,
+        displayLabel: cat.displayLabel,
+        icon: cat.icon,
+        displayOrder: cat.displayOrder,
+      });
+    }
+  });
+
   // Verify counts
   const [{ catCount }] = await db
     .select({ catCount: sql<number>`COUNT(*)` })
