@@ -162,34 +162,30 @@ describe('questions data-access', () => {
     });
   });
 
-  describe('updateQuestion - categoryId 변경', () => {
-    it('질문의 카테고리를 변경하면 새 카테고리에서 조회된다', async () => {
+  describe('updateQuestion - categoryId 변경 불가', () => {
+    it('categoryId를 전달해도 무시된다 (display_order 보호)', async () => {
       await seedTestQuestions(db);
       const cats = await db.select({ id: interviewCategories.id }).from(interviewCategories);
       const [cat1, cat2] = cats;
       const questions = await getLibraryQuestions();
 
-      expect(await getQuestionsByCategory(cat1.id)).toHaveLength(1);
-      expect(await getQuestionsByCategory(cat2.id)).toHaveLength(0);
-
       await updateQuestion({ id: questions[0].id, categoryId: cat2.id });
 
-      expect(await getQuestionsByCategory(cat1.id)).toHaveLength(0);
-      expect(await getQuestionsByCategory(cat2.id)).toHaveLength(1);
-      expect((await getQuestionsByCategory(cat2.id))[0].categoryId).toBe(cat2.id);
+      // categoryId는 변경되지 않음
+      expect(await getQuestionsByCategory(cat1.id)).toHaveLength(1);
+      expect(await getQuestionsByCategory(cat2.id)).toHaveLength(0);
     });
 
-    it('categoryId 변경 시 다른 필드는 유지된다', async () => {
+    it('categoryId 무시 시에도 다른 필드는 정상 수정된다', async () => {
       await seedTestQuestions(db);
       const cats = await db.select({ id: interviewCategories.id }).from(interviewCategories);
-      const [, cat2] = cats;
+      const [cat1, cat2] = cats;
       const questions = await getLibraryQuestions();
       await updateQuestion({ id: questions[0].id, categoryId: cat2.id, answer: '수정된 답변' });
-      const updated = await getQuestionsByCategory(cat2.id);
+      const updated = await getQuestionsByCategory(cat1.id);
       expect(updated).toHaveLength(1);
-      expect(updated[0].question).toBe('자기소개를 해주세요');
       expect(updated[0].answer).toBe('수정된 답변');
-      expect(updated[0].categoryId).toBe(cat2.id);
+      expect(updated[0].categoryId).toBe(cat1.id); // 변경되지 않음
     });
   });
 

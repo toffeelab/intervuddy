@@ -1,25 +1,9 @@
-import fs from 'fs';
 import path from 'path';
 import react from '@vitejs/plugin-react';
+import dotenv from 'dotenv';
 import { defineConfig } from 'vitest/config';
 
-// Load DATABASE_URL from .env.local for tests
-function loadLocalEnv(): Record<string, string> {
-  const envPath = path.resolve(__dirname, '.env.local');
-  const env: Record<string, string> = {};
-  if (fs.existsSync(envPath)) {
-    const lines = fs.readFileSync(envPath, 'utf-8').split('\n');
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
-      const [key, ...rest] = trimmed.split('=');
-      if (key) env[key.trim()] = rest.join('=').trim();
-    }
-  }
-  return env;
-}
-
-const localEnv = loadLocalEnv();
+dotenv.config({ path: path.resolve(__dirname, '.env.local') });
 
 export default defineConfig({
   plugins: [react()],
@@ -42,7 +26,7 @@ export default defineConfig({
     maxConcurrency: 1,
     env: {
       DATABASE_URL:
-        localEnv.DATABASE_URL ?? 'postgresql://intervuddy:intervuddy@localhost:5433/intervuddy',
+        process.env.DATABASE_URL ?? 'postgresql://intervuddy:intervuddy@localhost:5433/intervuddy',
     },
   },
 });

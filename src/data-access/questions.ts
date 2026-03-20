@@ -194,7 +194,7 @@ export async function createQuestion(input: CreateQuestionInput): Promise<number
 export async function updateQuestion(input: UpdateQuestionInput): Promise<void> {
   const updates: Partial<typeof interviewQuestions.$inferInsert> = {};
 
-  if (input.categoryId !== undefined) updates.categoryId = input.categoryId;
+  // categoryId 변경은 허용하지 않음 (display_order 계산 로직 깨짐 방지, 생성 시에만 설정)
   if (input.question !== undefined) updates.question = input.question;
   if (input.answer !== undefined) updates.answer = input.answer;
   if (input.tip !== undefined) updates.tip = input.tip;

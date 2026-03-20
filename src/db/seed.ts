@@ -35,62 +35,63 @@ async function main() {
     ])
     .onConflictDoNothing();
 
-  console.log(`Inserting ${categories.length} categories...`);
+  console.log(`Inserting ${categories.length} categories, ${questions.length} questions...`);
   const categoryMap = new Map<string, number>();
 
-  for (const cat of categories) {
-    const [result] = await db
-      .insert(interviewCategories)
-      .values({
-        userId: DEFAULT_USER_ID,
-        name: cat.name,
-        slug: cat.slug,
-        displayLabel: cat.displayLabel,
-        icon: cat.icon,
-        displayOrder: cat.displayOrder,
-      })
-      .returning({ id: interviewCategories.id });
-    categoryMap.set(cat.name, result.id);
-  }
-
-  console.log(`Inserting ${questions.length} questions...`);
-  const orderByCategory = new Map<string, number>();
-  for (const item of questions) {
-    const categoryId = categoryMap.get(item.cat);
-    if (!categoryId) {
-      console.warn(`  Warning: Category "${item.cat}" not found, skipping item.`);
-      continue;
+  await db.transaction(async (tx) => {
+    for (const cat of categories) {
+      const [result] = await tx
+        .insert(interviewCategories)
+        .values({
+          userId: DEFAULT_USER_ID,
+          name: cat.name,
+          slug: cat.slug,
+          displayLabel: cat.displayLabel,
+          icon: cat.icon,
+          displayOrder: cat.displayOrder,
+        })
+        .returning({ id: interviewCategories.id });
+      categoryMap.set(cat.name, result.id);
     }
 
-    const currentOrder = (orderByCategory.get(item.cat) ?? 0) + 1;
-    orderByCategory.set(item.cat, currentOrder);
+    const orderByCategory = new Map<string, number>();
+    for (const item of questions) {
+      const categoryId = categoryMap.get(item.cat);
+      if (!categoryId) {
+        console.warn(`  Warning: Category "${item.cat}" not found, skipping item.`);
+        continue;
+      }
 
-    const [questionResult] = await db
-      .insert(interviewQuestions)
-      .values({
-        userId: DEFAULT_USER_ID,
-        categoryId,
-        question: item.q,
-        answer: item.a,
-        tip: item.tip ?? null,
-        keywords: item.keywords ?? [],
-        displayOrder: currentOrder,
-      })
-      .returning({ id: interviewQuestions.id });
+      const currentOrder = (orderByCategory.get(item.cat) ?? 0) + 1;
+      orderByCategory.set(item.cat, currentOrder);
 
-    const questionId = questionResult.id;
+      const [questionResult] = await tx
+        .insert(interviewQuestions)
+        .values({
+          userId: DEFAULT_USER_ID,
+          categoryId,
+          question: item.q,
+          answer: item.a,
+          tip: item.tip ?? null,
+          keywords: item.keywords ?? [],
+          displayOrder: currentOrder,
+        })
+        .returning({ id: interviewQuestions.id });
 
-    for (let i = 0; i < item.followups.length; i++) {
-      const followup = item.followups[i];
-      await db.insert(followupQuestions).values({
-        userId: DEFAULT_USER_ID,
-        questionId,
-        question: followup.q,
-        answer: followup.a,
-        displayOrder: i + 1,
-      });
+      const questionId = questionResult.id;
+
+      for (let i = 0; i < item.followups.length; i++) {
+        const followup = item.followups[i];
+        await tx.insert(followupQuestions).values({
+          userId: DEFAULT_USER_ID,
+          questionId,
+          question: followup.q,
+          answer: followup.a,
+          displayOrder: i + 1,
+        });
+      }
     }
-  }
+  });
 
   // Verify counts
   const [{ catCount }] = await db
