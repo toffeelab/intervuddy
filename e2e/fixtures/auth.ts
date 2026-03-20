@@ -1,6 +1,6 @@
-import { encode } from 'next-auth/jwt';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import { encode } from 'next-auth/jwt';
 
 const AUTH_SECRET = process.env.AUTH_SECRET || 'e2e-test-secret';
 const STORAGE_STATE_DIR = path.join(__dirname, '..', '.auth');

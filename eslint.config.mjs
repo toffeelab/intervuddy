@@ -73,6 +73,15 @@ export default tseslint.config(
     },
   },
 
+  // E2E test overrides (Playwright's `use()` is not a React Hook)
+  {
+    files: ['e2e/**/*.{ts,tsx}'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+
   // Prettier must be last
   eslintConfigPrettier
 );
