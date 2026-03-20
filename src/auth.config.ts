@@ -10,11 +10,9 @@ import Google from 'next-auth/providers/google';
  */
 export default {
   session: { strategy: 'jwt' },
-  // 동일 이메일로 여러 OAuth provider 연결 허용 (Google + GitHub 동시 사용)
-  allowDangerousEmailAccountLinking: true,
   providers: [
-    Google,
-    GitHub,
+    Google({ allowDangerousEmailAccountLinking: true }),
+    GitHub({ allowDangerousEmailAccountLinking: true }),
     // Resend provider는 adapter 필요 → auth.ts(Node.js)에서만 추가
   ],
   callbacks: {
@@ -41,5 +39,7 @@ export default {
   },
   pages: {
     signIn: '/login',
+    verifyRequest: '/login/verify',
+    error: '/login/error',
   },
 } satisfies NextAuthConfig;

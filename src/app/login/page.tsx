@@ -44,7 +44,7 @@ export default function LoginPage() {
                   fill="#EA4335"
                 />
               </svg>
-              Continue with Google
+              Google로 계속하기
             </Button>
           </form>
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
           >
             <Button type="submit" variant="outline" className="w-full gap-2">
               <Github className="h-4 w-4" />
-              Continue with GitHub
+              GitHub로 계속하기
             </Button>
           </form>
 
@@ -93,6 +93,9 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
+      <p className="text-muted-foreground mt-4 text-center text-xs">
+        로그인 시 <span className="underline underline-offset-4">서비스 이용약관</span>에 동의합니다
+      </p>
     </div>
   );
 }
