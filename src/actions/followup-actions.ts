@@ -8,29 +8,34 @@ import {
   restoreFollowup as dbRestore,
 } from '@/data-access/followups';
 import type { CreateFollowupInput, UpdateFollowupInput } from '@/data-access/types';
+import { getCurrentUserId } from '@/lib/auth';
 
 export async function createFollowupAction(input: CreateFollowupInput) {
-  const id = await dbCreate(input);
+  const userId = await getCurrentUserId();
+  const id = await dbCreate(userId, input);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   return { id };
 }
 
 export async function updateFollowupAction(input: UpdateFollowupInput) {
-  await dbUpdate(input);
+  const userId = await getCurrentUserId();
+  await dbUpdate(userId, input);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
 }
 
 export async function deleteFollowupAction(id: number) {
-  await dbDelete(id);
+  const userId = await getCurrentUserId();
+  await dbDelete(userId, id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   revalidatePath('/interviews/trash');
 }
 
 export async function restoreFollowupAction(id: number) {
-  await dbRestore(id);
+  const userId = await getCurrentUserId();
+  await dbRestore(userId, id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   revalidatePath('/interviews/trash');

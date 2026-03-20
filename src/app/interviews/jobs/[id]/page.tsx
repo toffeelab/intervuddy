@@ -8,21 +8,23 @@ import { QuestionTable } from '@/components/interviews/question-table';
 import { getCategoriesByJdId, getGlobalCategories } from '@/data-access/categories';
 import { getJobById } from '@/data-access/jobs';
 import { getQuestionsByJdId, getLibraryQuestions } from '@/data-access/questions';
+import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
 export default async function JobDetailPage({ params }: Props) {
+  const userId = await getCurrentUserId();
   const { id } = await params;
-  const job = await getJobById(Number(id));
+  const job = await getJobById(userId, Number(id));
   if (!job) notFound();
 
   const [jdQuestions, jdCategories, libraryQuestions, globalCategories] = await Promise.all([
-    getQuestionsByJdId(job.id),
-    getCategoriesByJdId(job.id),
-    getLibraryQuestions(),
-    getGlobalCategories(),
+    getQuestionsByJdId(userId, job.id),
+    getCategoriesByJdId(userId, job.id),
+    getLibraryQuestions(userId),
+    getGlobalCategories(userId),
   ]);
   const importedOriginIds = jdQuestions
     .filter((q) => q.originQuestionId !== null)

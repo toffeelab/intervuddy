@@ -9,6 +9,7 @@
 - Next.js 16.1.7 (App Router, RSC), React 19, TypeScript 5
 - Tailwind CSS v4, shadcn/ui (base-nova 스타일, lucide 아이콘)
 - PostgreSQL (Drizzle ORM, Neon 프로덕션 / Docker 로컬), Zustand (UI 상태)
+- Auth.js v5 (Google/GitHub OAuth + 매직 링크), JWT 세션 전략
 - pnpm (패키지 매니저 — npm/yarn 사용 금지)
 - ESLint 9 (flat config) + Prettier (코드 품질/포매팅)
 
@@ -69,6 +70,17 @@ pnpm dev               # 개발 서버
 - **Zustand**: UI 상태만 (카테고리 선택, 검색, 카드 확장)
 - **Server Props**: DB 데이터는 Server Component에서 fetch → props 전달
 - 전역 상태 남용 금지 — props로 충분하면 props 사용
+
+### 인증 (Auth.js v5)
+
+- `src/auth.ts`: Node.js 전용 — `{ auth, signIn, signOut, handlers }` export
+- `src/auth.config.ts`: Edge-safe 설정 (Middleware에서 사용)
+- `src/lib/auth.ts`: `getCurrentUserId()` (미인증 시 /login 리다이렉트), `getOptionalUserId()`
+- 모든 Server Action에서 `getCurrentUserId()` 호출로 userId 획득 — 직접 세션 접근 금지
+- JWT 세션 전략 사용 (DB 세션 없음)
+- 필수 환경변수: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `AUTH_RESEND_KEY`, `AUTH_EMAIL_FROM`
+- `SYSTEM_USER_ID = 'system'`: 시스템 템플릿 데이터용
+- `DEFAULT_USER_ID = 'local-user'`: 로컬 개발 / 테스트용 (실제 OAuth 사용자 ID 아님)
 
 ### 데이터베이스
 

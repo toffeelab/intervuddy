@@ -1,14 +1,16 @@
 import { notFound } from 'next/navigation';
 import { JobForm } from '@/components/interviews/job-form';
 import { getJobById } from '@/data-access/jobs';
+import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
 export default async function EditJobPage({ params }: Props) {
+  const userId = await getCurrentUserId();
   const { id } = await params;
-  const job = await getJobById(Number(id));
+  const job = await getJobById(userId, Number(id));
   if (!job) notFound();
 
   return (

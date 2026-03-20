@@ -26,19 +26,21 @@ export const users = pgTable('users', {
 export const accounts = pgTable(
   'accounts',
   {
-    id: text('id').primaryKey(),
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     provider: text('provider').notNull(),
     providerAccountId: text('provider_account_id').notNull(),
     type: text('type').notNull(),
-    accessToken: text('access_token'),
-    refreshToken: text('refresh_token'),
-    expiresAt: integer('expires_at'),
-    tokenType: text('token_type'),
+    access_token: text('access_token'),
+    refresh_token: text('refresh_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
     scope: text('scope'),
-    idToken: text('id_token'),
+    id_token: text('id_token'),
   },
   (table) => [
     uniqueIndex('accounts_provider_account_unique').on(table.provider, table.providerAccountId),

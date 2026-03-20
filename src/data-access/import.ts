@@ -1,5 +1,4 @@
 import { eq, and, asc, isNull } from 'drizzle-orm';
-import { DEFAULT_USER_ID } from '@/db/constants';
 import { getDb } from '@/db/index';
 import { interviewQuestions, followupQuestions } from '@/db/schema';
 
@@ -8,10 +7,13 @@ interface ImportResult {
   skippedCount: number;
 }
 
-export async function importQuestionsToJob(params: {
-  jdId: number;
-  questionIds: number[];
-}): Promise<ImportResult> {
+export async function importQuestionsToJob(
+  userId: string,
+  params: {
+    jdId: number;
+    questionIds: number[];
+  }
+): Promise<ImportResult> {
   let importedCount = 0;
   let skippedCount = 0;
 
@@ -31,6 +33,7 @@ export async function importQuestionsToJob(params: {
         .where(
           and(
             eq(interviewQuestions.id, questionId),
+            eq(interviewQuestions.userId, userId),
             isNull(interviewQuestions.jdId),
             isNull(interviewQuestions.deletedAt)
           )
@@ -60,7 +63,7 @@ export async function importQuestionsToJob(params: {
       const [newQuestion] = await tx
         .insert(interviewQuestions)
         .values({
-          userId: DEFAULT_USER_ID,
+          userId,
           categoryId: original.categoryId,
           jdId: params.jdId,
           originQuestionId: original.id,
@@ -88,7 +91,7 @@ export async function importQuestionsToJob(params: {
 
       for (const fu of origFollowups) {
         await tx.insert(followupQuestions).values({
-          userId: DEFAULT_USER_ID,
+          userId,
           questionId: newQuestionId,
           question: fu.question,
           answer: fu.answer,
