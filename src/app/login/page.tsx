@@ -93,9 +93,6 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
-      <p className="text-muted-foreground mt-4 text-center text-xs">
-        로그인 시 <span className="underline underline-offset-4">서비스 이용약관</span>에 동의합니다
-      </p>
     </div>
   );
 }
