@@ -205,6 +205,10 @@ export async function updateQuestion(input: UpdateQuestionInput): Promise<void> 
   await getDb().update(interviewQuestions).set(updates).where(eq(interviewQuestions.id, input.id));
 }
 
+export async function updateQuestionKeywords(id: number, keywords: string[]): Promise<void> {
+  await getDb().update(interviewQuestions).set({ keywords }).where(eq(interviewQuestions.id, id));
+}
+
 export async function softDeleteQuestion(id: number): Promise<void> {
   await getDb()
     .update(interviewQuestions)

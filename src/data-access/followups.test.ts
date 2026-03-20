@@ -1,6 +1,12 @@
-import Database from 'better-sqlite3';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createTestDb, cleanupTestDb, seedTestQuestions } from '@/test/helpers/db';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
+import * as schema from '@/db/schema';
+import {
+  createTestDb,
+  cleanupTestDb,
+  seedTestQuestions,
+  truncateAllTables,
+} from '@/test/helpers/db';
 import {
   getFollowupsByQuestionId,
   createFollowup,
@@ -8,66 +14,78 @@ import {
   softDeleteFollowup,
   restoreFollowup,
 } from './followups';
+import { getLibraryQuestions } from './questions';
 
 describe('followups data-access', () => {
-  let db: Database.Database;
+  let db: NodePgDatabase<typeof schema>;
+  let questionId: number;
 
-  beforeEach(() => {
-    db = createTestDb();
-    seedTestQuestions(db);
+  beforeAll(async () => {
+    db = await createTestDb();
   });
 
-  afterEach(() => {
-    cleanupTestDb(db);
+  beforeEach(async () => {
+    await truncateAllTables(db);
+    await seedTestQuestions(db);
+    const questions = await getLibraryQuestions();
+    questionId = questions[0].id;
+  });
+
+  afterAll(async () => {
+    await cleanupTestDb();
   });
 
   describe('getFollowupsByQuestionId', () => {
-    it('질문에 속한 꼬리질문을 반환한다', () => {
-      const followups = getFollowupsByQuestionId(1);
+    it('질문에 속한 꼬리질문을 반환한다', async () => {
+      const followups = await getFollowupsByQuestionId(questionId);
       expect(followups).toHaveLength(1);
       expect(followups[0].question).toBe('가장 어려웠던 프로젝트는?');
       expect(followups[0].answer).toBe('실시간 통신 시스템 구축');
     });
 
-    it('삭제된 꼬리질문은 제외한다', () => {
-      softDeleteFollowup(1);
-      expect(getFollowupsByQuestionId(1)).toEqual([]);
+    it('삭제된 꼬리질문은 제외한다', async () => {
+      const followups = await getFollowupsByQuestionId(questionId);
+      await softDeleteFollowup(followups[0].id);
+      expect(await getFollowupsByQuestionId(questionId)).toEqual([]);
     });
 
-    it('다른 질문의 꼬리질문은 포함하지 않는다', () => {
-      expect(getFollowupsByQuestionId(999)).toEqual([]);
+    it('다른 질문의 꼬리질문은 포함하지 않는다', async () => {
+      expect(await getFollowupsByQuestionId(999999)).toEqual([]);
     });
   });
 
   describe('createFollowup', () => {
-    it('꼬리질문을 생성하고 id를 반환한다', () => {
-      const id = createFollowup({
-        questionId: 1,
+    it('꼬리질문을 생성하고 id를 반환한다', async () => {
+      const id = await createFollowup({
+        questionId,
         question: '새 꼬리질문',
         answer: '새 답변',
       });
       expect(id).toBeGreaterThan(0);
-      const followups = getFollowupsByQuestionId(1);
+      const followups = await getFollowupsByQuestionId(questionId);
       expect(followups).toHaveLength(2);
     });
   });
 
   describe('updateFollowup', () => {
-    it('꼬리질문을 부분 수정할 수 있다', () => {
-      updateFollowup({ id: 1, answer: '수정된 답변' });
-      const followups = getFollowupsByQuestionId(1);
-      expect(followups[0].answer).toBe('수정된 답변');
-      expect(followups[0].question).toBe('가장 어려웠던 프로젝트는?'); // 변경 안 됨
+    it('꼬리질문을 부분 수정할 수 있다', async () => {
+      const followups = await getFollowupsByQuestionId(questionId);
+      await updateFollowup({ id: followups[0].id, answer: '수정된 답변' });
+      const updated = await getFollowupsByQuestionId(questionId);
+      expect(updated[0].answer).toBe('수정된 답변');
+      expect(updated[0].question).toBe('가장 어려웠던 프로젝트는?');
     });
   });
 
   describe('softDeleteFollowup / restoreFollowup', () => {
-    it('소프트 삭제 후 복원할 수 있다', () => {
-      softDeleteFollowup(1);
-      expect(getFollowupsByQuestionId(1)).toEqual([]);
+    it('소프트 삭제 후 복원할 수 있다', async () => {
+      const followups = await getFollowupsByQuestionId(questionId);
+      const followupId = followups[0].id;
+      await softDeleteFollowup(followupId);
+      expect(await getFollowupsByQuestionId(questionId)).toEqual([]);
 
-      restoreFollowup(1);
-      expect(getFollowupsByQuestionId(1)).toHaveLength(1);
+      await restoreFollowup(followupId);
+      expect(await getFollowupsByQuestionId(questionId)).toHaveLength(1);
     });
   });
 });

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import {
   createQuestion as dbCreate,
   updateQuestion as dbUpdate,
+  updateQuestionKeywords as dbUpdateKeywords,
   softDeleteQuestion as dbDelete,
   restoreQuestion as dbRestore,
 } from '@/data-access/questions';
@@ -34,4 +35,10 @@ export async function restoreQuestionAction(id: number) {
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   revalidatePath('/interviews/trash');
+}
+
+export async function updateQuestionKeywordsAction(id: number, keywords: string[]) {
+  await dbUpdateKeywords(id, keywords);
+  revalidatePath('/study');
+  revalidatePath('/interviews/questions');
 }
