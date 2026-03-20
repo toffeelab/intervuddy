@@ -5,6 +5,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
@@ -149,6 +150,127 @@ export const followupQuestions = pgTable('followup_questions', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// ─── interviewSessions ──────────────────────────────────────────────────────
+
+export const interviewSessions = pgTable('interview_sessions', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  title: text('title').notNull(),
+  status: text('status').notNull().default('waiting'),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  qaOwnerId: text('qa_owner_id').references(() => users.id, { onDelete: 'set null' }),
+  jdId: text('jd_id').references(() => jobDescriptions.id, { onDelete: 'set null' }),
+  categoryId: integer('category_id').references(() => interviewCategories.id, {
+    onDelete: 'set null',
+  }),
+  summary: text('summary'),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+  endedAt: timestamp('ended_at', { withTimezone: true }),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ─── sessionParticipants ────────────────────────────────────────────────────
+
+export const sessionParticipants = pgTable(
+  'session_participants',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    sessionId: text('session_id')
+      .notNull()
+      .references(() => interviewSessions.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: text('role').notNull(),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique('session_participants_session_user_unique').on(table.sessionId, table.userId)]
+);
+
+// ─── sessionInvitations ─────────────────────────────────────────────────────
+
+export const sessionInvitations = pgTable('session_invitations', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  sessionId: text('session_id')
+    .notNull()
+    .references(() => interviewSessions.id, { onDelete: 'cascade' }),
+  invitedBy: text('invited_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  role: text('role').notNull(),
+  inviteCode: text('invite_code').notNull().unique(),
+  status: text('status').notNull().default('pending'),
+  maxUses: integer('max_uses').notNull().default(1),
+  usedCount: integer('used_count').notNull().default(0),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ─── sessionQuestions ───────────────────────────────────────────────────────
+
+export const sessionQuestions = pgTable('session_questions', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  sessionId: text('session_id')
+    .notNull()
+    .references(() => interviewSessions.id, { onDelete: 'cascade' }),
+  questionId: text('question_id').references(() => interviewQuestions.id, {
+    onDelete: 'set null',
+  }),
+  content: text('content').notNull(),
+  displayOrder: integer('display_order').notNull(),
+  askedAt: timestamp('asked_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ─── sessionAnswers ─────────────────────────────────────────────────────────
+
+export const sessionAnswers = pgTable(
+  'session_answers',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    sessionQuestionId: text('session_question_id')
+      .notNull()
+      .references(() => sessionQuestions.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    content: text('content').notNull(),
+    answeredAt: timestamp('answered_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('session_answers_question_user_unique').on(table.sessionQuestionId, table.userId),
+  ]
+);
+
+// ─── sessionFeedbacks ───────────────────────────────────────────────────────
+
+export const sessionFeedbacks = pgTable('session_feedbacks', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  sessionQuestionId: text('session_question_id')
+    .notNull()
+    .references(() => sessionQuestions.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  content: text('content'),
+  score: integer('score'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -157,6 +279,12 @@ export const usersRelations = relations(users, ({ many }) => ({
   interviewQuestions: many(interviewQuestions),
   followupQuestions: many(followupQuestions),
   accounts: many(accounts),
+  createdSessions: many(interviewSessions, { relationName: 'sessionCreator' }),
+  ownedSessions: many(interviewSessions, { relationName: 'sessionQaOwner' }),
+  sessionParticipants: many(sessionParticipants),
+  sessionInvitations: many(sessionInvitations),
+  sessionAnswers: many(sessionAnswers),
+  sessionFeedbacks: many(sessionFeedbacks),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -173,6 +301,7 @@ export const jobDescriptionsRelations = relations(jobDescriptions, ({ one, many 
   }),
   interviewCategories: many(interviewCategories),
   interviewQuestions: many(interviewQuestions),
+  interviewSessions: many(interviewSessions),
 }));
 
 export const interviewCategoriesRelations = relations(interviewCategories, ({ one, many }) => ({
@@ -193,6 +322,7 @@ export const interviewCategoriesRelations = relations(interviewCategories, ({ on
     relationName: 'categorySource',
   }),
   interviewQuestions: many(interviewQuestions),
+  interviewSessions: many(interviewSessions),
 }));
 
 export const interviewQuestionsRelations = relations(interviewQuestions, ({ one, many }) => ({
@@ -217,6 +347,7 @@ export const interviewQuestionsRelations = relations(interviewQuestions, ({ one,
     relationName: 'questionOrigin',
   }),
   followupQuestions: many(followupQuestions),
+  sessionQuestions: many(sessionQuestions),
 }));
 
 export const followupQuestionsRelations = relations(followupQuestions, ({ one }) => ({
@@ -230,6 +361,87 @@ export const followupQuestionsRelations = relations(followupQuestions, ({ one })
   }),
 }));
 
+export const interviewSessionsRelations = relations(interviewSessions, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [interviewSessions.createdBy],
+    references: [users.id],
+    relationName: 'sessionCreator',
+  }),
+  qaOwner: one(users, {
+    fields: [interviewSessions.qaOwnerId],
+    references: [users.id],
+    relationName: 'sessionQaOwner',
+  }),
+  jobDescription: one(jobDescriptions, {
+    fields: [interviewSessions.jdId],
+    references: [jobDescriptions.id],
+  }),
+  category: one(interviewCategories, {
+    fields: [interviewSessions.categoryId],
+    references: [interviewCategories.id],
+  }),
+  participants: many(sessionParticipants),
+  invitations: many(sessionInvitations),
+  questions: many(sessionQuestions),
+}));
+
+export const sessionParticipantsRelations = relations(sessionParticipants, ({ one }) => ({
+  session: one(interviewSessions, {
+    fields: [sessionParticipants.sessionId],
+    references: [interviewSessions.id],
+  }),
+  user: one(users, {
+    fields: [sessionParticipants.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sessionInvitationsRelations = relations(sessionInvitations, ({ one }) => ({
+  session: one(interviewSessions, {
+    fields: [sessionInvitations.sessionId],
+    references: [interviewSessions.id],
+  }),
+  inviter: one(users, {
+    fields: [sessionInvitations.invitedBy],
+    references: [users.id],
+  }),
+}));
+
+export const sessionQuestionsRelations = relations(sessionQuestions, ({ one, many }) => ({
+  session: one(interviewSessions, {
+    fields: [sessionQuestions.sessionId],
+    references: [interviewSessions.id],
+  }),
+  sourceQuestion: one(interviewQuestions, {
+    fields: [sessionQuestions.questionId],
+    references: [interviewQuestions.id],
+  }),
+  answers: many(sessionAnswers),
+  feedbacks: many(sessionFeedbacks),
+}));
+
+export const sessionAnswersRelations = relations(sessionAnswers, ({ one }) => ({
+  sessionQuestion: one(sessionQuestions, {
+    fields: [sessionAnswers.sessionQuestionId],
+    references: [sessionQuestions.id],
+  }),
+  user: one(users, {
+    fields: [sessionAnswers.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sessionFeedbacksRelations = relations(sessionFeedbacks, ({ one }) => ({
+  sessionQuestion: one(sessionQuestions, {
+    fields: [sessionFeedbacks.sessionQuestionId],
+    references: [sessionQuestions.id],
+  }),
+  user: one(users, {
+    fields: [sessionFeedbacks.userId],
+    references: [users.id],
+  }),
+}));
+
 // ─── Schema export ────────────────────────────────────────────────────────────
 
 export const schema = {
@@ -240,10 +452,22 @@ export const schema = {
   interviewCategories,
   interviewQuestions,
   followupQuestions,
+  interviewSessions,
+  sessionParticipants,
+  sessionInvitations,
+  sessionQuestions,
+  sessionAnswers,
+  sessionFeedbacks,
   usersRelations,
   accountsRelations,
   jobDescriptionsRelations,
   interviewCategoriesRelations,
   interviewQuestionsRelations,
   followupQuestionsRelations,
+  interviewSessionsRelations,
+  sessionParticipantsRelations,
+  sessionInvitationsRelations,
+  sessionQuestionsRelations,
+  sessionAnswersRelations,
+  sessionFeedbacksRelations,
 };

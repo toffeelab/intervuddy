@@ -8,6 +8,7 @@ import {
   interviewQuestions,
   followupQuestions,
   jobDescriptions,
+  interviewSessions,
 } from '@/db/schema';
 
 const TEST_DATABASE_URL =
@@ -60,6 +61,12 @@ export async function truncateAllTables(_db: NodePgDatabase<typeof schema>): Pro
   const client = await pool.connect();
   try {
     await client.query('SELECT pg_advisory_lock(12345678)');
+    await client.query('DELETE FROM session_feedbacks');
+    await client.query('DELETE FROM session_answers');
+    await client.query('DELETE FROM session_questions');
+    await client.query('DELETE FROM session_invitations');
+    await client.query('DELETE FROM session_participants');
+    await client.query('DELETE FROM interview_sessions');
     await client.query('DELETE FROM followup_questions');
     await client.query('DELETE FROM interview_questions');
     await client.query('DELETE FROM interview_categories');
@@ -144,6 +151,15 @@ export async function seedTestJobDescription(db: NodePgDatabase<typeof schema>):
     positionTitle: '프론트엔드 시니어',
     status: 'in_progress',
     memo: '웹 플랫폼팀',
+  });
+}
+
+export async function seedTestSession(db: NodePgDatabase<typeof schema>): Promise<void> {
+  await db.insert(interviewSessions).values({
+    title: '모의면접 테스트 세션',
+    status: 'waiting',
+    createdBy: DEFAULT_USER_ID,
+    qaOwnerId: DEFAULT_USER_ID,
   });
 }
 
