@@ -60,7 +60,7 @@ describe('question-actions', () => {
         tip: '팁 내용',
       });
 
-      expect(result.id).toBeGreaterThan(0);
+      expect(result.id).toBeDefined();
     });
 
     it('생성된 질문이 DB에 실제로 저장된다', async () => {

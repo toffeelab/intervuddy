@@ -82,7 +82,7 @@ describe('purgeAllExpiredItems', () => {
     await seedTestQuestions(db);
     const questions = await getLibraryQuestions(DEFAULT_USER_ID);
     const qId = questions[0].id;
-    const followups = await getFollowupsByQuestionId(qId);
+    const followups = await getFollowupsByQuestionId(DEFAULT_USER_ID, qId);
     const fId = followups[0].id;
 
     await softDeleteFollowup(DEFAULT_USER_ID, fId);
