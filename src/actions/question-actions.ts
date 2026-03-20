@@ -26,7 +26,7 @@ export async function updateQuestionAction(input: UpdateQuestionInput) {
   revalidatePath('/interviews/questions');
 }
 
-export async function deleteQuestionAction(id: number) {
+export async function deleteQuestionAction(id: string) {
   const userId = await getCurrentUserId();
   await dbDelete(userId, id);
   revalidatePath('/study');
@@ -34,7 +34,7 @@ export async function deleteQuestionAction(id: number) {
   revalidatePath('/interviews/trash');
 }
 
-export async function restoreQuestionAction(id: number) {
+export async function restoreQuestionAction(id: string) {
   const userId = await getCurrentUserId();
   await dbRestore(userId, id);
   revalidatePath('/study');
@@ -42,7 +42,7 @@ export async function restoreQuestionAction(id: number) {
   revalidatePath('/interviews/trash');
 }
 
-export async function updateQuestionKeywordsAction(id: number, keywords: string[]) {
+export async function updateQuestionKeywordsAction(id: string, keywords: string[]) {
   const userId = await getCurrentUserId();
   await dbUpdateKeywords(userId, id, keywords);
   revalidatePath('/study');

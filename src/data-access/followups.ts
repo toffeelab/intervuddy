@@ -3,7 +3,10 @@ import { getDb } from '@/db/index';
 import { followupQuestions } from '@/db/schema';
 import type { FollowupQuestion, CreateFollowupInput, UpdateFollowupInput } from './types';
 
-export async function getFollowupsByQuestionId(questionId: number): Promise<FollowupQuestion[]> {
+export async function getFollowupsByQuestionId(
+  userId: string,
+  questionId: string
+): Promise<FollowupQuestion[]> {
   const rows = await getDb()
     .select({
       id: followupQuestions.id,
@@ -16,13 +19,19 @@ export async function getFollowupsByQuestionId(questionId: number): Promise<Foll
       updatedAt: followupQuestions.updatedAt,
     })
     .from(followupQuestions)
-    .where(and(eq(followupQuestions.questionId, questionId), isNull(followupQuestions.deletedAt)))
+    .where(
+      and(
+        eq(followupQuestions.userId, userId),
+        eq(followupQuestions.questionId, questionId),
+        isNull(followupQuestions.deletedAt)
+      )
+    )
     .orderBy(followupQuestions.displayOrder);
 
   return rows;
 }
 
-export async function createFollowup(userId: string, input: CreateFollowupInput): Promise<number> {
+export async function createFollowup(userId: string, input: CreateFollowupInput): Promise<string> {
   const questionId = input.questionId;
 
   const [result] = await getDb()
@@ -53,14 +62,14 @@ export async function updateFollowup(userId: string, input: UpdateFollowupInput)
     .where(and(eq(followupQuestions.id, input.id), eq(followupQuestions.userId, userId)));
 }
 
-export async function softDeleteFollowup(userId: string, id: number): Promise<void> {
+export async function softDeleteFollowup(userId: string, id: string): Promise<void> {
   await getDb()
     .update(followupQuestions)
     .set({ deletedAt: sql`NOW()` })
     .where(and(eq(followupQuestions.id, id), eq(followupQuestions.userId, userId)));
 }
 
-export async function restoreFollowup(userId: string, id: number): Promise<void> {
+export async function restoreFollowup(userId: string, id: string): Promise<void> {
   await getDb()
     .update(followupQuestions)
     .set({ deletedAt: null })

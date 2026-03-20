@@ -25,21 +25,21 @@ export async function updateJobAction(input: UpdateJobInput) {
   revalidatePath(`/interviews/jobs/${input.id}`);
 }
 
-export async function updateJobStatusAction(id: number, status: JobDescriptionStatus) {
+export async function updateJobStatusAction(id: string, status: JobDescriptionStatus) {
   const userId = await getCurrentUserId();
   await updateJobStatus(userId, id, status);
   revalidatePath('/interviews');
   revalidatePath(`/interviews/jobs/${id}`);
 }
 
-export async function deleteJobAction(id: number) {
+export async function deleteJobAction(id: string) {
   const userId = await getCurrentUserId();
   await softDeleteJobWithQuestions(userId, id);
   revalidatePath('/interviews');
   revalidatePath('/interviews/trash');
 }
 
-export async function restoreJobAction(id: number) {
+export async function restoreJobAction(id: string) {
   const userId = await getCurrentUserId();
   await restoreJobWithQuestions(userId, id);
   revalidatePath('/interviews');

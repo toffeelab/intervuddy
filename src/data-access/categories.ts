@@ -46,7 +46,7 @@ export async function getGlobalCategories(userId: string): Promise<InterviewCate
 
 export async function getCategoriesByJdId(
   userId: string,
-  jdId: number
+  jdId: string
 ): Promise<InterviewCategory[]> {
   const rows = await getDb()
     .select({
