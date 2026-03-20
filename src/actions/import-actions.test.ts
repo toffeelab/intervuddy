@@ -2,6 +2,7 @@ import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import { getAllJobs } from '@/data-access/jobs';
 import { getQuestionsByJdId, getLibraryQuestions } from '@/data-access/questions';
+import { DEFAULT_USER_ID } from '@/db/constants';
 import * as schema from '@/db/schema';
 import {
   createTestDb,
@@ -16,6 +17,9 @@ const { mockRevalidatePath } = vi.hoisted(() => ({
   mockRevalidatePath: vi.fn(),
 }));
 vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
+vi.mock('@/lib/auth', () => ({
+  getCurrentUserId: vi.fn().mockResolvedValue(DEFAULT_USER_ID),
+}));
 
 describe('importQuestionsAction', () => {
   let db: NodePgDatabase<typeof schema>;
@@ -37,8 +41,8 @@ describe('importQuestionsAction', () => {
     await seedTestQuestions(db);
     await seedTestJobDescription(db);
 
-    const questions = await getLibraryQuestions();
-    const jobs = await getAllJobs();
+    const questions = await getLibraryQuestions(DEFAULT_USER_ID);
+    const jobs = await getAllJobs(DEFAULT_USER_ID);
 
     const result = await importQuestionsAction({
       jdId: jobs[0].id,
@@ -48,6 +52,6 @@ describe('importQuestionsAction', () => {
     expect(result.skippedCount).toBe(0);
     expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
     expect(mockRevalidatePath).toHaveBeenCalledWith(`/interviews/jobs/${jobs[0].id}`);
-    expect(await getQuestionsByJdId(jobs[0].id)).toHaveLength(1);
+    expect(await getQuestionsByJdId(DEFAULT_USER_ID, jobs[0].id)).toHaveLength(1);
   });
 });

@@ -1,9 +1,9 @@
 import { sql } from 'drizzle-orm';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
-import { DEFAULT_USER_ID } from '@/db/constants';
+import { DEFAULT_USER_ID, SYSTEM_USER_ID } from '@/db/constants';
 import * as schema from '@/db/schema';
-import { interviewCategories, interviewQuestions } from '@/db/schema';
+import { interviewCategories, interviewQuestions, users } from '@/db/schema';
 import {
   createTestDb,
   cleanupTestDb,
@@ -12,6 +12,8 @@ import {
   seedTestQuestions,
   truncateAllTables,
 } from '@/test/helpers/db';
+
+const OTHER_USER_ID = 'other-user';
 import {
   getAllJobs,
   getJobById,
@@ -206,6 +208,55 @@ describe('jobs data-access', () => {
 
       expect(await getAllJobs(DEFAULT_USER_ID)).toHaveLength(1);
       expect(await getQuestionsByJdId(DEFAULT_USER_ID, jobs[0].id)).toHaveLength(1);
+    });
+  });
+
+  describe('user isolation', () => {
+    beforeEach(async () => {
+      // Seed the other user (SYSTEM_USER_ID already seeded in truncateAllTables)
+      await db
+        .insert(users)
+        .values({ id: OTHER_USER_ID, name: 'Other', email: 'other@test.com' })
+        .onConflictDoNothing();
+    });
+
+    it('다른 유저의 JD를 조회할 수 없다', async () => {
+      await createJob(DEFAULT_USER_ID, { companyName: 'A사', positionTitle: '개발자' });
+      const jobs = await getAllJobs(OTHER_USER_ID);
+      expect(jobs).toHaveLength(0);
+    });
+
+    it('다른 유저의 JD를 수정할 수 없다', async () => {
+      const id = await createJob(DEFAULT_USER_ID, { companyName: 'A사', positionTitle: '개발자' });
+      await updateJob(OTHER_USER_ID, { id, companyName: '변경됨' });
+      const job = await getJobById(DEFAULT_USER_ID, id);
+      expect(job?.companyName).toBe('A사');
+    });
+
+    it('다른 유저의 JD를 삭제할 수 없다', async () => {
+      const id = await createJob(DEFAULT_USER_ID, { companyName: 'A사', positionTitle: '개발자' });
+      await softDeleteJob(OTHER_USER_ID, id);
+      const jobs = await getAllJobs(DEFAULT_USER_ID);
+      expect(jobs).toHaveLength(1);
+    });
+
+    it('자신의 JD만 조회된다 (여러 유저)', async () => {
+      await createJob(DEFAULT_USER_ID, { companyName: '내 회사', positionTitle: '개발자' });
+      await createJob(OTHER_USER_ID, { companyName: '다른 회사', positionTitle: '디자이너' });
+
+      const myJobs = await getAllJobs(DEFAULT_USER_ID);
+      const otherJobs = await getAllJobs(OTHER_USER_ID);
+
+      expect(myJobs).toHaveLength(1);
+      expect(myJobs[0].companyName).toBe('내 회사');
+      expect(otherJobs).toHaveLength(1);
+      expect(otherJobs[0].companyName).toBe('다른 회사');
+    });
+
+    it('SYSTEM_USER_ID 데이터는 일반 유저 조회에 포함되지 않는다', async () => {
+      await createJob(SYSTEM_USER_ID, { companyName: '시스템 JD', positionTitle: '시스템' });
+      const jobs = await getAllJobs(DEFAULT_USER_ID);
+      expect(jobs).toHaveLength(0);
     });
   });
 });

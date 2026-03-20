@@ -3,6 +3,7 @@ import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import { getFollowupsByQuestionId } from '@/data-access/followups';
 import { getLibraryQuestions } from '@/data-access/questions';
+import { DEFAULT_USER_ID } from '@/db/constants';
 import * as schema from '@/db/schema';
 import { followupQuestions } from '@/db/schema';
 import {
@@ -22,6 +23,9 @@ const { mockRevalidatePath } = vi.hoisted(() => ({
   mockRevalidatePath: vi.fn(),
 }));
 vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
+vi.mock('@/lib/auth', () => ({
+  getCurrentUserId: vi.fn().mockResolvedValue(DEFAULT_USER_ID),
+}));
 
 describe('followup-actions', () => {
   let db: NodePgDatabase<typeof schema>;
@@ -34,7 +38,7 @@ describe('followup-actions', () => {
   beforeEach(async () => {
     await truncateAllTables(db);
     await seedTestQuestions(db);
-    const questions = await getLibraryQuestions();
+    const questions = await getLibraryQuestions(DEFAULT_USER_ID);
     questionId = questions[0].id;
     vi.clearAllMocks();
   });
