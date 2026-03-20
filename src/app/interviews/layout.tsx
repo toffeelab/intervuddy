@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Menu } from 'lucide-react';
 import { SidebarNav } from '@/components/interviews/sidebar-nav';
+import { UserMenu } from '@/components/shared/user-menu';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 
@@ -31,6 +32,9 @@ export default function InterviewsLayout({ children }: { children: React.ReactNo
         </Link>
         <div className="bg-iv-border h-4 w-px" />
         <h1 className="text-iv-text text-sm font-medium">면접 관리</h1>
+        <div className="ml-auto">
+          <UserMenu />
+        </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">

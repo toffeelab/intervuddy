@@ -1,5 +1,6 @@
 import { Noto_Sans_KR, JetBrains_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
+import { Providers } from '@/components/shared/providers';
 import { ThemeProvider } from '@/components/shared/theme-provider';
 import { ThemeScript } from '@/components/shared/theme-script';
 import './globals.css';
@@ -37,7 +38,9 @@ export default function RootLayout({
       <body
         className={`${notoSansKR.variable} ${jetbrainsMono.variable} bg-iv-bg text-iv-text min-h-screen antialiased`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>
+          <ThemeProvider>{children}</ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
