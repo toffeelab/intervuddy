@@ -12,8 +12,6 @@ import {
   seedTestQuestions,
   truncateAllTables,
 } from '@/test/helpers/db';
-
-const OTHER_USER_ID = 'other-user';
 import {
   getAllJobs,
   getJobById,
@@ -27,6 +25,8 @@ import {
   restoreJobWithQuestions,
 } from './jobs';
 import { getQuestionsByJdId, getDeletedQuestions, getLibraryQuestions } from './questions';
+
+const OTHER_USER_ID = 'other-user';
 
 describe('jobs data-access', () => {
   let db: NodePgDatabase<typeof schema>;
