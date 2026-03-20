@@ -17,7 +17,7 @@ interface Props {
 export default async function JobDetailPage({ params }: Props) {
   const userId = await getCurrentUserId();
   const { id } = await params;
-  const job = await getJobById(userId, Number(id));
+  const job = await getJobById(userId, id);
   if (!job) notFound();
 
   const [jdQuestions, jdCategories, libraryQuestions, globalCategories] = await Promise.all([
@@ -28,7 +28,7 @@ export default async function JobDetailPage({ params }: Props) {
   ]);
   const importedOriginIds = jdQuestions
     .filter((q) => q.originQuestionId !== null)
-    .map((q) => q.originQuestionId as number);
+    .map((q) => q.originQuestionId as string);
 
   return (
     <div className="p-4 md:p-6">
