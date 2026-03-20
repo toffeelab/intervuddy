@@ -3,11 +3,11 @@ import { create } from 'zustand';
 interface EditStore {
   editingItemId: string | null; // "question-5", "followup-3" 등
   drawerOpen: boolean;
-  drawerTargetId: number | null;
+  drawerTargetId: string | null;
 
   startEditing: (itemId: string) => void;
   stopEditing: () => void;
-  openDrawer: (targetId: number) => void;
+  openDrawer: (targetId: string) => void;
   closeDrawer: () => void;
 }
 

@@ -11,10 +11,10 @@ import type { InterviewQuestion, InterviewCategory } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
 interface Props {
-  jdId: number;
+  jdId: string;
   libraryQuestions: InterviewQuestion[];
   categories: InterviewCategory[];
-  importedOriginIds: number[];
+  importedOriginIds: string[];
 }
 
 export function ImportModal({
@@ -25,7 +25,7 @@ export function ImportModal({
 }: Props) {
   const importedOriginIds = new Set(importedOriginIdsArray);
   const [open, setOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [filterCategoryId, setFilterCategoryId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -34,7 +34,7 @@ export function ImportModal({
     ? libraryQuestions.filter((q) => q.categoryId === filterCategoryId)
     : libraryQuestions;
 
-  function toggleQuestion(id: number) {
+  function toggleQuestion(id: string) {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);

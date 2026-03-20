@@ -9,8 +9,8 @@ import type {
 } from './types';
 
 interface FollowupRow {
-  id: number;
-  questionId: number;
+  id: string;
+  questionId: string;
   question: string;
   answer: string;
   displayOrder: number;
@@ -21,13 +21,13 @@ interface FollowupRow {
 
 function mapRow(
   row: {
-    id: number;
+    id: string;
     categoryId: number;
     categoryName: string;
     categorySlug: string;
     categoryDisplayLabel: string;
-    jdId: number | null;
-    originQuestionId: number | null;
+    jdId: string | null;
+    originQuestionId: string | null;
     question: string;
     answer: string;
     tip: string | null;
@@ -59,8 +59,8 @@ function mapRow(
   };
 }
 
-async function batchLoadFollowups(ids: number[]): Promise<Map<number, FollowupQuestion[]>> {
-  const map = new Map<number, FollowupQuestion[]>();
+async function batchLoadFollowups(ids: string[]): Promise<Map<string, FollowupQuestion[]>> {
+  const map = new Map<string, FollowupQuestion[]>();
   if (ids.length === 0) return map;
 
   const rows = await getDb()
@@ -97,13 +97,13 @@ async function batchLoadFollowups(ids: number[]): Promise<Map<number, FollowupQu
 
 async function mapRows(
   rows: {
-    id: number;
+    id: string;
     categoryId: number;
     categoryName: string;
     categorySlug: string;
     categoryDisplayLabel: string;
-    jdId: number | null;
-    originQuestionId: number | null;
+    jdId: string | null;
+    originQuestionId: string | null;
     question: string;
     answer: string;
     tip: string | null;
@@ -156,7 +156,7 @@ export async function getLibraryQuestions(userId: string): Promise<InterviewQues
 
 export async function getQuestionsByJdId(
   userId: string,
-  jdId: number
+  jdId: string
 ): Promise<InterviewQuestion[]> {
   const rows = await getDb()
     .select(questionSelect)
@@ -194,7 +194,7 @@ export async function getQuestionsByCategory(
   return mapRows(rows);
 }
 
-export async function createQuestion(userId: string, input: CreateQuestionInput): Promise<number> {
+export async function createQuestion(userId: string, input: CreateQuestionInput): Promise<string> {
   const categoryId = input.categoryId;
 
   const [result] = await getDb()
@@ -233,7 +233,7 @@ export async function updateQuestion(userId: string, input: UpdateQuestionInput)
 
 export async function updateQuestionKeywords(
   userId: string,
-  id: number,
+  id: string,
   keywords: string[]
 ): Promise<void> {
   await getDb()
@@ -242,14 +242,14 @@ export async function updateQuestionKeywords(
     .where(and(eq(interviewQuestions.id, id), eq(interviewQuestions.userId, userId)));
 }
 
-export async function softDeleteQuestion(userId: string, id: number): Promise<void> {
+export async function softDeleteQuestion(userId: string, id: string): Promise<void> {
   await getDb()
     .update(interviewQuestions)
     .set({ deletedAt: sql`NOW()` })
     .where(and(eq(interviewQuestions.id, id), eq(interviewQuestions.userId, userId)));
 }
 
-export async function restoreQuestion(userId: string, id: number): Promise<void> {
+export async function restoreQuestion(userId: string, id: string): Promise<void> {
   await getDb()
     .update(interviewQuestions)
     .set({ deletedAt: null })
@@ -258,7 +258,7 @@ export async function restoreQuestion(userId: string, id: number): Promise<void>
 
 export async function getDeletedQuestions(
   userId: string,
-  jdId?: number
+  jdId?: string
 ): Promise<InterviewQuestion[]> {
   const rows = await getDb()
     .select(questionSelect)

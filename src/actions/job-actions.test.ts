@@ -51,7 +51,7 @@ describe('job-actions', () => {
         companyName: '카카오',
         positionTitle: '프론트엔드',
       });
-      expect(result.id).toBeGreaterThan(0);
+      expect(result.id).toBeDefined();
       expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews');
 
       const job = await getJobById(DEFAULT_USER_ID, result.id);

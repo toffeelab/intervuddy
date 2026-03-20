@@ -11,14 +11,14 @@ interface StudyPageProps {
 export default async function StudyPage({ searchParams }: StudyPageProps) {
   const userId = await getCurrentUserId();
   const { jdId } = await searchParams;
-  const jdIdNum = jdId ? Number(jdId) : null;
+  const validJdId = jdId || null;
 
   const [items, categories, jobs] = await Promise.all([
-    jdIdNum !== null && !Number.isNaN(jdIdNum)
-      ? getQuestionsByJdId(userId, jdIdNum)
+    validJdId !== null
+      ? getQuestionsByJdId(userId, validJdId)
       : getLibraryQuestions(userId),
-    jdIdNum !== null && !Number.isNaN(jdIdNum)
-      ? getCategoriesByJdId(userId, jdIdNum)
+    validJdId !== null
+      ? getCategoriesByJdId(userId, validJdId)
       : getGlobalCategories(userId),
     getAllJobs(userId),
   ]);

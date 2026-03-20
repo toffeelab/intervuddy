@@ -10,8 +10,8 @@ interface ImportResult {
 export async function importQuestionsToJob(
   userId: string,
   params: {
-    jdId: number;
-    questionIds: number[];
+    jdId: string;
+    questionIds: string[];
   }
 ): Promise<ImportResult> {
   let importedCount = 0;

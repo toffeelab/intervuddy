@@ -25,7 +25,7 @@ export async function updateFollowupAction(input: UpdateFollowupInput) {
   revalidatePath('/interviews/questions');
 }
 
-export async function deleteFollowupAction(id: number) {
+export async function deleteFollowupAction(id: string) {
   const userId = await getCurrentUserId();
   await dbDelete(userId, id);
   revalidatePath('/study');
@@ -33,7 +33,7 @@ export async function deleteFollowupAction(id: number) {
   revalidatePath('/interviews/trash');
 }
 
-export async function restoreFollowupAction(id: number) {
+export async function restoreFollowupAction(id: string) {
   const userId = await getCurrentUserId();
   await dbRestore(userId, id);
   revalidatePath('/study');

@@ -170,7 +170,7 @@ describe('categories data-access', () => {
         displayLabel: '새 카테고리',
         icon: '🆕',
       });
-      expect(id).toBeGreaterThan(0);
+      expect(id).toBeDefined();
       const categories = await getGlobalCategories(DEFAULT_USER_ID);
       expect(categories).toHaveLength(1);
       expect(categories[0].name).toBe('새 카테고리');
@@ -186,7 +186,7 @@ describe('categories data-access', () => {
         displayLabel: 'JD',
         icon: '📋',
       });
-      expect(id).toBeGreaterThan(0);
+      expect(id).toBeDefined();
     });
   });
 

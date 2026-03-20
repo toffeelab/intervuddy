@@ -4,15 +4,15 @@ import { CATEGORY_ALL } from '@/lib/constants';
 interface StudyStore {
   activeCategory: string;
   searchQuery: string;
-  expandedCards: Set<number>;
+  expandedCards: Set<string>;
   allExpanded: boolean;
-  selectedJdId: number | null;
+  selectedJdId: string | null;
 
   setActiveCategory: (category: string) => void;
   setSearchQuery: (query: string) => void;
-  toggleCard: (id: number) => void;
-  toggleAll: (allIds: number[]) => void;
-  setSelectedJdId: (jdId: number | null) => void;
+  toggleCard: (id: string) => void;
+  toggleAll: (allIds: string[]) => void;
+  setSelectedJdId: (jdId: string | null) => void;
 }
 
 export const useStudyStore = create<StudyStore>((set) => ({

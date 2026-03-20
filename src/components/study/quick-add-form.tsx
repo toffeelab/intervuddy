@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils';
 
 interface QuickAddFormProps {
   categoryId: number;
-  jdId?: number | null;
+  jdId?: string | null;
   /** If provided, adds a followup to this question instead of a top-level question */
-  questionId?: number;
+  questionId?: string;
   onAdded?: () => void;
 }
 

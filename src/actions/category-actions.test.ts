@@ -51,7 +51,7 @@ describe('category-actions', () => {
         icon: '🆕',
       });
 
-      expect(result.id).toBeGreaterThan(0);
+      expect(result.id).toBeDefined();
     });
 
     it('생성된 카테고리가 DB에 실제로 저장된다', async () => {

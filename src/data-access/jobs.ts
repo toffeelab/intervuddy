@@ -33,7 +33,7 @@ export async function getAllJobs(userId: string): Promise<JobDescription[]> {
   }));
 }
 
-export async function getJobById(userId: string, id: number): Promise<JobDescription | null> {
+export async function getJobById(userId: string, id: string): Promise<JobDescription | null> {
   const questionCountSq = getDb()
     .select({ count: count() })
     .from(interviewQuestions)
@@ -67,7 +67,7 @@ export async function getJobById(userId: string, id: number): Promise<JobDescrip
   return { ...row, status: row.status as JobDescriptionStatus };
 }
 
-export async function createJob(userId: string, input: CreateJobInput): Promise<number> {
+export async function createJob(userId: string, input: CreateJobInput): Promise<string> {
   const [result] = await getDb()
     .insert(jobDescriptions)
     .values({
@@ -99,7 +99,7 @@ export async function updateJob(userId: string, input: UpdateJobInput): Promise<
 
 export async function updateJobStatus(
   userId: string,
-  id: number,
+  id: string,
   status: JobDescriptionStatus
 ): Promise<void> {
   await getDb()
@@ -108,21 +108,21 @@ export async function updateJobStatus(
     .where(and(eq(jobDescriptions.id, id), eq(jobDescriptions.userId, userId)));
 }
 
-export async function softDeleteJob(userId: string, id: number): Promise<void> {
+export async function softDeleteJob(userId: string, id: string): Promise<void> {
   await getDb()
     .update(jobDescriptions)
     .set({ deletedAt: sql`NOW()` })
     .where(and(eq(jobDescriptions.id, id), eq(jobDescriptions.userId, userId)));
 }
 
-export async function restoreJob(userId: string, id: number): Promise<void> {
+export async function restoreJob(userId: string, id: string): Promise<void> {
   await getDb()
     .update(jobDescriptions)
     .set({ deletedAt: null })
     .where(and(eq(jobDescriptions.id, id), eq(jobDescriptions.userId, userId)));
 }
 
-export async function softDeleteJobWithQuestions(userId: string, id: number): Promise<void> {
+export async function softDeleteJobWithQuestions(userId: string, id: string): Promise<void> {
   await getDb().transaction(async (tx) => {
     await tx
       .update(jobDescriptions)
@@ -141,7 +141,7 @@ export async function softDeleteJobWithQuestions(userId: string, id: number): Pr
   });
 }
 
-export async function restoreJobWithQuestions(userId: string, id: number): Promise<void> {
+export async function restoreJobWithQuestions(userId: string, id: string): Promise<void> {
   await getDb().transaction(async (tx) => {
     await tx
       .update(jobDescriptions)

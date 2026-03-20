@@ -101,7 +101,7 @@ describe('jobs data-access', () => {
     });
 
     it('존재하지 않는 id는 null을 반환한다', async () => {
-      expect(await getJobById(DEFAULT_USER_ID, 999999)).toBeNull();
+      expect(await getJobById(DEFAULT_USER_ID, 'nonexistent-id')).toBeNull();
     });
   });
 
@@ -112,7 +112,7 @@ describe('jobs data-access', () => {
         positionTitle: '백엔드 개발자',
         memo: '데이터팀',
       });
-      expect(id).toBeGreaterThan(0);
+      expect(id).toBeDefined();
       const job = await getJobById(DEFAULT_USER_ID, id);
       expect(job!.companyName).toBe('카카오');
       expect(job!.memo).toBe('데이터팀');

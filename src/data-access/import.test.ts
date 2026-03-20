@@ -78,7 +78,7 @@ describe('importQuestionsToJob', () => {
 
     const result = await importQuestionsToJob(DEFAULT_USER_ID, {
       jdId: jobs[0].id,
-      questionIds: [999999],
+      questionIds: ['nonexistent-id'],
     });
     expect(result.importedCount).toBe(0);
     expect(result.skippedCount).toBe(1);

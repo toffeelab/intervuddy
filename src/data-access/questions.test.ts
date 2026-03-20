@@ -127,7 +127,7 @@ describe('questions data-access', () => {
         answer: '새 답변',
         tip: '팁',
       });
-      expect(id).toBeGreaterThan(0);
+      expect(id).toBeDefined();
       const questions = await getLibraryQuestions(DEFAULT_USER_ID);
       expect(questions).toHaveLength(1);
       expect(questions[0].question).toBe('새 질문');
@@ -145,7 +145,7 @@ describe('questions data-access', () => {
         question: 'JD 질문',
         answer: 'JD 답변',
       });
-      expect(id).toBeGreaterThan(0);
+      expect(id).toBeDefined();
       const questions = await getQuestionsByJdId(DEFAULT_USER_ID, jobs[0].id);
       expect(questions).toHaveLength(1);
     });

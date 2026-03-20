@@ -1,6 +1,6 @@
 export interface FollowupQuestion {
-  id: number;
-  questionId: number;
+  id: string;
+  questionId: string;
   question: string;
   answer: string;
   displayOrder: number;
@@ -10,13 +10,13 @@ export interface FollowupQuestion {
 }
 
 export interface InterviewQuestion {
-  id: number;
+  id: string;
   categoryId: number;
   categoryName: string;
   categorySlug: string;
   categoryDisplayLabel: string;
-  jdId: number | null;
-  originQuestionId: number | null;
+  jdId: string | null;
+  originQuestionId: string | null;
   question: string;
   answer: string;
   tip: string | null;
@@ -30,7 +30,7 @@ export interface InterviewQuestion {
 
 export interface InterviewCategory {
   id: number;
-  jdId: number | null;
+  jdId: string | null;
   name: string;
   slug: string;
   displayLabel: string;
@@ -45,7 +45,7 @@ export interface InterviewCategory {
 export type JobDescriptionStatus = 'in_progress' | 'completed' | 'archived';
 
 export interface JobDescription {
-  id: number;
+  id: string;
   companyName: string;
   positionTitle: string;
   status: JobDescriptionStatus;
@@ -58,7 +58,7 @@ export interface JobDescription {
 
 export interface CreateQuestionInput {
   categoryId: number;
-  jdId?: number | null;
+  jdId?: string | null;
   question: string;
   answer: string;
   tip?: string | null;
@@ -66,7 +66,7 @@ export interface CreateQuestionInput {
 }
 
 export interface UpdateQuestionInput {
-  id: number;
+  id: string;
   categoryId?: number;
   question?: string;
   answer?: string;
@@ -75,13 +75,13 @@ export interface UpdateQuestionInput {
 }
 
 export interface CreateFollowupInput {
-  questionId: number;
+  questionId: string;
   question: string;
   answer: string;
 }
 
 export interface UpdateFollowupInput {
-  id: number;
+  id: string;
   question?: string;
   answer?: string;
 }
@@ -93,7 +93,7 @@ export interface CreateJobInput {
 }
 
 export interface UpdateJobInput {
-  id: number;
+  id: string;
   companyName?: string;
   positionTitle?: string;
   status?: JobDescriptionStatus;
@@ -101,7 +101,7 @@ export interface UpdateJobInput {
 }
 
 export interface CreateCategoryInput {
-  jdId?: number | null;
+  jdId?: string | null;
   name: string;
   slug: string;
   displayLabel: string;
