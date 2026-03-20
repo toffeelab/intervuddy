@@ -76,13 +76,13 @@ const mockQuestion: InterviewQuestion = {
       answer: '실시간 통신 시스템 구축',
       displayOrder: 1,
       deletedAt: null,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-01',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
     },
   ],
   deletedAt: null,
-  createdAt: '2024-01-01',
-  updatedAt: '2024-01-01',
+  createdAt: new Date('2024-01-01'),
+  updatedAt: new Date('2024-01-01'),
 };
 
 const mockCategories: InterviewCategory[] = [
@@ -96,7 +96,8 @@ const mockCategories: InterviewCategory[] = [
     displayOrder: 1,
     questionCount: 1,
     deletedAt: null,
-    createdAt: '2024-01-01',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
   {
     id: 2,
@@ -108,7 +109,8 @@ const mockCategories: InterviewCategory[] = [
     displayOrder: 2,
     questionCount: 0,
     deletedAt: null,
-    createdAt: '2024-01-01',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
 ];
 

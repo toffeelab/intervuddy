@@ -4,9 +4,9 @@ export interface FollowupQuestion {
   question: string;
   answer: string;
   displayOrder: number;
-  deletedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface InterviewQuestion {
@@ -23,9 +23,9 @@ export interface InterviewQuestion {
   displayOrder: number;
   keywords: string[];
   followups: FollowupQuestion[];
-  deletedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface InterviewCategory {
@@ -37,8 +37,9 @@ export interface InterviewCategory {
   icon: string;
   displayOrder: number;
   questionCount: number;
-  deletedAt: string | null;
-  createdAt: string;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type JobDescriptionStatus = 'in_progress' | 'completed' | 'archived';
@@ -50,9 +51,9 @@ export interface JobDescription {
   status: JobDescriptionStatus;
   memo: string | null;
   questionCount: number;
-  deletedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateQuestionInput {
@@ -61,6 +62,7 @@ export interface CreateQuestionInput {
   question: string;
   answer: string;
   tip?: string | null;
+  keywords?: string[];
 }
 
 export interface UpdateQuestionInput {
@@ -69,6 +71,7 @@ export interface UpdateQuestionInput {
   question?: string;
   answer?: string;
   tip?: string | null;
+  keywords?: string[];
 }
 
 export interface CreateFollowupInput {

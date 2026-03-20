@@ -11,31 +11,31 @@ import {
 import type { CreateJobInput, UpdateJobInput, JobDescriptionStatus } from '@/data-access/types';
 
 export async function createJobAction(input: CreateJobInput) {
-  const id = createJob(input);
+  const id = await createJob(input);
   revalidatePath('/interviews');
   return { id };
 }
 
 export async function updateJobAction(input: UpdateJobInput) {
-  updateJob(input);
+  await updateJob(input);
   revalidatePath('/interviews');
   revalidatePath(`/interviews/jobs/${input.id}`);
 }
 
 export async function updateJobStatusAction(id: number, status: JobDescriptionStatus) {
-  updateJobStatus(id, status);
+  await updateJobStatus(id, status);
   revalidatePath('/interviews');
   revalidatePath(`/interviews/jobs/${id}`);
 }
 
 export async function deleteJobAction(id: number) {
-  softDeleteJobWithQuestions(id);
+  await softDeleteJobWithQuestions(id);
   revalidatePath('/interviews');
   revalidatePath('/interviews/trash');
 }
 
 export async function restoreJobAction(id: number) {
-  restoreJobWithQuestions(id);
+  await restoreJobWithQuestions(id);
   revalidatePath('/interviews');
   revalidatePath('/interviews/trash');
   revalidatePath(`/interviews/jobs/${id}`);

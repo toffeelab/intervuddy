@@ -1,90 +1,66 @@
+import { eq, and, isNull, sql } from 'drizzle-orm';
+import { DEFAULT_USER_ID } from '@/db/constants';
 import { getDb } from '@/db/index';
+import { followupQuestions } from '@/db/schema';
 import type { FollowupQuestion, CreateFollowupInput, UpdateFollowupInput } from './types';
 
-interface FollowupRow {
-  id: number;
-  question_id: number;
-  question: string;
-  answer: string;
-  display_order: number;
-  deleted_at: string | null;
-  created_at: string;
-  updated_at: string;
+export async function getFollowupsByQuestionId(questionId: number): Promise<FollowupQuestion[]> {
+  const rows = await getDb()
+    .select({
+      id: followupQuestions.id,
+      questionId: followupQuestions.questionId,
+      question: followupQuestions.question,
+      answer: followupQuestions.answer,
+      displayOrder: followupQuestions.displayOrder,
+      deletedAt: followupQuestions.deletedAt,
+      createdAt: followupQuestions.createdAt,
+      updatedAt: followupQuestions.updatedAt,
+    })
+    .from(followupQuestions)
+    .where(and(eq(followupQuestions.questionId, questionId), isNull(followupQuestions.deletedAt)))
+    .orderBy(followupQuestions.displayOrder);
+
+  return rows;
 }
 
-function mapRow(row: FollowupRow): FollowupQuestion {
-  return {
-    id: row.id,
-    questionId: row.question_id,
-    question: row.question,
-    answer: row.answer,
-    displayOrder: row.display_order,
-    deletedAt: row.deleted_at,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
+export async function createFollowup(input: CreateFollowupInput): Promise<number> {
+  const questionId = input.questionId;
+
+  const [result] = await getDb()
+    .insert(followupQuestions)
+    .values({
+      userId: DEFAULT_USER_ID,
+      questionId,
+      question: input.question,
+      answer: input.answer,
+      displayOrder: sql`COALESCE((SELECT MAX(${followupQuestions.displayOrder}) + 1 FROM ${followupQuestions} WHERE ${followupQuestions.questionId} = ${questionId} AND ${followupQuestions.deletedAt} IS NULL), 0)`,
+    })
+    .returning({ id: followupQuestions.id });
+
+  return result.id;
 }
 
-export function getFollowupsByQuestionId(questionId: number): FollowupQuestion[] {
-  const db = getDb();
-  const rows = db
-    .prepare(
-      `
-    SELECT id, question_id, question, answer, display_order, deleted_at, created_at, updated_at
-    FROM followup_questions
-    WHERE question_id = ? AND deleted_at IS NULL
-    ORDER BY display_order
-  `
-    )
-    .all(questionId) as FollowupRow[];
+export async function updateFollowup(input: UpdateFollowupInput): Promise<void> {
+  const updates: Partial<typeof followupQuestions.$inferInsert> = {};
 
-  return rows.map(mapRow);
+  if (input.question !== undefined) updates.question = input.question;
+  if (input.answer !== undefined) updates.answer = input.answer;
+
+  if (Object.keys(updates).length === 0) return;
+
+  await getDb().update(followupQuestions).set(updates).where(eq(followupQuestions.id, input.id));
 }
 
-export function createFollowup(input: CreateFollowupInput): number {
-  const db = getDb();
-  const result = db
-    .prepare(
-      `
-    INSERT INTO followup_questions (question_id, question, answer, display_order)
-    VALUES (?, ?, ?, COALESCE(
-      (SELECT MAX(display_order) + 1 FROM followup_questions
-       WHERE question_id = ? AND deleted_at IS NULL),
-      0
-    ))
-  `
-    )
-    .run(input.questionId, input.question, input.answer, input.questionId);
-
-  return Number(result.lastInsertRowid);
+export async function softDeleteFollowup(id: number): Promise<void> {
+  await getDb()
+    .update(followupQuestions)
+    .set({ deletedAt: sql`NOW()` })
+    .where(eq(followupQuestions.id, id));
 }
 
-export function updateFollowup(input: UpdateFollowupInput): void {
-  const db = getDb();
-  const fields: string[] = [];
-  const values: unknown[] = [];
-
-  if (input.question !== undefined) {
-    fields.push('question = ?');
-    values.push(input.question);
-  }
-  if (input.answer !== undefined) {
-    fields.push('answer = ?');
-    values.push(input.answer);
-  }
-
-  if (fields.length === 0) return;
-
-  values.push(input.id);
-  db.prepare(`UPDATE followup_questions SET ${fields.join(', ')} WHERE id = ?`).run(...values);
-}
-
-export function softDeleteFollowup(id: number): void {
-  const db = getDb();
-  db.prepare(`UPDATE followup_questions SET deleted_at = datetime('now') WHERE id = ?`).run(id);
-}
-
-export function restoreFollowup(id: number): void {
-  const db = getDb();
-  db.prepare(`UPDATE followup_questions SET deleted_at = NULL WHERE id = ?`).run(id);
+export async function restoreFollowup(id: number): Promise<void> {
+  await getDb()
+    .update(followupQuestions)
+    .set({ deletedAt: null })
+    .where(eq(followupQuestions.id, id));
 }

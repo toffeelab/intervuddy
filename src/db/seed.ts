@@ -1,65 +1,60 @@
 /* eslint-disable no-console */
-import { initializeDatabase } from './schema';
-import db from './index';
+import { sql } from 'drizzle-orm';
+import { getDb, getPool } from '@/db';
+import { SYSTEM_USER_ID, DEFAULT_USER_ID } from '@/db/constants';
+import {
+  users,
+  interviewCategories,
+  interviewQuestions,
+  followupQuestions,
+  jobDescriptions,
+} from '@/db/schema';
 
 const useSample = process.argv.includes('--sample');
 const dataSource = useSample ? '../../data/seed.sample' : '../../data/seed';
 
 async function main() {
+  console.log(`Using ${useSample ? 'sample' : 'personal'} seed data`);
+
+  const db = getDb();
   const { categories, questions } = await import(dataSource);
 
-  console.log(`Using ${useSample ? 'sample' : 'personal'} seed data`);
-  console.log('Initializing database schema...');
-  initializeDatabase();
-
   console.log('Clearing existing data...');
-  db.exec('DELETE FROM question_keywords');
-  db.exec('DELETE FROM followup_questions');
-  db.exec('DELETE FROM interview_questions');
-  db.exec('DELETE FROM interview_categories');
-  db.exec('DELETE FROM job_descriptions');
+  await db.delete(followupQuestions);
+  await db.delete(interviewQuestions);
+  await db.delete(interviewCategories);
+  await db.delete(jobDescriptions);
+  // Don't delete users — just ensure they exist
 
-  console.log(`Inserting ${categories.length} categories...`);
-  const insertCategory = db.prepare(`
-    INSERT INTO interview_categories (name, slug, display_label, icon, display_order)
-    VALUES (@name, @slug, @displayLabel, @icon, @displayOrder)
-  `);
+  console.log('Seeding users...');
+  await db
+    .insert(users)
+    .values([
+      { id: SYSTEM_USER_ID, name: 'System', email: 'system@intervuddy.internal' },
+      { id: DEFAULT_USER_ID, name: 'Local User', email: 'local@intervuddy.internal' },
+    ])
+    .onConflictDoNothing();
 
+  console.log(`Inserting ${categories.length} categories, ${questions.length} questions...`);
   const categoryMap = new Map<string, number>();
 
-  const insertCategories = db.transaction(() => {
+  await db.transaction(async (tx) => {
     for (const cat of categories) {
-      const result = insertCategory.run({
-        name: cat.name,
-        slug: cat.slug,
-        displayLabel: cat.displayLabel,
-        icon: cat.icon,
-        displayOrder: cat.displayOrder,
-      });
-      categoryMap.set(cat.name, result.lastInsertRowid as number);
+      const [result] = await tx
+        .insert(interviewCategories)
+        .values({
+          userId: DEFAULT_USER_ID,
+          name: cat.name,
+          slug: cat.slug,
+          displayLabel: cat.displayLabel,
+          icon: cat.icon,
+          displayOrder: cat.displayOrder,
+        })
+        .returning({ id: interviewCategories.id });
+      categoryMap.set(cat.name, result.id);
     }
-  });
-  insertCategories();
 
-  console.log(`Inserting ${questions.length} questions...`);
-  const insertQuestion = db.prepare(`
-    INSERT INTO interview_questions (category_id, question, answer, tip, display_order)
-    VALUES (@categoryId, @question, @answer, @tip, @displayOrder)
-  `);
-
-  const insertKeyword = db.prepare(`
-    INSERT INTO question_keywords (question_id, keyword)
-    VALUES (@questionId, @keyword)
-  `);
-
-  const insertFollowup = db.prepare(`
-    INSERT INTO followup_questions (question_id, question, answer, display_order)
-    VALUES (@questionId, @question, @answer, @displayOrder)
-  `);
-
-  const insertAllQuestions = db.transaction(() => {
     const orderByCategory = new Map<string, number>();
-
     for (const item of questions) {
       const categoryId = categoryMap.get(item.cat);
       if (!categoryId) {
@@ -70,23 +65,25 @@ async function main() {
       const currentOrder = (orderByCategory.get(item.cat) ?? 0) + 1;
       orderByCategory.set(item.cat, currentOrder);
 
-      const result = insertQuestion.run({
-        categoryId,
-        question: item.q,
-        answer: item.a,
-        tip: item.tip ?? null,
-        displayOrder: currentOrder,
-      });
+      const [questionResult] = await tx
+        .insert(interviewQuestions)
+        .values({
+          userId: DEFAULT_USER_ID,
+          categoryId,
+          question: item.q,
+          answer: item.a,
+          tip: item.tip ?? null,
+          keywords: item.keywords ?? [],
+          displayOrder: currentOrder,
+        })
+        .returning({ id: interviewQuestions.id });
 
-      const questionId = result.lastInsertRowid as number;
-
-      for (const keyword of item.keywords) {
-        insertKeyword.run({ questionId, keyword });
-      }
+      const questionId = questionResult.id;
 
       for (let i = 0; i < item.followups.length; i++) {
         const followup = item.followups[i];
-        insertFollowup.run({
+        await tx.insert(followupQuestions).values({
+          userId: DEFAULT_USER_ID,
           questionId,
           question: followup.q,
           answer: followup.a,
@@ -95,27 +92,20 @@ async function main() {
       }
     }
   });
-  insertAllQuestions();
 
-  // Verify
-  const catCount = db.prepare('SELECT COUNT(*) as count FROM interview_categories').get() as {
-    count: number;
-  };
-  const qCount = db.prepare('SELECT COUNT(*) as count FROM interview_questions').get() as {
-    count: number;
-  };
-  const kwCount = db.prepare('SELECT COUNT(*) as count FROM question_keywords').get() as {
-    count: number;
-  };
-  const fCount = db.prepare('SELECT COUNT(*) as count FROM followup_questions').get() as {
-    count: number;
-  };
+  // Verify counts
+  const [{ catCount }] = await db
+    .select({ catCount: sql<number>`COUNT(*)` })
+    .from(interviewCategories);
+  const [{ qCount }] = await db.select({ qCount: sql<number>`COUNT(*)` }).from(interviewQuestions);
+  const [{ fCount }] = await db.select({ fCount: sql<number>`COUNT(*)` }).from(followupQuestions);
 
   console.log('\nSeed complete!');
-  console.log(`  Categories:  ${catCount.count}`);
-  console.log(`  Questions:   ${qCount.count}`);
-  console.log(`  Keywords:    ${kwCount.count}`);
-  console.log(`  Followups:   ${fCount.count}`);
+  console.log(`  Categories:  ${catCount}`);
+  console.log(`  Questions:   ${qCount}`);
+  console.log(`  Followups:   ${fCount}`);
+
+  await getPool().end();
 }
 
-main();
+main().catch(console.error);

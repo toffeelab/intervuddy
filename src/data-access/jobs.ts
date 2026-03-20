@@ -1,160 +1,164 @@
+import { eq, and, isNull, isNotNull, sql, desc, count } from 'drizzle-orm';
+import { DEFAULT_USER_ID } from '@/db/constants';
 import { getDb } from '@/db/index';
+import { jobDescriptions, interviewQuestions } from '@/db/schema';
 import type { JobDescription, JobDescriptionStatus, CreateJobInput, UpdateJobInput } from './types';
 
-interface JobRow {
-  id: number;
-  company_name: string;
-  position_title: string;
-  status: JobDescriptionStatus;
-  memo: string | null;
-  question_count: number;
-  deleted_at: string | null;
-  created_at: string;
-  updated_at: string;
+export async function getAllJobs(): Promise<JobDescription[]> {
+  const questionCountSq = getDb()
+    .select({ count: count() })
+    .from(interviewQuestions)
+    .where(
+      and(eq(interviewQuestions.jdId, jobDescriptions.id), isNull(interviewQuestions.deletedAt))
+    );
+
+  const rows = await getDb()
+    .select({
+      id: jobDescriptions.id,
+      companyName: jobDescriptions.companyName,
+      positionTitle: jobDescriptions.positionTitle,
+      status: jobDescriptions.status,
+      memo: jobDescriptions.memo,
+      questionCount: sql<number>`(${questionCountSq})::int`,
+      deletedAt: jobDescriptions.deletedAt,
+      createdAt: jobDescriptions.createdAt,
+      updatedAt: jobDescriptions.updatedAt,
+    })
+    .from(jobDescriptions)
+    .where(and(eq(jobDescriptions.userId, DEFAULT_USER_ID), isNull(jobDescriptions.deletedAt)))
+    .orderBy(desc(jobDescriptions.createdAt));
+
+  return rows.map((row) => ({
+    ...row,
+    status: row.status as JobDescriptionStatus,
+  }));
 }
 
-function mapRow(row: JobRow): JobDescription {
-  return {
-    id: row.id,
-    companyName: row.company_name,
-    positionTitle: row.position_title,
-    status: row.status,
-    memo: row.memo,
-    questionCount: row.question_count,
-    deletedAt: row.deleted_at,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
+export async function getJobById(id: number): Promise<JobDescription | null> {
+  const questionCountSq = getDb()
+    .select({ count: count() })
+    .from(interviewQuestions)
+    .where(
+      and(eq(interviewQuestions.jdId, jobDescriptions.id), isNull(interviewQuestions.deletedAt))
+    );
+
+  const rows = await getDb()
+    .select({
+      id: jobDescriptions.id,
+      companyName: jobDescriptions.companyName,
+      positionTitle: jobDescriptions.positionTitle,
+      status: jobDescriptions.status,
+      memo: jobDescriptions.memo,
+      questionCount: sql<number>`(${questionCountSq})::int`,
+      deletedAt: jobDescriptions.deletedAt,
+      createdAt: jobDescriptions.createdAt,
+      updatedAt: jobDescriptions.updatedAt,
+    })
+    .from(jobDescriptions)
+    .where(
+      and(
+        eq(jobDescriptions.userId, DEFAULT_USER_ID),
+        eq(jobDescriptions.id, id),
+        isNull(jobDescriptions.deletedAt)
+      )
+    );
+
+  const row = rows[0];
+  if (!row) return null;
+  return { ...row, status: row.status as JobDescriptionStatus };
 }
 
-const BASE_SELECT = `
-  SELECT
-    j.id, j.company_name, j.position_title, j.status, j.memo,
-    j.deleted_at, j.created_at, j.updated_at,
-    (SELECT COUNT(*) FROM interview_questions q
-     WHERE q.jd_id = j.id AND q.deleted_at IS NULL) AS question_count
-  FROM job_descriptions j
-`;
+export async function createJob(input: CreateJobInput): Promise<number> {
+  const [result] = await getDb()
+    .insert(jobDescriptions)
+    .values({
+      userId: DEFAULT_USER_ID,
+      companyName: input.companyName,
+      positionTitle: input.positionTitle,
+      memo: input.memo ?? null,
+    })
+    .returning({ id: jobDescriptions.id });
 
-export function getAllJobs(): JobDescription[] {
-  const db = getDb();
-  const rows = db
-    .prepare(
-      `
-    ${BASE_SELECT}
-    WHERE j.deleted_at IS NULL
-    ORDER BY j.created_at DESC
-  `
-    )
-    .all() as JobRow[];
-
-  return rows.map(mapRow);
+  return result.id;
 }
 
-export function getJobById(id: number): JobDescription | null {
-  const db = getDb();
-  const row = db
-    .prepare(
-      `
-    ${BASE_SELECT}
-    WHERE j.id = ? AND j.deleted_at IS NULL
-  `
-    )
-    .get(id) as JobRow | undefined;
+export async function updateJob(input: UpdateJobInput): Promise<void> {
+  const updates: Partial<typeof jobDescriptions.$inferInsert> = {};
 
-  return row ? mapRow(row) : null;
+  if (input.companyName !== undefined) updates.companyName = input.companyName;
+  if (input.positionTitle !== undefined) updates.positionTitle = input.positionTitle;
+  if (input.status !== undefined) updates.status = input.status;
+  if (input.memo !== undefined) updates.memo = input.memo;
+
+  if (Object.keys(updates).length === 0) return;
+
+  await getDb().update(jobDescriptions).set(updates).where(eq(jobDescriptions.id, input.id));
 }
 
-export function createJob(input: CreateJobInput): number {
-  const db = getDb();
-  const result = db
-    .prepare(
-      `
-    INSERT INTO job_descriptions (company_name, position_title, memo)
-    VALUES (?, ?, ?)
-  `
-    )
-    .run(input.companyName, input.positionTitle, input.memo ?? null);
-
-  return Number(result.lastInsertRowid);
+export async function updateJobStatus(id: number, status: JobDescriptionStatus): Promise<void> {
+  await getDb().update(jobDescriptions).set({ status }).where(eq(jobDescriptions.id, id));
 }
 
-export function updateJob(input: UpdateJobInput): void {
-  const db = getDb();
-  const fields: string[] = [];
-  const values: unknown[] = [];
-
-  if (input.companyName !== undefined) {
-    fields.push('company_name = ?');
-    values.push(input.companyName);
-  }
-  if (input.positionTitle !== undefined) {
-    fields.push('position_title = ?');
-    values.push(input.positionTitle);
-  }
-  if (input.status !== undefined) {
-    fields.push('status = ?');
-    values.push(input.status);
-  }
-  if (input.memo !== undefined) {
-    fields.push('memo = ?');
-    values.push(input.memo);
-  }
-
-  if (fields.length === 0) return;
-
-  values.push(input.id);
-  db.prepare(`UPDATE job_descriptions SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+export async function softDeleteJob(id: number): Promise<void> {
+  await getDb()
+    .update(jobDescriptions)
+    .set({ deletedAt: sql`NOW()` })
+    .where(eq(jobDescriptions.id, id));
 }
 
-export function updateJobStatus(id: number, status: JobDescriptionStatus): void {
-  const db = getDb();
-  db.prepare(`UPDATE job_descriptions SET status = ? WHERE id = ?`).run(status, id);
+export async function restoreJob(id: number): Promise<void> {
+  await getDb().update(jobDescriptions).set({ deletedAt: null }).where(eq(jobDescriptions.id, id));
 }
 
-export function softDeleteJob(id: number): void {
-  const db = getDb();
-  db.prepare(`UPDATE job_descriptions SET deleted_at = datetime('now') WHERE id = ?`).run(id);
-}
-
-export function restoreJob(id: number): void {
-  const db = getDb();
-  db.prepare(`UPDATE job_descriptions SET deleted_at = NULL WHERE id = ?`).run(id);
-}
-
-export function softDeleteJobWithQuestions(id: number): void {
-  const db = getDb();
-  const transaction = db.transaction(() => {
-    db.prepare(`UPDATE job_descriptions SET deleted_at = datetime('now') WHERE id = ?`).run(id);
-    db.prepare(
-      `UPDATE interview_questions SET deleted_at = datetime('now') WHERE jd_id = ? AND deleted_at IS NULL`
-    ).run(id);
+export async function softDeleteJobWithQuestions(id: number): Promise<void> {
+  await getDb().transaction(async (tx) => {
+    await tx
+      .update(jobDescriptions)
+      .set({ deletedAt: sql`NOW()` })
+      .where(eq(jobDescriptions.id, id));
+    await tx
+      .update(interviewQuestions)
+      .set({ deletedAt: sql`NOW()` })
+      .where(and(eq(interviewQuestions.jdId, id), isNull(interviewQuestions.deletedAt)));
   });
-  transaction();
 }
 
-export function restoreJobWithQuestions(id: number): void {
-  const db = getDb();
-  const transaction = db.transaction(() => {
-    db.prepare(`UPDATE job_descriptions SET deleted_at = NULL WHERE id = ?`).run(id);
-    db.prepare(
-      `UPDATE interview_questions SET deleted_at = NULL WHERE jd_id = ? AND deleted_at IS NOT NULL`
-    ).run(id);
+export async function restoreJobWithQuestions(id: number): Promise<void> {
+  await getDb().transaction(async (tx) => {
+    await tx.update(jobDescriptions).set({ deletedAt: null }).where(eq(jobDescriptions.id, id));
+    await tx
+      .update(interviewQuestions)
+      .set({ deletedAt: null })
+      .where(and(eq(interviewQuestions.jdId, id), isNotNull(interviewQuestions.deletedAt)));
   });
-  transaction();
 }
 
-export function getDeletedJobs(): JobDescription[] {
-  const db = getDb();
-  const rows = db
-    .prepare(
-      `
-    ${BASE_SELECT}
-    WHERE j.deleted_at IS NOT NULL
-    ORDER BY j.deleted_at DESC
-  `
-    )
-    .all() as JobRow[];
+export async function getDeletedJobs(): Promise<JobDescription[]> {
+  const questionCountSq = getDb()
+    .select({ count: count() })
+    .from(interviewQuestions)
+    .where(
+      and(eq(interviewQuestions.jdId, jobDescriptions.id), isNull(interviewQuestions.deletedAt))
+    );
 
-  return rows.map(mapRow);
+  const rows = await getDb()
+    .select({
+      id: jobDescriptions.id,
+      companyName: jobDescriptions.companyName,
+      positionTitle: jobDescriptions.positionTitle,
+      status: jobDescriptions.status,
+      memo: jobDescriptions.memo,
+      questionCount: sql<number>`(${questionCountSq})::int`,
+      deletedAt: jobDescriptions.deletedAt,
+      createdAt: jobDescriptions.createdAt,
+      updatedAt: jobDescriptions.updatedAt,
+    })
+    .from(jobDescriptions)
+    .where(and(eq(jobDescriptions.userId, DEFAULT_USER_ID), isNotNull(jobDescriptions.deletedAt)))
+    .orderBy(desc(jobDescriptions.deletedAt));
+
+  return rows.map((row) => ({
+    ...row,
+    status: row.status as JobDescriptionStatus,
+  }));
 }

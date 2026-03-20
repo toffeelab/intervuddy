@@ -8,7 +8,7 @@ interface Props {
 
 export default async function EditJobPage({ params }: Props) {
   const { id } = await params;
-  const job = getJobById(Number(id));
+  const job = await getJobById(Number(id));
   if (!job) notFound();
 
   return (

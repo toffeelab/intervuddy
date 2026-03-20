@@ -10,7 +10,7 @@ interface Props {
 
 export default async function InterviewsPage({ searchParams }: Props) {
   const { status } = await searchParams;
-  const allJobs = getAllJobs();
+  const allJobs = await getAllJobs();
   const jobs = status ? allJobs.filter((j) => j.status === status) : allJobs;
 
   return (

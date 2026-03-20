@@ -10,27 +10,27 @@ import {
 import type { CreateFollowupInput, UpdateFollowupInput } from '@/data-access/types';
 
 export async function createFollowupAction(input: CreateFollowupInput) {
-  const id = dbCreate(input);
+  const id = await dbCreate(input);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   return { id };
 }
 
 export async function updateFollowupAction(input: UpdateFollowupInput) {
-  dbUpdate(input);
+  await dbUpdate(input);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
 }
 
 export async function deleteFollowupAction(id: number) {
-  dbDelete(id);
+  await dbDelete(id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   revalidatePath('/interviews/trash');
 }
 
 export async function restoreFollowupAction(id: number) {
-  dbRestore(id);
+  await dbRestore(id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   revalidatePath('/interviews/trash');
