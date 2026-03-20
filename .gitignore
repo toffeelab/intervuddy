@@ -55,3 +55,4 @@ data/seed.ts
 
 # Claude worktrees
 .claude/worktrees/
+.worktrees/
