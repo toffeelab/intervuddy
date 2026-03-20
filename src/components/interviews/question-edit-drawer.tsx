@@ -27,7 +27,7 @@ interface Props {
 }
 
 interface FollowupFormItem {
-  id?: number;
+  id?: string;
   question: string;
   answer: string;
   isNew?: boolean;
@@ -227,7 +227,7 @@ export function QuestionEditDrawer({ questions, categories }: Props) {
 
         // Handle followups: sync existing and new
         const originalFollowupIds = new Set(question.followups.map((f) => f.id));
-        const keepIds = new Set(validFollowups.filter((f) => f.id).map((f) => f.id as number));
+        const keepIds = new Set(validFollowups.filter((f) => f.id).map((f) => f.id as string));
 
         // Delete removed followups
         for (const f of question.followups) {

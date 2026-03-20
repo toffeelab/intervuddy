@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface TrashItem {
-  id: number;
+  id: string;
   type: 'job' | 'question';
   title: string;
   subtitle?: string;
@@ -17,7 +17,7 @@ interface TrashSectionProps {
   label: string;
   icon: React.ReactNode;
   items: TrashItem[];
-  onRestore: (id: number) => Promise<void>;
+  onRestore: (id: string) => Promise<void>;
   retentionDays: number;
 }
 
@@ -35,7 +35,7 @@ function TrashItemRow({
   retentionDays,
 }: {
   item: TrashItem;
-  onRestore: (id: number) => Promise<void>;
+  onRestore: (id: string) => Promise<void>;
   retentionDays: number;
 }) {
   const [error, setError] = useState<string | null>(null);

@@ -117,9 +117,9 @@ export async function getSystemQuestionsByCategory(
 }
 
 async function batchLoadFollowups(
-  questionIds: number[]
-): Promise<Map<number, InterviewQuestion['followups']>> {
-  const map = new Map<number, InterviewQuestion['followups']>();
+  questionIds: string[]
+): Promise<Map<string, InterviewQuestion['followups']>> {
+  const map = new Map<string, InterviewQuestion['followups']>();
   if (questionIds.length === 0) return map;
 
   const rows = await getDb()
@@ -156,7 +156,7 @@ export async function importSystemToLibrary(
   userId: string,
   params: {
     categoryIds?: number[];
-    questionIds?: number[];
+    questionIds?: string[];
   }
 ): Promise<ImportSystemToLibraryResult> {
   let importedCategories = 0;
