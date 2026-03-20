@@ -81,6 +81,7 @@ pnpm dev               # 개발 서버
 - 환경변수: `DATABASE_URL` (.env.local에 설정)
 - **시드 업데이트**: DB 스키마 변경 시 `data/seed.sample.ts`와 `src/test/helpers/db.ts`도 동기화 필수
 - **테스트**: Docker PG의 `intervuddy_test` DB 사용, TRUNCATE CASCADE로 격리
+- **프로덕션 DB**: Neon 연결 문자열은 `.env.production`의 `DATABASE_URL` 사용. Neon 마이그레이션: `npx tsx --env-file=.env.production src/db/migrate.ts`
 
 ### Import 경로
 

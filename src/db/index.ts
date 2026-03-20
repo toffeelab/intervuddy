@@ -24,12 +24,19 @@ export function getDb(): NodePgDatabase<typeof schema> {
   return testDb ?? ensureDb().db;
 }
 
-/** 테스트 전용: 외부 DB 인스턴스 주입 */
+/**
+ * 테스트 전용: 외부 DB 인스턴스 주입.
+ * 테스트 헬퍼(src/test/helpers/db.ts)의 createTestDb()에서 호출.
+ */
 export function setDb(instance: NodePgDatabase<typeof schema>): void {
   testDb = instance;
 }
 
-/** 테스트 전용: DB 인스턴스 초기화 */
+/**
+ * 테스트 전용: DB 인스턴스 초기화.
+ * 테스트 종료 시 closeTestPool()에서 호출하여 프로덕션 DB와 격리.
+ * 프로덕션 코드에서 호출하지 마세요.
+ */
 export function resetDb(): void {
   testDb = null;
   _db = null;

@@ -17,6 +17,7 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['src/test/setup.ts'],
     globalSetup: ['src/test/global-setup.ts'],
+    globalTeardown: ['src/test/global-teardown.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     // Run DB tests serially to avoid lock contention on the shared test database.
     // fileParallelism: false ensures test files run one at a time (no overlap between files).
