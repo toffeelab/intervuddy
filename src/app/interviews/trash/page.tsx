@@ -5,12 +5,14 @@ import { TrashSection } from '@/components/interviews/trash-section';
 import type { TrashItem } from '@/components/interviews/trash-section';
 import { getDeletedJobs } from '@/data-access/jobs';
 import { getDeletedQuestions } from '@/data-access/questions';
+import { getCurrentUserId } from '@/lib/auth';
 import { DEFAULT_RETENTION_DAYS } from '@/lib/retention-policy';
 
 export default async function TrashPage() {
+  const userId = await getCurrentUserId();
   const [deletedJobs, deletedQuestions] = await Promise.all([
-    getDeletedJobs(),
-    getDeletedQuestions(),
+    getDeletedJobs(userId),
+    getDeletedQuestions(userId),
   ]);
 
   const jobItems: TrashItem[] = deletedJobs.map((j) => ({
