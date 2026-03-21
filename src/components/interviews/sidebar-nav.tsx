@@ -20,7 +20,7 @@ export function SidebarNav({ className, onNavigate }: SidebarNavProps) {
   return (
     <nav
       className={cn(
-        'border-iv-border bg-iv-bg2 flex w-52 shrink-0 flex-col gap-1 border-r p-3',
+        'border-iv-border bg-iv-bg2 flex h-full w-52 shrink-0 flex-col gap-1 border-r p-3',
         className
       )}
     >
