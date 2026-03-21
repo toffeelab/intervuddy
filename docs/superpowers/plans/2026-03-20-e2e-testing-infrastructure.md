@@ -113,10 +113,12 @@ export default defineConfig({
     port: 3000,
     reuseExistingServer: !process.env.CI,
     env: {
+      NODE_ENV: 'test',
       DATABASE_URL:
         process.env.DATABASE_URL ||
         'postgresql://intervuddy:intervuddy@localhost:5433/intervuddy_test',
       AUTH_SECRET: process.env.AUTH_SECRET || 'e2e-test-secret',
+      AUTH_TRUST_HOST: 'true',
     },
   },
 });
