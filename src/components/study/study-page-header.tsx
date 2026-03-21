@@ -7,7 +7,7 @@ import { useStudyStore } from '@/stores/study-store';
 
 interface StudyPageHeaderProps {
   totalCount: number;
-  allItemIds: number[];
+  allItemIds: string[];
   onMenuClick?: () => void;
 }
 
