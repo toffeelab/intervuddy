@@ -3,14 +3,16 @@ import { Plus } from 'lucide-react';
 import { JobCard } from '@/components/interviews/job-card';
 import { JobStatusFilter } from '@/components/interviews/job-status-filter';
 import { getAllJobs } from '@/data-access/jobs';
+import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
   searchParams: Promise<{ status?: string }>;
 }
 
 export default async function InterviewsPage({ searchParams }: Props) {
+  const userId = await getCurrentUserId();
   const { status } = await searchParams;
-  const allJobs = getAllJobs();
+  const allJobs = await getAllJobs(userId);
   const jobs = status ? allJobs.filter((j) => j.status === status) : allJobs;
 
   return (

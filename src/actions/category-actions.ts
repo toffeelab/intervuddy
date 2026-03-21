@@ -8,29 +8,34 @@ import {
   restoreCategory,
 } from '@/data-access/categories';
 import type { CreateCategoryInput, UpdateCategoryInput } from '@/data-access/types';
+import { getCurrentUserId } from '@/lib/auth';
 
 export async function createCategoryAction(input: CreateCategoryInput) {
-  const id = createCategory(input);
+  const userId = await getCurrentUserId();
+  const id = await createCategory(userId, input);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   return { id };
 }
 
 export async function updateCategoryAction(id: number, input: Omit<UpdateCategoryInput, 'id'>) {
-  updateCategory(id, input);
+  const userId = await getCurrentUserId();
+  await updateCategory(userId, id, input);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
 }
 
 export async function deleteCategoryAction(id: number) {
-  softDeleteCategory(id);
+  const userId = await getCurrentUserId();
+  await softDeleteCategory(userId, id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   revalidatePath('/interviews/trash');
 }
 
 export async function restoreCategoryAction(id: number) {
-  restoreCategory(id);
+  const userId = await getCurrentUserId();
+  await restoreCategory(userId, id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   revalidatePath('/interviews/trash');

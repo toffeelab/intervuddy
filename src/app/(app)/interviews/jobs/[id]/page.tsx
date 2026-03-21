@@ -8,24 +8,27 @@ import { QuestionTable } from '@/components/interviews/question-table';
 import { getCategoriesByJdId, getGlobalCategories } from '@/data-access/categories';
 import { getJobById } from '@/data-access/jobs';
 import { getQuestionsByJdId, getLibraryQuestions } from '@/data-access/questions';
+import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
 export default async function JobDetailPage({ params }: Props) {
+  const userId = await getCurrentUserId();
   const { id } = await params;
-  const job = getJobById(Number(id));
+  const job = await getJobById(userId, id);
   if (!job) notFound();
 
-  const jdQuestions = getQuestionsByJdId(job.id);
-  const jdCategories = getCategoriesByJdId(job.id);
-
-  const libraryQuestions = getLibraryQuestions();
-  const globalCategories = getGlobalCategories();
+  const [jdQuestions, jdCategories, libraryQuestions, globalCategories] = await Promise.all([
+    getQuestionsByJdId(userId, job.id),
+    getCategoriesByJdId(userId, job.id),
+    getLibraryQuestions(userId),
+    getGlobalCategories(userId),
+  ]);
   const importedOriginIds = jdQuestions
     .filter((q) => q.originQuestionId !== null)
-    .map((q) => q.originQuestionId as number);
+    .map((q) => q.originQuestionId as string);
 
   return (
     <div className="p-4 md:p-6">

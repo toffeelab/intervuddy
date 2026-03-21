@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1773949452275,
+      "tag": "0000_striped_calypso",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773949452276,
+      "tag": "0001_custom_indexes_triggers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774003670462,
+      "tag": "0002_sudden_psynapse",
+      "breakpoints": true
+    }
+  ]
+}

@@ -56,7 +56,7 @@ vi.mock('@/components/ui/textarea', () => ({
 // ────────────────────────────────────────────────────────────────────────────
 
 const mockQuestion: InterviewQuestion = {
-  id: 1,
+  id: 'question-uuid-1',
   categoryId: 1,
   categoryName: '자기소개',
   categorySlug: 'self-intro',
@@ -70,19 +70,19 @@ const mockQuestion: InterviewQuestion = {
   keywords: ['자기소개', '경력'],
   followups: [
     {
-      id: 1,
-      questionId: 1,
+      id: 'followup-uuid-1',
+      questionId: 'question-uuid-1',
       question: '가장 어려웠던 프로젝트는?',
       answer: '실시간 통신 시스템 구축',
       displayOrder: 1,
       deletedAt: null,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-01',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
     },
   ],
   deletedAt: null,
-  createdAt: '2024-01-01',
-  updatedAt: '2024-01-01',
+  createdAt: new Date('2024-01-01'),
+  updatedAt: new Date('2024-01-01'),
 };
 
 const mockCategories: InterviewCategory[] = [
@@ -96,7 +96,8 @@ const mockCategories: InterviewCategory[] = [
     displayOrder: 1,
     questionCount: 1,
     deletedAt: null,
-    createdAt: '2024-01-01',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
   {
     id: 2,
@@ -108,7 +109,8 @@ const mockCategories: InterviewCategory[] = [
     displayOrder: 2,
     questionCount: 0,
     deletedAt: null,
-    createdAt: '2024-01-01',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
 ];
 
@@ -118,10 +120,11 @@ const mockCategories: InterviewCategory[] = [
 
 const mockCloseDrawer = vi.fn();
 
-function setupStore(overrides: { drawerTargetId?: number | null } = {}) {
+function setupStore(overrides: { drawerTargetId?: string | null } = {}) {
   (useEditStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
     drawerOpen: true,
-    drawerTargetId: overrides.drawerTargetId !== undefined ? overrides.drawerTargetId : 1,
+    drawerTargetId:
+      overrides.drawerTargetId !== undefined ? overrides.drawerTargetId : 'question-uuid-1',
     closeDrawer: mockCloseDrawer,
   });
 }
@@ -354,7 +357,7 @@ describe('QuestionEditDrawer', () => {
   // ── 6. Does not render when no matching question ──────────────────────────
   describe('drawerTargetId가 질문 목록과 일치하지 않을 때', () => {
     it('컴포넌트를 렌더링하지 않는다', () => {
-      setupStore({ drawerTargetId: 999 });
+      setupStore({ drawerTargetId: 'nonexistent-id' });
 
       const { container } = renderDrawer();
 

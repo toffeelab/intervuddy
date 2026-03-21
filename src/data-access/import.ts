@@ -1,113 +1,107 @@
+import { eq, and, asc, isNull } from 'drizzle-orm';
 import { getDb } from '@/db/index';
+import { interviewQuestions, followupQuestions } from '@/db/schema';
 
 interface ImportResult {
   importedCount: number;
   skippedCount: number;
 }
 
-interface OriginalQuestionRow {
-  id: number;
-  category_id: number;
-  question: string;
-  answer: string;
-  tip: string | null;
-  display_order: number;
-}
-
-interface ExistingRow {
-  id: number;
-}
-
-interface KeywordRow {
-  keyword: string;
-}
-
-interface FollowupRow {
-  question: string;
-  answer: string;
-  display_order: number;
-}
-
-export function importQuestionsToJob(params: {
-  jdId: number;
-  questionIds: number[];
-}): ImportResult {
-  const db = getDb();
+export async function importQuestionsToJob(
+  userId: string,
+  params: {
+    jdId: string;
+    questionIds: string[];
+  }
+): Promise<ImportResult> {
   let importedCount = 0;
   let skippedCount = 0;
 
-  const transaction = db.transaction(() => {
+  await getDb().transaction(async (tx) => {
     for (const questionId of params.questionIds) {
-      const original = db
-        .prepare(
-          `SELECT id, category_id, question, answer, tip, display_order
-           FROM interview_questions
-           WHERE id = ? AND jd_id IS NULL AND deleted_at IS NULL`
-        )
-        .get(questionId) as OriginalQuestionRow | undefined;
+      const [original] = await tx
+        .select({
+          id: interviewQuestions.id,
+          categoryId: interviewQuestions.categoryId,
+          question: interviewQuestions.question,
+          answer: interviewQuestions.answer,
+          tip: interviewQuestions.tip,
+          keywords: interviewQuestions.keywords,
+          displayOrder: interviewQuestions.displayOrder,
+        })
+        .from(interviewQuestions)
+        .where(
+          and(
+            eq(interviewQuestions.id, questionId),
+            eq(interviewQuestions.userId, userId),
+            isNull(interviewQuestions.jdId),
+            isNull(interviewQuestions.deletedAt)
+          )
+        );
 
       if (!original) {
         skippedCount++;
         continue;
       }
 
-      const existing = db
-        .prepare(
-          `SELECT id FROM interview_questions
-           WHERE origin_question_id = ? AND jd_id = ? AND deleted_at IS NULL`
-        )
-        .get(original.id, params.jdId) as ExistingRow | undefined;
+      const [existing] = await tx
+        .select({ id: interviewQuestions.id })
+        .from(interviewQuestions)
+        .where(
+          and(
+            eq(interviewQuestions.originQuestionId, original.id),
+            eq(interviewQuestions.jdId, params.jdId),
+            isNull(interviewQuestions.deletedAt)
+          )
+        );
 
       if (existing) {
         skippedCount++;
         continue;
       }
 
-      const result = db
-        .prepare(
-          `INSERT INTO interview_questions
-             (category_id, jd_id, origin_question_id, question, answer, tip, display_order)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`
+      const [newQuestion] = await tx
+        .insert(interviewQuestions)
+        .values({
+          userId,
+          categoryId: original.categoryId,
+          jdId: params.jdId,
+          originQuestionId: original.id,
+          question: original.question,
+          answer: original.answer,
+          tip: original.tip,
+          keywords: original.keywords,
+          displayOrder: original.displayOrder,
+        })
+        .returning({ id: interviewQuestions.id });
+
+      const newQuestionId = newQuestion.id;
+
+      const origFollowups = await tx
+        .select({
+          question: followupQuestions.question,
+          answer: followupQuestions.answer,
+          displayOrder: followupQuestions.displayOrder,
+        })
+        .from(followupQuestions)
+        .where(
+          and(eq(followupQuestions.questionId, original.id), isNull(followupQuestions.deletedAt))
         )
-        .run(
-          original.category_id,
-          params.jdId,
-          original.id,
-          original.question,
-          original.answer,
-          original.tip,
-          original.display_order
-        );
+        .orderBy(asc(followupQuestions.displayOrder));
 
-      const newQuestionId = Number(result.lastInsertRowid);
-
-      const keywords = db
-        .prepare(`SELECT keyword FROM question_keywords WHERE question_id = ?`)
-        .all(original.id) as KeywordRow[];
-      const insertKeyword = db.prepare(
-        `INSERT INTO question_keywords (question_id, keyword) VALUES (?, ?)`
-      );
-      for (const kw of keywords) {
-        insertKeyword.run(newQuestionId, kw.keyword);
-      }
-
-      const followups = db
-        .prepare(
-          `SELECT question, answer, display_order FROM followup_questions
-           WHERE question_id = ? AND deleted_at IS NULL`
-        )
-        .all(original.id) as FollowupRow[];
-      const insertFollowup = db.prepare(
-        `INSERT INTO followup_questions (question_id, question, answer, display_order) VALUES (?, ?, ?, ?)`
-      );
-      for (const fu of followups) {
-        insertFollowup.run(newQuestionId, fu.question, fu.answer, fu.display_order);
+      for (const fu of origFollowups) {
+        await tx.insert(followupQuestions).values({
+          userId,
+          questionId: newQuestionId,
+          question: fu.question,
+          answer: fu.answer,
+          displayOrder: fu.displayOrder,
+        });
       }
 
       importedCount++;
     }
   });
 
-  transaction();
   return { importedCount, skippedCount };
 }

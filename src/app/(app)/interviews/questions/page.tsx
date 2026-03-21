@@ -3,10 +3,14 @@ import { QuestionEditDrawer } from '@/components/interviews/question-edit-drawer
 import { QuestionTable } from '@/components/interviews/question-table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { getGlobalCategories, getLibraryQuestions } from '@/data-access';
+import { getCurrentUserId } from '@/lib/auth';
 
-export default function InterviewQuestionsPage() {
-  const categories = getGlobalCategories();
-  const questions = getLibraryQuestions();
+export default async function InterviewQuestionsPage() {
+  const userId = await getCurrentUserId();
+  const [categories, questions] = await Promise.all([
+    getGlobalCategories(userId),
+    getLibraryQuestions(userId),
+  ]);
 
   return (
     <div className="p-6">

@@ -1,7 +1,16 @@
-import Database from 'better-sqlite3';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { eq } from 'drizzle-orm';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import { getGlobalCategories } from '@/data-access/categories';
-import { createTestDb, cleanupTestDb, seedTestCategories } from '@/test/helpers/db';
+import { DEFAULT_USER_ID } from '@/db/constants';
+import * as schema from '@/db/schema';
+import { interviewCategories } from '@/db/schema';
+import {
+  createTestDb,
+  cleanupTestDb,
+  seedTestCategories,
+  truncateAllTables,
+} from '@/test/helpers/db';
 import {
   createCategoryAction,
   updateCategoryAction,
@@ -13,17 +22,24 @@ const { mockRevalidatePath } = vi.hoisted(() => ({
   mockRevalidatePath: vi.fn(),
 }));
 vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
+vi.mock('@/lib/auth', () => ({
+  getCurrentUserId: vi.fn().mockResolvedValue(DEFAULT_USER_ID),
+}));
 
 describe('category-actions', () => {
-  let db: Database.Database;
+  let db: NodePgDatabase<typeof schema>;
 
-  beforeEach(() => {
-    db = createTestDb();
+  beforeAll(async () => {
+    db = await createTestDb();
+  });
+
+  beforeEach(async () => {
+    await truncateAllTables(db);
     vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    cleanupTestDb(db);
+  afterAll(async () => {
+    await cleanupTestDb();
   });
 
   describe('createCategoryAction', () => {
@@ -35,7 +51,7 @@ describe('category-actions', () => {
         icon: '🆕',
       });
 
-      expect(result.id).toBeGreaterThan(0);
+      expect(result.id).toBeDefined();
     });
 
     it('생성된 카테고리가 DB에 실제로 저장된다', async () => {
@@ -46,7 +62,7 @@ describe('category-actions', () => {
         icon: '✅',
       });
 
-      const categories = getGlobalCategories();
+      const categories = await getGlobalCategories(DEFAULT_USER_ID);
       expect(categories).toHaveLength(1);
       expect(categories[0].name).toBe('저장 확인 카테고리');
       expect(categories[0].slug).toBe('save-check');
@@ -67,7 +83,7 @@ describe('category-actions', () => {
         icon: '2️⃣',
       });
 
-      const categories = getGlobalCategories();
+      const categories = await getGlobalCategories(DEFAULT_USER_ID);
       expect(categories).toHaveLength(2);
       expect(categories[0].displayOrder).toBeLessThan(categories[1].displayOrder);
     });
@@ -88,32 +104,35 @@ describe('category-actions', () => {
 
   describe('updateCategoryAction', () => {
     it('카테고리 필드를 부분 수정한다', async () => {
-      seedTestCategories(db);
+      await seedTestCategories(db);
 
-      await updateCategoryAction(1, { displayLabel: '수정된 라벨' });
+      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      await updateCategoryAction(cats[0].id, { displayLabel: '수정된 라벨' });
 
-      const categories = getGlobalCategories();
-      const updated = categories.find((c) => c.id === 1);
+      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const updated = categories.find((c) => c.id === cats[0].id);
       expect(updated?.displayLabel).toBe('수정된 라벨');
       expect(updated?.name).toBe('자기소개/커리어');
     });
 
     it('여러 필드를 동시에 수정할 수 있다', async () => {
-      seedTestCategories(db);
+      await seedTestCategories(db);
 
-      await updateCategoryAction(1, { name: '수정된 이름', icon: '🔄' });
+      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      await updateCategoryAction(cats[0].id, { name: '수정된 이름', icon: '🔄' });
 
-      const categories = getGlobalCategories();
-      const updated = categories.find((c) => c.id === 1);
+      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const updated = categories.find((c) => c.id === cats[0].id);
       expect(updated?.name).toBe('수정된 이름');
       expect(updated?.icon).toBe('🔄');
       expect(updated?.slug).toBe('self-intro');
     });
 
     it('revalidatePath를 /study와 /interviews/questions 경로로 호출한다', async () => {
-      seedTestCategories(db);
+      await seedTestCategories(db);
+      const cats = await getGlobalCategories(DEFAULT_USER_ID);
 
-      await updateCategoryAction(1, { name: '수정' });
+      await updateCategoryAction(cats[0].id, { name: '수정' });
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
       expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
@@ -123,34 +142,35 @@ describe('category-actions', () => {
 
   describe('deleteCategoryAction', () => {
     it('카테고리를 소프트 삭제한다', async () => {
-      seedTestCategories(db);
-      expect(getGlobalCategories()).toHaveLength(2);
+      await seedTestCategories(db);
+      expect(await getGlobalCategories(DEFAULT_USER_ID)).toHaveLength(2);
 
-      await deleteCategoryAction(1);
+      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      await deleteCategoryAction(cats[0].id);
 
-      const categories = getGlobalCategories();
+      const categories = await getGlobalCategories(DEFAULT_USER_ID);
       expect(categories).toHaveLength(1);
       expect(categories[0].name).toBe('기술역량');
     });
 
     it('삭제 후 deleted_at이 설정된다', async () => {
-      seedTestCategories(db);
+      await seedTestCategories(db);
+      const cats = await getGlobalCategories(DEFAULT_USER_ID);
 
-      await deleteCategoryAction(1);
+      await deleteCategoryAction(cats[0].id);
 
-      interface CategoryDeletedRow {
-        deleted_at: string | null;
-      }
-      const row = db
-        .prepare('SELECT deleted_at FROM interview_categories WHERE id = ?')
-        .get(1) as CategoryDeletedRow;
-      expect(row.deleted_at).not.toBeNull();
+      const rows = await db
+        .select({ deletedAt: interviewCategories.deletedAt })
+        .from(interviewCategories)
+        .where(eq(interviewCategories.id, cats[0].id));
+      expect(rows[0].deletedAt).not.toBeNull();
     });
 
     it('revalidatePath를 /study와 /interviews/questions, /interviews/trash 경로로 호출한다', async () => {
-      seedTestCategories(db);
+      await seedTestCategories(db);
+      const cats = await getGlobalCategories(DEFAULT_USER_ID);
 
-      await deleteCategoryAction(1);
+      await deleteCategoryAction(cats[0].id);
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
       expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');
@@ -161,35 +181,46 @@ describe('category-actions', () => {
 
   describe('restoreCategoryAction', () => {
     it('소프트 삭제된 카테고리를 복원한다', async () => {
-      seedTestCategories(db);
-      db.exec(`UPDATE interview_categories SET deleted_at = datetime('now') WHERE id = 1`);
-      expect(getGlobalCategories()).toHaveLength(1);
+      await seedTestCategories(db);
+      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      // Soft-delete first category
+      await db
+        .update(interviewCategories)
+        .set({ deletedAt: new Date() })
+        .where(eq(interviewCategories.id, cats[0].id));
+      expect(await getGlobalCategories(DEFAULT_USER_ID)).toHaveLength(1);
 
-      await restoreCategoryAction(1);
+      await restoreCategoryAction(cats[0].id);
 
-      expect(getGlobalCategories()).toHaveLength(2);
+      expect(await getGlobalCategories(DEFAULT_USER_ID)).toHaveLength(2);
     });
 
     it('복원 후 deleted_at이 NULL로 돌아온다', async () => {
-      seedTestCategories(db);
-      db.exec(`UPDATE interview_categories SET deleted_at = datetime('now') WHERE id = 1`);
+      await seedTestCategories(db);
+      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      await db
+        .update(interviewCategories)
+        .set({ deletedAt: new Date() })
+        .where(eq(interviewCategories.id, cats[0].id));
 
-      await restoreCategoryAction(1);
+      await restoreCategoryAction(cats[0].id);
 
-      interface CategoryDeletedRow {
-        deleted_at: string | null;
-      }
-      const row = db
-        .prepare('SELECT deleted_at FROM interview_categories WHERE id = ?')
-        .get(1) as CategoryDeletedRow;
-      expect(row.deleted_at).toBeNull();
+      const rows = await db
+        .select({ deletedAt: interviewCategories.deletedAt })
+        .from(interviewCategories)
+        .where(eq(interviewCategories.id, cats[0].id));
+      expect(rows[0].deletedAt).toBeNull();
     });
 
     it('revalidatePath를 /study와 /interviews/questions, /interviews/trash 경로로 호출한다', async () => {
-      seedTestCategories(db);
-      db.exec(`UPDATE interview_categories SET deleted_at = datetime('now') WHERE id = 1`);
+      await seedTestCategories(db);
+      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      await db
+        .update(interviewCategories)
+        .set({ deletedAt: new Date() })
+        .where(eq(interviewCategories.id, cats[0].id));
 
-      await restoreCategoryAction(1);
+      await restoreCategoryAction(cats[0].id);
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
       expect(mockRevalidatePath).toHaveBeenCalledWith('/interviews/questions');

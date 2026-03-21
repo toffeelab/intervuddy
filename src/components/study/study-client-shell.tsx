@@ -11,7 +11,7 @@ interface Props {
   items: InterviewQuestion[];
   categories: InterviewCategory[];
   jobs: JobDescription[];
-  allItemIds: number[];
+  allItemIds: string[];
 }
 
 export function StudyClientShell({ items, categories, jobs, allItemIds }: Props) {
