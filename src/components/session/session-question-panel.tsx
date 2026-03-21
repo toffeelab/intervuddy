@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Send } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search, Send } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +20,7 @@ export function SessionQuestionPanel({ libraryQuestions, send }: Props) {
   const { questions } = useSessionStore();
   const [search, setSearch] = useState('');
   const [customQuestion, setCustomQuestion] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filteredQuestions = search.trim()
     ? libraryQuestions.filter(
@@ -41,6 +43,18 @@ export function SessionQuestionPanel({ libraryQuestions, send }: Props) {
     });
   }
 
+  function handleSendFollowUp(parentQuestion: InterviewQuestion, followUpText: string) {
+    send({
+      type: 'question:send',
+      payload: {
+        questionId: parentQuestion.id,
+        content: followUpText,
+        displayOrder: nextDisplayOrder,
+        isFollowUp: true,
+      },
+    });
+  }
+
   function handleSendCustomQuestion() {
     if (!customQuestion.trim()) return;
     send({
@@ -51,6 +65,10 @@ export function SessionQuestionPanel({ libraryQuestions, send }: Props) {
       },
     });
     setCustomQuestion('');
+  }
+
+  function toggleExpand(id: string) {
+    setExpandedId((prev) => (prev === id ? null : id));
   }
 
   return (
@@ -103,21 +121,83 @@ export function SessionQuestionPanel({ libraryQuestions, send }: Props) {
         ) : (
           <div className="space-y-1">
             {filteredQuestions.map((q) => {
-              const alreadySent = questions.some((sq) => sq.questionId === q.id);
+              const alreadySent = questions.some((sq) => sq.questionId === q.id && !sq.isFollowUp);
+              const isExpanded = expandedId === q.id;
+              const hasFollowups = q.followups.length > 0;
+
               return (
-                <button
-                  key={q.id}
-                  type="button"
-                  disabled={alreadySent}
-                  onClick={() => handleSendLibraryQuestion(q)}
-                  className={cn(
-                    'w-full rounded-md p-2 text-left transition-colors',
-                    alreadySent ? 'cursor-not-allowed opacity-40' : 'hover:bg-iv-bg3'
+                <div key={q.id}>
+                  <div className="flex items-start gap-1">
+                    {/* Expand toggle for followups */}
+                    {hasFollowups ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(q.id)}
+                        className="text-iv-text3 hover:text-iv-text mt-2 shrink-0 rounded p-0.5 transition-colors"
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="size-3.5" />
+                        ) : (
+                          <ChevronRight className="size-3.5" />
+                        )}
+                      </button>
+                    ) : (
+                      <span className="mt-2 w-[18px] shrink-0" />
+                    )}
+
+                    {/* Main question button */}
+                    <button
+                      type="button"
+                      disabled={alreadySent}
+                      onClick={() => handleSendLibraryQuestion(q)}
+                      className={cn(
+                        'w-full rounded-md p-2 text-left transition-colors',
+                        alreadySent ? 'cursor-not-allowed opacity-40' : 'hover:bg-iv-bg3'
+                      )}
+                    >
+                      <p className="text-iv-text text-xs leading-relaxed">{q.question}</p>
+                      <div className="mt-0.5 flex items-center gap-1.5">
+                        <span className="text-iv-text3 text-[10px]">{q.categoryDisplayLabel}</span>
+                        {hasFollowups && (
+                          <Badge variant="outline" className="h-4 px-1 text-[9px]">
+                            꼬리질문 {q.followups.length}
+                          </Badge>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Follow-up questions */}
+                  {isExpanded && hasFollowups && (
+                    <div className="border-iv-border mt-0.5 ml-[18px] space-y-0.5 border-l pl-2">
+                      {q.followups.map((fu) => {
+                        const fuAlreadySent = questions.some(
+                          (sq) =>
+                            sq.isFollowUp && sq.questionId === q.id && sq.content === fu.question
+                        );
+                        return (
+                          <button
+                            key={fu.id}
+                            type="button"
+                            disabled={fuAlreadySent}
+                            onClick={() => handleSendFollowUp(q, fu.question)}
+                            className={cn(
+                              'w-full rounded-md p-1.5 text-left transition-colors',
+                              fuAlreadySent ? 'cursor-not-allowed opacity-40' : 'hover:bg-iv-bg3'
+                            )}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <Badge variant="secondary" className="h-4 shrink-0 px-1 text-[9px]">
+                                꼬리질문
+                              </Badge>
+                              <p className="text-iv-text2 text-xs leading-relaxed">{fu.question}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
-                >
-                  <p className="text-iv-text text-xs leading-relaxed">{q.question}</p>
-                  <span className="text-iv-text3 mt-0.5 text-[10px]">{q.categoryDisplayLabel}</span>
-                </button>
+                </div>
               );
             })}
           </div>

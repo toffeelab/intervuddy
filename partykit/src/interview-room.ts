@@ -3,7 +3,13 @@ import type { ClientMessage, Participant, SessionRole, SyncState } from './types
 
 export default class InterviewRoom implements Party.Server {
   private participants: Map<string, Participant & { connId: string }> = new Map();
-  private questions: Array<{ displayOrder: number; content: string; questionId?: string }> = [];
+  private questions: Array<{
+    displayOrder: number;
+    content: string;
+    questionId?: string;
+    isFollowUp?: boolean;
+  }> = [];
+  private summary: string | null = null;
   private sessionStatus: 'waiting' | 'in_progress' | 'completed' = 'waiting';
 
   constructor(readonly room: Party.Room) {}
@@ -77,6 +83,9 @@ export default class InterviewRoom implements Party.Server {
       case 'session:end':
         if (senderParticipant.role !== 'interviewer') return;
         this.sessionStatus = 'completed';
+        if (msg.payload?.summary) {
+          this.summary = msg.payload.summary;
+        }
         this.broadcast(enriched);
         break;
 

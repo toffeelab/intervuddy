@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { useSessionStore } from '@/stores/session-store';
 import type { ClientMessage } from '@/types/session-messages';
 
@@ -14,9 +15,22 @@ interface Props {
 export function SessionAnswerPanel({ send }: Props) {
   const { questions, currentDisplayOrder } = useSessionStore();
   const [answer, setAnswer] = useState('');
+  const [highlightOrder, setHighlightOrder] = useState<number | null>(null);
+  const prevDisplayOrderRef = useRef(currentDisplayOrder);
 
   const currentQuestion = questions.find((q) => q.displayOrder === currentDisplayOrder);
   const hasAnswered = currentQuestion?.answer !== undefined;
+
+  // Highlight animation when new question arrives
+  useEffect(() => {
+    if (currentDisplayOrder !== prevDisplayOrderRef.current && currentDisplayOrder > 0) {
+      setHighlightOrder(currentDisplayOrder);
+      const timer = setTimeout(() => setHighlightOrder(null), 1200);
+      prevDisplayOrderRef.current = currentDisplayOrder;
+      return () => clearTimeout(timer);
+    }
+    prevDisplayOrderRef.current = currentDisplayOrder;
+  }, [currentDisplayOrder]);
 
   function handleSubmit() {
     if (!answer.trim() || !currentDisplayOrder) return;
@@ -41,8 +55,18 @@ export function SessionAnswerPanel({ send }: Props) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Current question */}
-      <div className="border-iv-border bg-iv-bg2 border-b p-4">
-        <span className="text-iv-text3 text-xs">질문 {currentDisplayOrder}</span>
+      <div
+        className={cn(
+          'border-iv-border bg-iv-bg2 border-b p-4 transition-colors duration-500',
+          highlightOrder === currentDisplayOrder && 'bg-yellow-50 dark:bg-yellow-950/20'
+        )}
+      >
+        <div className="flex items-center gap-1.5">
+          <span className="text-iv-text3 text-xs">질문 {currentDisplayOrder}</span>
+          {currentQuestion.isFollowUp && (
+            <span className="bg-iv-bg3 text-iv-text2 rounded px-1 py-0.5 text-[9px]">꼬리질문</span>
+          )}
+        </div>
         <p className="text-iv-text mt-1 text-sm leading-relaxed">{currentQuestion.content}</p>
       </div>
 
@@ -79,7 +103,7 @@ export function SessionAnswerPanel({ send }: Props) {
         )}
       </div>
 
-      {/* Previous questions */}
+      {/* Previous questions — newest on top */}
       {questions.length > 1 && (
         <div className="border-iv-border overflow-y-auto border-t p-3" style={{ maxHeight: '40%' }}>
           <p className="text-iv-text3 mb-2 text-xs font-medium">이전 질문</p>
@@ -89,7 +113,14 @@ export function SessionAnswerPanel({ send }: Props) {
               .sort((a, b) => b.displayOrder - a.displayOrder)
               .map((q) => (
                 <div key={q.displayOrder} className="border-iv-border rounded-md border p-2">
-                  <p className="text-iv-text3 text-[10px]">Q{q.displayOrder}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-iv-text3 text-[10px]">Q{q.displayOrder}</p>
+                    {q.isFollowUp && (
+                      <span className="bg-iv-bg3 text-iv-text2 rounded px-1 py-0.5 text-[9px]">
+                        꼬리질문
+                      </span>
+                    )}
+                  </div>
                   <p className="text-iv-text mt-0.5 text-xs leading-relaxed">{q.content}</p>
                   {q.answer && (
                     <div className="bg-iv-bg2 mt-1.5 rounded p-1.5">

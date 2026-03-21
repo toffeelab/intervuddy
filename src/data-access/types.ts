@@ -129,6 +129,7 @@ export interface InterviewSession {
   qaOwnerId: string | null;
   jdId: string | null;
   categoryId: number | null;
+  summary: string | null;
   startedAt: Date | null;
   endedAt: Date | null;
   deletedAt: Date | null;

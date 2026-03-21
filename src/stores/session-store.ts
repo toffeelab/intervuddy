@@ -5,6 +5,7 @@ interface SessionQuestion {
   displayOrder: number;
   content: string;
   questionId?: string;
+  isFollowUp?: boolean;
   answer?: { content: string; sender: string; timestamp: number };
 }
 
@@ -33,6 +34,7 @@ interface SessionState {
   timerStartedAt: number | null;
   feedbacks: SessionFeedback[];
   suggestions: QuestionSuggestion[];
+  summary: string | null;
 
   // Actions
   setSession: (sessionId: string, role: SessionRole) => void;
@@ -51,6 +53,7 @@ const initialState = {
   timerStartedAt: null,
   feedbacks: [] as SessionFeedback[],
   suggestions: [] as QuestionSuggestion[],
+  summary: null,
 };
 
 export const useSessionStore = create<SessionState>((set) => ({
@@ -81,7 +84,10 @@ export const useSessionStore = create<SessionState>((set) => ({
         break;
 
       case 'session:end':
-        set({ status: 'completed' });
+        set({
+          status: 'completed',
+          summary: message.payload?.summary ?? null,
+        });
         break;
 
       case 'question:send':
@@ -92,6 +98,7 @@ export const useSessionStore = create<SessionState>((set) => ({
               displayOrder: message.payload.displayOrder,
               content: message.payload.content,
               questionId: message.payload.questionId,
+              isFollowUp: message.payload.isFollowUp,
             },
           ],
           currentDisplayOrder: message.payload.displayOrder,

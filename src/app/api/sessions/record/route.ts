@@ -24,7 +24,9 @@ export async function POST(request: NextRequest) {
         await updateSessionStatus(sender, sessionId, 'in_progress');
         break;
       case 'session:end':
-        await updateSessionStatus(sender, sessionId, 'completed');
+        await updateSessionStatus(sender, sessionId, 'completed', {
+          summary: payload?.summary,
+        });
         break;
       case 'question:send':
         await recordQuestion(sessionId, {

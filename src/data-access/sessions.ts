@@ -40,6 +40,7 @@ export async function getSessionById(
       qaOwnerId: interviewSessions.qaOwnerId,
       jdId: interviewSessions.jdId,
       categoryId: interviewSessions.categoryId,
+      summary: interviewSessions.summary,
       startedAt: interviewSessions.startedAt,
       endedAt: interviewSessions.endedAt,
       deletedAt: interviewSessions.deletedAt,
@@ -71,6 +72,7 @@ export async function getSessionsByUserId(userId: string): Promise<InterviewSess
       qaOwnerId: interviewSessions.qaOwnerId,
       jdId: interviewSessions.jdId,
       categoryId: interviewSessions.categoryId,
+      summary: interviewSessions.summary,
       startedAt: interviewSessions.startedAt,
       endedAt: interviewSessions.endedAt,
       deletedAt: interviewSessions.deletedAt,
@@ -94,7 +96,8 @@ export async function getSessionsByUserId(userId: string): Promise<InterviewSess
 export async function updateSessionStatus(
   userId: string,
   sessionId: string,
-  status: SessionStatus
+  status: SessionStatus,
+  options?: { summary?: string }
 ): Promise<void> {
   const updates: Record<string, unknown> = { status };
 
@@ -102,6 +105,9 @@ export async function updateSessionStatus(
     updates.startedAt = sql`NOW()`;
   } else if (status === 'completed') {
     updates.endedAt = sql`NOW()`;
+    if (options?.summary) {
+      updates.summary = options.summary;
+    }
   }
 
   await getDb()

@@ -14,10 +14,10 @@ export interface WsMessage {
 export type ClientMessage =
   | { type: 'leave'; payload: { userId: string } }
   | { type: 'session:start' }
-  | { type: 'session:end' }
+  | { type: 'session:end'; payload?: { summary?: string } }
   | {
       type: 'question:send';
-      payload: { questionId?: string; content: string; displayOrder: number };
+      payload: { questionId?: string; content: string; displayOrder: number; isFollowUp?: boolean };
     }
   | { type: 'answer:send'; payload: { displayOrder: number; content: string } }
   | { type: 'timer:start'; payload: { duration: number } }
