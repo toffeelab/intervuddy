@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { SidebarNav } from '@/components/interviews/sidebar-nav';
-import { UserMenu } from '@/components/shared/user-menu';
+import { PageHeader } from '@/components/nav/page-header';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 
@@ -12,30 +11,22 @@ export default function InterviewsLayout({ children }: { children: React.ReactNo
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="bg-iv-bg flex min-h-screen flex-col">
-      <header className="border-iv-border bg-iv-bg2 flex items-center gap-3 border-b px-4 py-3">
+    <>
+      {/* Mobile header */}
+      <header className="border-iv-border bg-iv-bg/80 sticky top-0 z-30 flex items-center gap-3 border-b px-3 py-2 backdrop-blur-md md:hidden">
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={() => setSidebarOpen(true)}
-          className="md:hidden"
-          aria-label="메뉴 열기"
+          aria-label="서브 메뉴 열기"
         >
           <Menu className="size-5" />
         </Button>
-        <Link
-          href="/study"
-          className="text-iv-text2 hover:text-iv-text flex items-center gap-1.5 text-sm transition-colors"
-        >
-          <ArrowLeft className="size-4" />
-          <span className="hidden sm:inline">스터디로 돌아가기</span>
-        </Link>
-        <div className="bg-iv-border h-4 w-px" />
-        <h1 className="text-iv-text text-sm font-medium">면접 관리</h1>
-        <div className="ml-auto">
-          <UserMenu />
-        </div>
+        <h1 className="text-iv-text text-sm font-medium">채용공고 관리</h1>
       </header>
+
+      {/* Desktop header */}
+      <PageHeader title="채용공고 관리" />
 
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop Sidebar */}
@@ -53,6 +44,6 @@ export default function InterviewsLayout({ children }: { children: React.ReactNo
 
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
-    </div>
+    </>
   );
 }

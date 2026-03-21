@@ -14,12 +14,8 @@ export default async function StudyPage({ searchParams }: StudyPageProps) {
   const validJdId = jdId || null;
 
   const [items, categories, jobs] = await Promise.all([
-    validJdId !== null
-      ? getQuestionsByJdId(userId, validJdId)
-      : getLibraryQuestions(userId),
-    validJdId !== null
-      ? getCategoriesByJdId(userId, validJdId)
-      : getGlobalCategories(userId),
+    validJdId !== null ? getQuestionsByJdId(userId, validJdId) : getLibraryQuestions(userId),
+    validJdId !== null ? getCategoriesByJdId(userId, validJdId) : getGlobalCategories(userId),
     getAllJobs(userId),
   ]);
   const allItemIds = items.map((item) => item.id);
