@@ -3,8 +3,10 @@ name: Claude PR Review
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review]
-    paths:
-      - 'src/**'
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.github/screenshots/**'
   issue_comment:
     types: [created]
 
