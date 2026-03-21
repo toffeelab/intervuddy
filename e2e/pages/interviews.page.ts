@@ -24,6 +24,6 @@ export class InterviewsPage {
   }
 
   getJobCardMoreButton(companyName: string): Locator {
-    return this.getJobCard(companyName).getByRole('button', { name: /더보기/ });
+    return this.getJobCard(companyName).getByTitle('더보기');
   }
 }

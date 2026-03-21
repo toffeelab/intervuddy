@@ -8,7 +8,7 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 export default tseslint.config(
   // Global ignores
   {
-    ignores: ['.next/', 'out/', 'build/', 'node_modules/', 'coverage/', '*.db'],
+    ignores: ['.next/', 'out/', 'build/', 'node_modules/', 'coverage/', '*.db', '.worktrees/', '.claude/worktrees/'],
   },
 
   // Base TypeScript rules

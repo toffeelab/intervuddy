@@ -2,7 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import { encode } from 'next-auth/jwt';
 
-const AUTH_SECRET = process.env.AUTH_SECRET || 'e2e-test-secret';
+function getAuthSecret(): string {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret)
+    throw new Error('AUTH_SECRET 환경변수가 설정되지 않았습니다. .env.local을 확인하세요.');
+  return secret;
+}
 const STORAGE_STATE_DIR = path.join(__dirname, '..', '.auth');
 
 export interface TestUser {
@@ -37,7 +42,7 @@ export async function createAuthState(user: TestUser): Promise<string> {
       name: user.name,
       email: user.email,
     },
-    secret: AUTH_SECRET,
+    secret: getAuthSecret(),
     salt: 'authjs.session-token',
   });
 

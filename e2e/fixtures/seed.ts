@@ -139,6 +139,17 @@ export async function seedE2EData(): Promise<void> {
     displayOrder: 1,
   });
 
+  // User A 공통 질문 (JD 없음 → 학습 모드 "공통 라이브러리"에 표시)
+  await db.insert(interviewQuestions).values({
+    userId: TEST_USER_A.id,
+    categoryId: catA.id,
+    question: '본인의 강점은 무엇인가요?',
+    answer: '문제 해결 능력과 팀 커뮤니케이션입니다.',
+    tip: '구체적 사례를 들어 설명하세요',
+    keywords: ['강점', '역량'],
+    displayOrder: 2,
+  });
+
   // User B 데이터: 별도 공고 (데이터 격리 검증용)
   await db.insert(jobDescriptions).values({
     userId: TEST_USER_B.id,
