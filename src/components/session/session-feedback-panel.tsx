@@ -15,13 +15,21 @@ interface Props {
 }
 
 export function SessionFeedbackPanel({ send, myRole }: Props) {
-  const { questions, currentDisplayOrder, feedbacks, suggestions } = useSessionStore();
+  const { questions, currentDisplayOrder, feedbacks, suggestions, participants } =
+    useSessionStore();
   const [feedbackContent, setFeedbackContent] = useState('');
   const [score, setScore] = useState<number | null>(null);
   const [suggestionContent, setSuggestionContent] = useState('');
 
   const currentQuestion = questions.find((q) => q.displayOrder === currentDisplayOrder);
   const currentFeedbacks = feedbacks.filter((f) => f.displayOrder === currentDisplayOrder);
+  const previousQuestions = questions
+    .filter((q) => q.displayOrder !== currentDisplayOrder)
+    .sort((a, b) => b.displayOrder - a.displayOrder);
+
+  function resolveDisplayName(userId: string): string {
+    return participants.find((p) => p.userId === userId)?.displayName || userId;
+  }
 
   function handleSendFeedback() {
     if (!currentDisplayOrder) return;
@@ -45,6 +53,8 @@ export function SessionFeedbackPanel({ send, myRole }: Props) {
     });
     setSuggestionContent('');
   }
+
+  const feedbackDisabled = !currentQuestion;
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -72,43 +82,51 @@ export function SessionFeedbackPanel({ send, myRole }: Props) {
       <div className="border-iv-border border-b p-3">
         <h4 className="text-iv-text mb-2 text-sm font-medium">피드백</h4>
 
-        {/* Score buttons */}
-        <div className="mb-2 flex items-center gap-1">
-          <span className="text-iv-text3 mr-1 text-xs">점수:</span>
-          {[1, 2, 3, 4, 5].map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setScore(score === s ? null : s)}
-              className="rounded p-0.5 transition-colors"
-            >
-              <Star
-                className={cn(
-                  'size-4',
-                  score !== null && s <= score ? 'fill-yellow-400 text-yellow-400' : 'text-iv-text3'
-                )}
-              />
-            </button>
-          ))}
-          {score !== null && <span className="text-iv-text3 ml-1 text-xs">{score}/5</span>}
-        </div>
+        {feedbackDisabled ? (
+          <p className="text-iv-text3 text-xs">질문이 출제되면 피드백을 남길 수 있습니다.</p>
+        ) : (
+          <>
+            {/* Score buttons */}
+            <div className="mb-2 flex items-center gap-1">
+              <span className="text-iv-text3 mr-1 text-xs">점수:</span>
+              {[1, 2, 3, 4, 5].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setScore(score === s ? null : s)}
+                  className="rounded p-0.5 transition-colors"
+                >
+                  <Star
+                    className={cn(
+                      'size-4',
+                      score !== null && s <= score
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-iv-text3'
+                    )}
+                  />
+                </button>
+              ))}
+              {score !== null && <span className="text-iv-text3 ml-1 text-xs">{score}/5</span>}
+            </div>
 
-        <div className="flex gap-2">
-          <Textarea
-            placeholder="피드백을 입력하세요..."
-            value={feedbackContent}
-            onChange={(e) => setFeedbackContent(e.target.value)}
-            className="min-h-[50px] resize-none text-sm"
-          />
-          <Button
-            size="sm"
-            className="shrink-0 self-end"
-            onClick={handleSendFeedback}
-            disabled={!feedbackContent.trim() && score === null}
-          >
-            <Send className="size-3.5" />
-          </Button>
-        </div>
+            <div className="flex gap-2">
+              <Textarea
+                placeholder="피드백을 입력하세요..."
+                value={feedbackContent}
+                onChange={(e) => setFeedbackContent(e.target.value)}
+                className="min-h-[50px] resize-none text-sm"
+              />
+              <Button
+                size="sm"
+                className="shrink-0 self-end"
+                onClick={handleSendFeedback}
+                disabled={!feedbackContent.trim() && score === null}
+              >
+                <Send className="size-3.5" />
+              </Button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Reviewer: question suggestion */}
@@ -134,7 +152,7 @@ export function SessionFeedbackPanel({ send, myRole }: Props) {
         </div>
       )}
 
-      {/* Display feedbacks */}
+      {/* Display feedbacks + Q&A history */}
       <div className="flex-1 overflow-y-auto p-3">
         {currentFeedbacks.length > 0 && (
           <>
@@ -143,7 +161,9 @@ export function SessionFeedbackPanel({ send, myRole }: Props) {
               {currentFeedbacks.map((f, i) => (
                 <div key={i} className="bg-iv-bg2 rounded-md p-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-iv-text3 text-[10px]">{f.sender}</span>
+                    <span className="text-iv-text3 text-[10px]">
+                      {resolveDisplayName(f.sender)}
+                    </span>
                     {f.score !== undefined && f.score !== null && (
                       <span className="flex items-center gap-0.5 text-[10px]">
                         <Star className="size-3 fill-yellow-400 text-yellow-400" />
@@ -167,10 +187,58 @@ export function SessionFeedbackPanel({ send, myRole }: Props) {
             <div className="space-y-2">
               {suggestions.map((s, i) => (
                 <div key={i} className="bg-iv-bg2 rounded-md p-2">
-                  <span className="text-iv-text3 text-[10px]">{s.sender}</span>
+                  <span className="text-iv-text3 text-[10px]">{resolveDisplayName(s.sender)}</span>
                   <p className="text-iv-text2 mt-0.5 text-xs">{s.content}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Q&A history */}
+        {previousQuestions.length > 0 && (
+          <div className="mt-3">
+            <h5 className="text-iv-text3 mb-2 text-xs font-medium">이전 Q&A</h5>
+            <div className="space-y-2">
+              {previousQuestions.map((q) => {
+                const qFeedbacks = feedbacks.filter((f) => f.displayOrder === q.displayOrder);
+                return (
+                  <div key={q.displayOrder} className="border-iv-border rounded-md border p-2.5">
+                    <p className="text-iv-text3 text-[10px]">Q{q.displayOrder}</p>
+                    <p className="text-iv-text mt-0.5 text-xs leading-relaxed">{q.content}</p>
+                    {q.answer && (
+                      <div className="bg-iv-bg2 mt-1.5 rounded p-1.5">
+                        <p className="text-iv-text3 text-[10px]">답변:</p>
+                        <p className="text-iv-text2 text-xs leading-relaxed whitespace-pre-wrap">
+                          {q.answer.content}
+                        </p>
+                      </div>
+                    )}
+                    {qFeedbacks.length > 0 && (
+                      <div className="mt-1.5 space-y-1">
+                        {qFeedbacks.map((f, i) => (
+                          <div key={i} className="flex items-center gap-1.5">
+                            <span className="text-iv-text3 text-[10px]">
+                              {resolveDisplayName(f.sender)}:
+                            </span>
+                            {f.score !== undefined && f.score !== null && (
+                              <span className="flex items-center gap-0.5 text-[10px]">
+                                <Star className="size-2.5 fill-yellow-400 text-yellow-400" />
+                                {f.score}
+                              </span>
+                            )}
+                            {f.content && (
+                              <span className="text-iv-text2 truncate text-[10px]">
+                                {f.content}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

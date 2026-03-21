@@ -107,35 +107,38 @@ export function SessionResultView({ session, participants, records }: Props) {
                       피드백 ({record.feedbacks.length})
                     </p>
                     <div className="space-y-2">
-                      {record.feedbacks.map((fb, i) => (
-                        <div key={i} className="bg-iv-bg rounded-md p-2.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-iv-text3 text-[10px]">
-                              {fb.userId.slice(0, 8)}
-                            </span>
-                            {fb.score !== null && (
-                              <span className="flex items-center gap-0.5 text-[10px]">
-                                {Array.from({ length: 5 }).map((_, idx) => (
-                                  <Star
-                                    key={idx}
-                                    className={cn(
-                                      'size-2.5',
-                                      idx < fb.score!
-                                        ? 'fill-yellow-400 text-yellow-400'
-                                        : 'text-iv-text3'
-                                    )}
-                                  />
-                                ))}
-                              </span>
+                      {record.feedbacks.map((fb, i) => {
+                        const feedbackAuthor =
+                          participants.find((p) => p.userId === fb.userId)?.displayName ??
+                          fb.userId.slice(0, 8);
+                        return (
+                          <div key={i} className="bg-iv-bg rounded-md p-2.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-iv-text3 text-[10px]">{feedbackAuthor}</span>
+                              {fb.score !== null && (
+                                <span className="flex items-center gap-0.5 text-[10px]">
+                                  {Array.from({ length: 5 }).map((_, idx) => (
+                                    <Star
+                                      key={idx}
+                                      className={cn(
+                                        'size-2.5',
+                                        idx < fb.score!
+                                          ? 'fill-yellow-400 text-yellow-400'
+                                          : 'text-iv-text3'
+                                      )}
+                                    />
+                                  ))}
+                                </span>
+                              )}
+                            </div>
+                            {fb.content && (
+                              <p className="text-iv-text2 mt-1 text-xs leading-relaxed">
+                                {fb.content}
+                              </p>
                             )}
                           </div>
-                          {fb.content && (
-                            <p className="text-iv-text2 mt-1 text-xs leading-relaxed">
-                              {fb.content}
-                            </p>
-                          )}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

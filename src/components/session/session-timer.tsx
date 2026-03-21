@@ -14,7 +14,7 @@ interface Props {
 const TIMER_PRESETS = [60, 120, 180, 300]; // seconds
 
 export function SessionTimer({ isInterviewer, send }: Props) {
-  const { timerDuration, timerStartedAt } = useSessionStore();
+  const { timerDuration, timerStartedAt, questions } = useSessionStore();
   const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {
@@ -43,6 +43,7 @@ export function SessionTimer({ isInterviewer, send }: Props) {
   }
 
   const isRunning = timerDuration !== null && timerStartedAt !== null;
+  const hasQuestions = questions.length > 0;
   const minutes = remaining !== null ? Math.floor(remaining / 60) : 0;
   const seconds = remaining !== null ? remaining % 60 : 0;
 
@@ -63,7 +64,13 @@ export function SessionTimer({ isInterviewer, send }: Props) {
       ) : isInterviewer ? (
         <div className="flex gap-1">
           {TIMER_PRESETS.map((s) => (
-            <Button key={s} size="sm" variant="ghost" onClick={() => handleStart(s)}>
+            <Button
+              key={s}
+              size="sm"
+              variant="ghost"
+              onClick={() => handleStart(s)}
+              disabled={!hasQuestions}
+            >
               {s >= 60 ? `${s / 60}분` : `${s}초`}
             </Button>
           ))}

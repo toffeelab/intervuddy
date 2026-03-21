@@ -81,16 +81,27 @@ export function SessionAnswerPanel({ send }: Props) {
 
       {/* Previous questions */}
       {questions.length > 1 && (
-        <div className="border-iv-border max-h-40 overflow-y-auto border-t p-3">
+        <div className="border-iv-border overflow-y-auto border-t p-3" style={{ maxHeight: '40%' }}>
           <p className="text-iv-text3 mb-2 text-xs font-medium">이전 질문</p>
-          {questions
-            .filter((q) => q.displayOrder !== currentDisplayOrder)
-            .map((q) => (
-              <div key={q.displayOrder} className="mb-2 last:mb-0">
-                <p className="text-iv-text3 text-[10px]">Q{q.displayOrder}</p>
-                <p className="text-iv-text truncate text-xs">{q.content}</p>
-              </div>
-            ))}
+          <div className="space-y-2">
+            {questions
+              .filter((q) => q.displayOrder !== currentDisplayOrder)
+              .sort((a, b) => b.displayOrder - a.displayOrder)
+              .map((q) => (
+                <div key={q.displayOrder} className="border-iv-border rounded-md border p-2">
+                  <p className="text-iv-text3 text-[10px]">Q{q.displayOrder}</p>
+                  <p className="text-iv-text mt-0.5 text-xs leading-relaxed">{q.content}</p>
+                  {q.answer && (
+                    <div className="bg-iv-bg2 mt-1.5 rounded p-1.5">
+                      <p className="text-iv-text3 text-[10px]">내 답변:</p>
+                      <p className="text-iv-text2 text-xs leading-relaxed whitespace-pre-wrap">
+                        {q.answer.content}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
         </div>
       )}
     </div>

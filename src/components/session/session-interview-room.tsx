@@ -71,7 +71,7 @@ function InterviewerLayout({
 
 function IntervieweeLayout({ send }: { send: (message: ClientMessage) => void }) {
   return (
-    <div className="flex w-full flex-1 flex-col">
+    <div className="flex min-h-0 w-full flex-1 flex-col">
       <SessionAnswerPanel send={send} />
     </div>
   );

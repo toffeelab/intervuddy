@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Check, Copy, Link2, Play } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Check, Copy, Link2, Loader2, Play } from 'lucide-react';
 import { createInvitationAction } from '@/actions/session-actions';
 import { SessionInterviewRoom } from '@/components/session/session-interview-room';
 import { SessionParticipantsBar } from '@/components/session/session-participants-bar';
@@ -36,6 +37,7 @@ export function SessionWaitingRoom({
   initialTitle,
   libraryQuestions,
 }: Props) {
+  const router = useRouter();
   const { status, participants, setSession, handleServerMessage, reset } = useSessionStore();
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteRole, setInviteRole] = useState<SessionRole>('interviewee');
@@ -46,6 +48,15 @@ export function SessionWaitingRoom({
     setSession(sessionId, myRole);
     return () => reset();
   }, [sessionId, myRole, setSession, reset]);
+
+  // Auto-redirect on session completion
+  useEffect(() => {
+    if (status !== 'completed') return;
+    const timer = setTimeout(() => {
+      router.push(`/interviews/sessions/${sessionId}/result`);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [status, sessionId, router]);
 
   const onMessage = useCallback(
     (message: ServerMessage) => {
@@ -100,19 +111,11 @@ export function SessionWaitingRoom({
     );
   }
 
-  // Completed state - should redirect but show a message as fallback
   if (status === 'completed') {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="text-iv-text3 text-center text-sm">
-          <p>이 세션은 종료되었습니다.</p>
-          <a
-            href={`/interviews/sessions/${sessionId}/result`}
-            className="text-iv-accent mt-2 inline-block hover:underline"
-          >
-            결과 보기
-          </a>
-        </div>
+      <div className="flex flex-1 flex-col items-center justify-center gap-3">
+        <Loader2 className="text-iv-text3 size-6 animate-spin" />
+        <p className="text-iv-text text-sm">면접이 종료되었습니다. 결과 페이지로 이동합니다...</p>
       </div>
     );
   }
