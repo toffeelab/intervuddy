@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
-import { acceptInvitationAction } from '@/actions/session-actions';
-import { getInvitationByCode } from '@/data-access';
+import { acceptInvitation, getInvitationByCode } from '@/data-access';
 import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
@@ -11,7 +10,7 @@ interface Props {
 
 export default async function JoinSessionPage({ params }: Props) {
   const { code } = await params;
-  await getCurrentUserId(); // ensure authenticated
+  const userId = await getCurrentUserId();
 
   const invitation = await getInvitationByCode(code);
 
@@ -32,10 +31,10 @@ export default async function JoinSessionPage({ params }: Props) {
     return <ErrorView message="초대 사용 횟수가 초과되었습니다." />;
   }
 
-  // Accept invitation and redirect
+  // Accept invitation and redirect (직접 data-access 호출 — Server Action은 렌더링 중 revalidatePath 불가)
   let sessionId: string;
   try {
-    const result = await acceptInvitationAction(code);
+    const result = await acceptInvitation(code, userId);
     sessionId = result.sessionId;
   } catch (error: unknown) {
     const message =
