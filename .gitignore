@@ -58,5 +58,7 @@ data/seed.ts
 .worktrees/
 
 # Playwright / E2E
+test-results/
+playwright-report/
 e2e/.auth/
-test-results/.superpowers/
+.superpowers/

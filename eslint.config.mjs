@@ -8,7 +8,7 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 export default tseslint.config(
   // Global ignores
   {
-    ignores: ['.next/', 'out/', 'build/', 'node_modules/', 'coverage/', '*.db'],
+    ignores: ['.next/', 'out/', 'build/', 'node_modules/', 'coverage/', '*.db', '.worktrees/', '.claude/worktrees/'],
   },
 
   // Base TypeScript rules
@@ -69,6 +69,15 @@ export default tseslint.config(
   {
     files: ['**/*.test.{ts,tsx}', '**/test/**/*.{ts,tsx}'],
     rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+
+  // E2E test overrides (Playwright's `use()` is not a React Hook)
+  {
+    files: ['e2e/**/*.{ts,tsx}'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
