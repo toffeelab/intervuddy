@@ -57,12 +57,12 @@ describe('session-store', () => {
     } as ServerMessage);
 
     // 답변 추가
-    const answerMessage = {
+    const answerMessage: ServerMessage = {
       type: 'answer:send',
       payload: { displayOrder: 1, content: '안녕하세요, 저는...' },
       sender: 'u2',
       timestamp: 1000,
-    } as unknown as ServerMessage;
+    };
 
     useSessionStore.getState().handleServerMessage(answerMessage);
 
@@ -116,12 +116,12 @@ describe('session-store', () => {
   });
 
   it('feedback:send 메시지로 피드백 추가', () => {
-    const message = {
+    const message: ServerMessage = {
       type: 'feedback:send',
       payload: { displayOrder: 1, content: '좋은 답변이었습니다', score: 4 },
       sender: 'u1',
       timestamp: 2000,
-    } as unknown as ServerMessage;
+    };
 
     useSessionStore.getState().handleServerMessage(message);
 

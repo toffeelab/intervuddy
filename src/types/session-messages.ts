@@ -31,12 +31,15 @@ export type ClientMessage =
   | { type: 'feedback:send'; payload: { displayOrder: number; content: string; score?: number } }
   | { type: 'question:suggest'; payload: { content: string } };
 
+// 릴레이된 클라이언트 메시지 (서버가 sender/timestamp를 추가)
+export type RelayedClientMessage = ClientMessage & { sender: string; timestamp: number };
+
 // 서버 → 클라이언트 메시지
 export type ServerMessage =
   | { type: 'participants'; payload: { participants: Participant[] } }
   | { type: 'sync'; payload: SyncState }
   | { type: 'error'; payload: { message: string } }
-  | ClientMessage; // 릴레이된 클라이언트 메시지
+  | RelayedClientMessage;
 
 export interface Participant {
   userId: string;

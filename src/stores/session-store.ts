@@ -1,5 +1,10 @@
 import { create } from 'zustand';
-import type { Participant, ServerMessage, SessionRole } from '@/types/session-messages';
+import type {
+  Participant,
+  RelayedClientMessage,
+  ServerMessage,
+  SessionRole,
+} from '@/types/session-messages';
 
 interface SessionQuestion {
   displayOrder: number;
@@ -40,6 +45,10 @@ interface SessionState {
   setSession: (sessionId: string, role: SessionRole) => void;
   handleServerMessage: (message: ServerMessage) => void;
   reset: () => void;
+}
+
+function isRelayed(message: ServerMessage): message is RelayedClientMessage {
+  return 'sender' in message && 'timestamp' in message;
 }
 
 const initialState = {
@@ -108,13 +117,13 @@ export const useSessionStore = create<SessionState>((set) => ({
       case 'answer:send':
         set((state) => ({
           questions: state.questions.map((q) =>
-            q.displayOrder === message.payload.displayOrder
+            q.displayOrder === message.payload.displayOrder && isRelayed(message)
               ? {
                   ...q,
                   answer: {
                     content: message.payload.content,
-                    sender: (message as unknown as { sender: string }).sender,
-                    timestamp: (message as unknown as { timestamp: number }).timestamp,
+                    sender: message.sender,
+                    timestamp: message.timestamp,
                   },
                 }
               : q
@@ -134,31 +143,35 @@ export const useSessionStore = create<SessionState>((set) => ({
         break;
 
       case 'feedback:send':
-        set((state) => ({
-          feedbacks: [
-            ...state.feedbacks,
-            {
-              displayOrder: message.payload.displayOrder,
-              content: message.payload.content,
-              score: message.payload.score,
-              sender: (message as unknown as { sender: string }).sender,
-              timestamp: (message as unknown as { timestamp: number }).timestamp,
-            },
-          ],
-        }));
+        if (isRelayed(message)) {
+          set((state) => ({
+            feedbacks: [
+              ...state.feedbacks,
+              {
+                displayOrder: message.payload.displayOrder,
+                content: message.payload.content,
+                score: message.payload.score,
+                sender: message.sender,
+                timestamp: message.timestamp,
+              },
+            ],
+          }));
+        }
         break;
 
       case 'question:suggest':
-        set((state) => ({
-          suggestions: [
-            ...state.suggestions,
-            {
-              content: message.payload.content,
-              sender: (message as unknown as { sender: string }).sender,
-              timestamp: (message as unknown as { timestamp: number }).timestamp,
-            },
-          ],
-        }));
+        if (isRelayed(message)) {
+          set((state) => ({
+            suggestions: [
+              ...state.suggestions,
+              {
+                content: message.payload.content,
+                sender: message.sender,
+                timestamp: message.timestamp,
+              },
+            ],
+          }));
+        }
         break;
     }
   },
