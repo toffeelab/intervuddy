@@ -1,0 +1,1 @@
+ALTER TABLE "session_feedbacks" ALTER COLUMN "score" SET DATA TYPE real;

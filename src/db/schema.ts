@@ -3,6 +3,7 @@ import {
   integer,
   pgTable,
   primaryKey,
+  real,
   text,
   timestamp,
   unique,
@@ -267,7 +268,7 @@ export const sessionFeedbacks = pgTable('session_feedbacks', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   content: text('content'),
-  score: integer('score'),
+  score: real('score'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
