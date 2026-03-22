@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { UserMenu } from '@/components/shared/user-menu';
 import { navItems, settingsItem } from './nav-config';
 
 function getPageTitle(pathname: string): string {
@@ -27,7 +28,10 @@ export function MobileHeader({ actions }: MobileHeaderProps) {
         </div>
         <h1 className="text-iv-text text-sm font-semibold">{title}</h1>
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      <div className="flex items-center gap-2">
+        {actions}
+        <UserMenu variant="mobile" />
+      </div>
     </header>
   );
 }
