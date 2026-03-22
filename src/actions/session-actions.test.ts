@@ -1,10 +1,10 @@
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import { getInvitationByCode } from '@/data-access/session-invitations';
-import { getParticipants } from '@/data-access/session-participants';
-import { getSessionById, getSessionsByUserId } from '@/data-access/sessions';
+import { getSessionById } from '@/data-access/sessions';
 import { DEFAULT_USER_ID } from '@/db/constants';
 import * as schema from '@/db/schema';
+import { users } from '@/db/schema';
 import { createTestDb, cleanupTestDb, truncateAllTables } from '@/test/helpers/db';
 import {
   createSessionAction,
@@ -139,18 +139,10 @@ describe('session-actions', () => {
 
       // Simulate a different user accepting
       const secondUserId = 'second-user';
-      const pool = await import('pg').then((pg) => {
-        return new pg.Pool({
-          connectionString:
-            process.env.DATABASE_URL?.replace(/\/[^/]+$/, '/intervuddy_test') ??
-            'postgresql://intervuddy:intervuddy@localhost:5433/intervuddy_test',
-        });
-      });
-      await pool.query(
-        'INSERT INTO users (id, name, email) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
-        [secondUserId, 'Second User', 'second@test.com']
-      );
-      await pool.end();
+      await db
+        .insert(users)
+        .values({ id: secondUserId, name: 'Second User', email: 'second@test.com' })
+        .onConflictDoNothing();
 
       // Mock getCurrentUserId to return the second user
       const { getCurrentUserId } = await import('@/lib/auth');
@@ -169,18 +161,10 @@ describe('session-actions', () => {
       const { inviteCode } = await createInvitationAction(sessionId, 'reviewer');
 
       const thirdUserId = 'third-user';
-      const pool = await import('pg').then((pg) => {
-        return new pg.Pool({
-          connectionString:
-            process.env.DATABASE_URL?.replace(/\/[^/]+$/, '/intervuddy_test') ??
-            'postgresql://intervuddy:intervuddy@localhost:5433/intervuddy_test',
-        });
-      });
-      await pool.query(
-        'INSERT INTO users (id, name, email) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
-        [thirdUserId, 'Third User', 'third@test.com']
-      );
-      await pool.end();
+      await db
+        .insert(users)
+        .values({ id: thirdUserId, name: 'Third User', email: 'third@test.com' })
+        .onConflictDoNothing();
 
       const { getCurrentUserId } = await import('@/lib/auth');
       vi.mocked(getCurrentUserId).mockResolvedValueOnce(thirdUserId);
