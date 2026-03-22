@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type ThemeMode = 'dark' | 'light' | 'system';
+export type ThemeMode = 'dark' | 'light' | 'system';
 
 interface ThemeStore {
   mode: ThemeMode;

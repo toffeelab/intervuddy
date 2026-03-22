@@ -1,7 +1,7 @@
 'use client';
 
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { UserMenu } from '@/components/shared/user-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMediaQuery } from '@/lib/hooks/use-media-query';
 import { cn } from '@/lib/utils';
@@ -89,14 +89,12 @@ export function AppSidebar() {
           })}
         </nav>
 
-        {/* Bottom: Settings + Theme */}
+        {/* Bottom: Settings + User */}
         <div className="border-iv-border border-t p-2">
           <SidebarNavItem item={settingsItem} isCollapsed={isCollapsed} />
-          {!isCollapsed && (
-            <div className="mt-1 px-2.5">
-              <ThemeToggle />
-            </div>
-          )}
+          <div className="mt-1">
+            <UserMenu variant={isCollapsed ? 'collapsed' : 'expanded'} />
+          </div>
         </div>
       </aside>
     </TooltipProvider>
