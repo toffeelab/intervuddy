@@ -11,10 +11,8 @@ interface Props {
   send: (message: ClientMessage) => void;
 }
 
-const TIMER_PRESETS = [60, 120, 180, 300]; // seconds
-
 export function SessionTimer({ isInterviewer, send }: Props) {
-  const { timerDuration, timerStartedAt, questions } = useSessionStore();
+  const { timerDuration, timerStartedAt } = useSessionStore();
   const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {
@@ -34,16 +32,11 @@ export function SessionTimer({ isInterviewer, send }: Props) {
     return () => clearInterval(interval);
   }, [timerDuration, timerStartedAt]);
 
-  function handleStart(seconds: number) {
-    send({ type: 'timer:start', payload: { duration: seconds } });
-  }
-
   function handleStop() {
     send({ type: 'timer:stop' });
   }
 
   const isRunning = timerDuration !== null && timerStartedAt !== null;
-  const hasQuestions = questions.length > 0;
   const minutes = remaining !== null ? Math.floor(remaining / 60) : 0;
   const seconds = remaining !== null ? remaining % 60 : 0;
 
@@ -61,20 +54,6 @@ export function SessionTimer({ isInterviewer, send }: Props) {
             </Button>
           )}
         </>
-      ) : isInterviewer ? (
-        <div className="flex gap-1">
-          {TIMER_PRESETS.map((s) => (
-            <Button
-              key={s}
-              size="sm"
-              variant="ghost"
-              onClick={() => handleStart(s)}
-              disabled={!hasQuestions}
-            >
-              {s >= 60 ? `${s / 60}분` : `${s}초`}
-            </Button>
-          ))}
-        </div>
       ) : (
         <span className="text-iv-text3 text-xs">타이머 대기 중</span>
       )}

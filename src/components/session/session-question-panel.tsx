@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Search, Send } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search, Send, Timer } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,11 +16,20 @@ interface Props {
   send: (message: ClientMessage) => void;
 }
 
+const TIMER_OPTIONS = [
+  { label: '없음', value: 0 },
+  { label: '1분', value: 60 },
+  { label: '2분', value: 120 },
+  { label: '3분', value: 180 },
+  { label: '5분', value: 300 },
+];
+
 export function SessionQuestionPanel({ libraryQuestions, send }: Props) {
   const { questions } = useSessionStore();
   const [search, setSearch] = useState('');
   const [customQuestion, setCustomQuestion] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedTimer, setSelectedTimer] = useState(120); // default 2분
 
   const filteredQuestions = search.trim()
     ? libraryQuestions.filter(
@@ -32,8 +41,15 @@ export function SessionQuestionPanel({ libraryQuestions, send }: Props) {
 
   const nextDisplayOrder = questions.length + 1;
 
+  function sendWithTimer(questionMsg: ClientMessage) {
+    send(questionMsg);
+    if (selectedTimer > 0) {
+      send({ type: 'timer:start', payload: { duration: selectedTimer } });
+    }
+  }
+
   function handleSendLibraryQuestion(q: InterviewQuestion) {
-    send({
+    sendWithTimer({
       type: 'question:send',
       payload: {
         questionId: q.id,
@@ -44,7 +60,7 @@ export function SessionQuestionPanel({ libraryQuestions, send }: Props) {
   }
 
   function handleSendFollowUp(parentQuestion: InterviewQuestion, followUpText: string) {
-    send({
+    sendWithTimer({
       type: 'question:send',
       payload: {
         questionId: parentQuestion.id,
@@ -57,7 +73,7 @@ export function SessionQuestionPanel({ libraryQuestions, send }: Props) {
 
   function handleSendCustomQuestion() {
     if (!customQuestion.trim()) return;
-    send({
+    sendWithTimer({
       type: 'question:send',
       payload: {
         content: customQuestion.trim(),
@@ -74,7 +90,27 @@ export function SessionQuestionPanel({ libraryQuestions, send }: Props) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="border-iv-border border-b p-3">
-        <h4 className="text-iv-text mb-2 text-sm font-medium">질문 출제</h4>
+        <div className="mb-2 flex items-center justify-between">
+          <h4 className="text-iv-text text-sm font-medium">질문 출제</h4>
+          <div className="flex items-center gap-1">
+            <Timer className="text-iv-text3 size-3.5" />
+            {TIMER_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedTimer(opt.value)}
+                className={cn(
+                  'rounded px-1.5 py-0.5 text-[10px] transition-colors',
+                  selectedTimer === opt.value
+                    ? 'bg-iv-accent text-white'
+                    : 'text-iv-text3 hover:bg-iv-bg3'
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Custom question input */}
         <div className="flex gap-2">
