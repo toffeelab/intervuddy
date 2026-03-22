@@ -188,9 +188,15 @@ export function SessionWaitingRoom({
           )}
 
           {myRole !== 'interviewer' && (
-            <p className="text-iv-text3 text-center text-sm">
-              면접관이 세션을 시작할 때까지 기다려주세요.
-            </p>
+            <div className="flex flex-col items-center gap-3 py-8">
+              <div className="flex items-center gap-1">
+                <span className="bg-iv-accent/60 inline-block size-2 animate-bounce rounded-full [animation-delay:0ms]" />
+                <span className="bg-iv-accent/60 inline-block size-2 animate-bounce rounded-full [animation-delay:150ms]" />
+                <span className="bg-iv-accent/60 inline-block size-2 animate-bounce rounded-full [animation-delay:300ms]" />
+              </div>
+              <p className="text-iv-text3 text-sm">면접관이 세션을 시작할 때까지 기다려주세요</p>
+              <p className="text-iv-text3/60 text-xs">곧 면접이 시작됩니다</p>
+            </div>
           )}
         </div>
       </div>
