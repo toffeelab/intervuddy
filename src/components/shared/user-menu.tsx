@@ -71,7 +71,7 @@ function UserAvatar({
         'text-iv-text2 bg-iv-bg3 flex items-center justify-center rounded-full'
       )}
     >
-      <User className="size-3.5" />
+      <User className="size-4" />
     </div>
   );
 }

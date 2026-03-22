@@ -115,3 +115,57 @@ export interface UpdateCategoryInput {
   displayLabel?: string;
   icon?: string;
 }
+
+// Session types
+export type SessionStatus = 'waiting' | 'in_progress' | 'completed';
+export type SessionRole = 'interviewer' | 'interviewee' | 'reviewer';
+export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
+
+export interface InterviewSession {
+  id: string;
+  title: string;
+  status: SessionStatus;
+  createdBy: string;
+  qaOwnerId: string | null;
+  jdId: string | null;
+  categoryId: number | null;
+  summary: string | null;
+  startedAt: Date | null;
+  endedAt: Date | null;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SessionParticipantInfo {
+  id: string;
+  sessionId: string;
+  userId: string;
+  role: SessionRole;
+  displayName: string | null;
+  joinedAt: Date;
+}
+
+export interface CreateSessionInput {
+  title: string;
+  role: SessionRole; // creator's role
+  qaOwnerId?: string;
+  jdId?: string | null;
+  categoryId?: number | null;
+}
+
+export interface SessionQuestionRecord {
+  id: string;
+  sessionId: string;
+  questionId: string | null;
+  content: string;
+  displayOrder: number;
+  askedAt: Date;
+  answer?: { userId: string; content: string; answeredAt: Date } | null;
+  feedbacks: Array<{
+    userId: string;
+    content: string | null;
+    score: number | null;
+    createdAt: Date;
+  }>;
+}

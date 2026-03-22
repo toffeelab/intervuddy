@@ -1,0 +1,5 @@
+{
+  "name": "intervuddy-interview",
+  "main": "src/interview-room.ts",
+  "compatibilityDate": "2025-03-01"
+}
