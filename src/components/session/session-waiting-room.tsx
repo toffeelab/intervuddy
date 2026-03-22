@@ -142,40 +142,42 @@ export function SessionWaitingRoom({
             </div>
           </div>
 
-          {/* Invite section */}
-          <div className="border-iv-border bg-iv-bg2 space-y-3 rounded-lg border p-4">
-            <h4 className="text-iv-text text-sm font-medium">참가자 초대</h4>
-            <div className="flex items-center gap-2">
-              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as SessionRole)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent align="start" alignItemWithTrigger={false}>
-                  <SelectItem value="interviewee">지원자</SelectItem>
-                  <SelectItem value="interviewer">면접관</SelectItem>
-                  <SelectItem value="reviewer">리뷰어</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button size="sm" onClick={handleCreateInvite} disabled={invitePending}>
-                <Link2 className="size-4" />
-                초대 생성
-              </Button>
-            </div>
-            {inviteCode && (
-              <div className="bg-iv-bg flex items-center gap-2 rounded-md border p-2">
-                <code className="text-iv-text flex-1 truncate text-xs">
-                  {`${typeof window !== 'undefined' ? window.location.origin : ''}/interviews/sessions/join/${inviteCode}`}
-                </code>
-                <Button size="sm" variant="ghost" onClick={handleCopyLink}>
-                  {copied ? (
-                    <Check className="size-3.5 text-green-500" />
-                  ) : (
-                    <Copy className="size-3.5" />
-                  )}
+          {/* Invite section (interviewer only) */}
+          {myRole === 'interviewer' && (
+            <div className="border-iv-border bg-iv-bg2 space-y-3 rounded-lg border p-4">
+              <h4 className="text-iv-text text-sm font-medium">참가자 초대</h4>
+              <div className="flex items-center gap-2">
+                <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as SessionRole)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent align="start" alignItemWithTrigger={false}>
+                    <SelectItem value="interviewee">지원자</SelectItem>
+                    <SelectItem value="interviewer">면접관</SelectItem>
+                    <SelectItem value="reviewer">리뷰어</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button size="sm" onClick={handleCreateInvite} disabled={invitePending}>
+                  <Link2 className="size-4" />
+                  초대 생성
                 </Button>
               </div>
-            )}
-          </div>
+              {inviteCode && (
+                <div className="bg-iv-bg flex items-center gap-2 rounded-md border p-2">
+                  <code className="text-iv-text flex-1 truncate text-xs">
+                    {`${typeof window !== 'undefined' ? window.location.origin : ''}/interviews/sessions/join/${inviteCode}`}
+                  </code>
+                  <Button size="sm" variant="ghost" onClick={handleCopyLink}>
+                    {copied ? (
+                      <Check className="size-3.5 text-green-500" />
+                    ) : (
+                      <Copy className="size-3.5" />
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Start button (interviewer only) */}
           {myRole === 'interviewer' && (

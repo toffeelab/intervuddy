@@ -70,6 +70,9 @@ export function SessionList({ sessions }: Props) {
                 <Clock className="size-3" />
                 {new Date(session.createdAt).toLocaleDateString('ko-KR')}
               </span>
+              {session.status === 'completed' && session.endedAt && (
+                <span>종료: {new Date(session.endedAt).toLocaleDateString('ko-KR')}</span>
+              )}
             </div>
           </div>
         );
