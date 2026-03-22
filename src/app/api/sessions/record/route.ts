@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getParticipantRole } from '@/data-access/session-participants';
 import {
   recordQuestion,
   recordAnswer,
@@ -17,6 +18,17 @@ export async function POST(request: NextRequest) {
   // 2. Parse body
   const { sessionId, message } = await request.json();
   const { type, payload, sender } = message;
+
+  // 3. Verify sender is a participant of the session
+  if (sender) {
+    const role = await getParticipantRole(sessionId, sender);
+    if (!role) {
+      return NextResponse.json(
+        { error: 'Sender is not a participant of this session' },
+        { status: 403 }
+      );
+    }
+  }
 
   try {
     switch (type) {
