@@ -145,8 +145,13 @@ function ReviewerQuestionView() {
 
   if (questions.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-iv-text3 text-sm">질문을 기다리는 중입니다...</p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-2">
+        <div className="flex items-center gap-1">
+          <span className="bg-iv-text3/40 inline-block size-1.5 animate-bounce rounded-full [animation-delay:0ms]" />
+          <span className="bg-iv-text3/40 inline-block size-1.5 animate-bounce rounded-full [animation-delay:150ms]" />
+          <span className="bg-iv-text3/40 inline-block size-1.5 animate-bounce rounded-full [animation-delay:300ms]" />
+        </div>
+        <p className="text-iv-text3 text-sm">질문을 기다리는 중</p>
       </div>
     );
   }

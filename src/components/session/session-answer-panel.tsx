@@ -46,8 +46,14 @@ export function SessionAnswerPanel({ send }: Props) {
 
   if (!currentQuestion) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-iv-text3 text-sm">질문을 기다리는 중입니다...</p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-3">
+        <div className="flex items-center gap-1">
+          <span className="bg-iv-accent/60 inline-block size-2 animate-bounce rounded-full [animation-delay:0ms]" />
+          <span className="bg-iv-accent/60 inline-block size-2 animate-bounce rounded-full [animation-delay:150ms]" />
+          <span className="bg-iv-accent/60 inline-block size-2 animate-bounce rounded-full [animation-delay:300ms]" />
+        </div>
+        <p className="text-iv-text3 text-sm">면접관이 질문을 준비하고 있습니다</p>
+        <p className="text-iv-text3/60 text-xs">잠시만 기다려주세요</p>
       </div>
     );
   }
@@ -80,9 +86,12 @@ export function SessionAnswerPanel({ send }: Props) {
                 {currentQuestion.answer?.content}
               </p>
             </div>
-            <p className="text-iv-text3 mt-2 text-center text-xs">
-              다음 질문을 기다리는 중입니다...
-            </p>
+            <div className="mt-3 flex items-center justify-center gap-1.5">
+              <span className="bg-iv-text3/40 inline-block size-1.5 animate-bounce rounded-full [animation-delay:0ms]" />
+              <span className="bg-iv-text3/40 inline-block size-1.5 animate-bounce rounded-full [animation-delay:150ms]" />
+              <span className="bg-iv-text3/40 inline-block size-1.5 animate-bounce rounded-full [animation-delay:300ms]" />
+              <p className="text-iv-text3 ml-1 text-xs">다음 질문을 기다리는 중</p>
+            </div>
           </div>
         ) : (
           <>

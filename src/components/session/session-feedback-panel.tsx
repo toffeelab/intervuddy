@@ -176,7 +176,12 @@ export function SessionFeedbackPanel({ send, myRole }: Props) {
             )}
           </>
         ) : (
-          <p className="text-iv-text3 text-sm">질문을 기다리는 중...</p>
+          <div className="flex items-center gap-1.5">
+            <span className="bg-iv-text3/40 inline-block size-1.5 animate-bounce rounded-full [animation-delay:0ms]" />
+            <span className="bg-iv-text3/40 inline-block size-1.5 animate-bounce rounded-full [animation-delay:150ms]" />
+            <span className="bg-iv-text3/40 inline-block size-1.5 animate-bounce rounded-full [animation-delay:300ms]" />
+            <p className="text-iv-text3 ml-1 text-sm">질문을 기다리는 중</p>
+          </div>
         )}
       </div>
 
