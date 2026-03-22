@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { ServerMessage } from '@/types/session-messages';
+import type { RelayedClientMessage, ServerMessage } from '@/types/session-messages';
 import { useSessionStore } from './session-store';
 
 describe('session-store', () => {
@@ -57,7 +57,7 @@ describe('session-store', () => {
     } as ServerMessage);
 
     // 답변 추가
-    const answerMessage: ServerMessage = {
+    const answerMessage: RelayedClientMessage = {
       type: 'answer:send',
       payload: { displayOrder: 1, content: '안녕하세요, 저는...' },
       sender: 'u2',
@@ -116,7 +116,7 @@ describe('session-store', () => {
   });
 
   it('feedback:send 메시지로 피드백 추가', () => {
-    const message: ServerMessage = {
+    const message: RelayedClientMessage = {
       type: 'feedback:send',
       payload: { displayOrder: 1, content: '좋은 답변이었습니다', score: 4 },
       sender: 'u1',
