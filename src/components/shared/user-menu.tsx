@@ -13,9 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import type { ThemeMode } from '@/stores/theme-store';
 import { useThemeStore } from '@/stores/theme-store';
-
-type ThemeMode = 'light' | 'dark' | 'system';
 
 const THEME_OPTIONS: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
   { value: 'light', label: '라이트', icon: Sun },
@@ -98,7 +97,7 @@ export function UserMenu({ variant }: UserMenuProps) {
 
   const { user } = session;
   const avatarSize = variant === 'mobile' ? 'sm' : 'md';
-  const dropdownSide = variant === 'mobile' ? 'bottom' : 'right';
+  const dropdownSide: 'bottom' | 'right' = variant === 'mobile' ? 'bottom' : 'right';
   const dropdownSideOffset = variant === 'mobile' ? 4 : 8;
 
   return (
@@ -124,7 +123,7 @@ export function UserMenu({ variant }: UserMenuProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        side={dropdownSide as 'bottom' | 'right'}
+        side={dropdownSide}
         align="end"
         sideOffset={dropdownSideOffset}
         className="w-auto min-w-[220px]"

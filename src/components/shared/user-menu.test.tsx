@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // --- Mocks (vi.hoisted 패턴) ---
+// Note: initial values mirror DEFAULT_SESSION. Both must stay in sync.
 const mockSession = vi.hoisted(() => ({
   data: {
     user: {
@@ -84,12 +85,11 @@ describe('UserMenu', () => {
     expect(screen.getAllByText('test@example.com').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('collapsed variant: 트리거에는 아바타만 표시, 이름/이메일 없음', () => {
+  it('collapsed variant: 아바타만 표시, 이름/이메일 숨김', () => {
     render(<UserMenu variant="collapsed" />);
-    expect(screen.getByAltText('Test User')).toBeInTheDocument();
-    // 트리거에는 이름/이메일이 없지만, 드롭다운 content에는 있음
     const trigger = screen.getByLabelText('사용자 메뉴');
-    expect(trigger.querySelector('.text-iv-text')).toBeNull();
+    expect(within(trigger).queryByText('Test User')).not.toBeInTheDocument();
+    expect(within(trigger).queryByText('test@example.com')).not.toBeInTheDocument();
   });
 
   it('mobile variant: 아바타만 표시', () => {
