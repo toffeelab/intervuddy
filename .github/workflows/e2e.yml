@@ -3,7 +3,7 @@ name: E2E Tests
 on:
   pull_request:
     branches: [develop]
-    paths: ['src/**', 'e2e/**', 'playwright.config.ts']
+    paths: ['apps/web/**', 'packages/**']
 
 jobs:
   e2e:
@@ -48,17 +48,17 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter @intervuddy/web exec playwright install --with-deps chromium
 
       - name: Install Playwright system deps
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
+        run: pnpm --filter @intervuddy/web exec playwright install-deps chromium
 
       - name: Run E2E tests
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intervuddy_test
           AUTH_SECRET: e2e-ci-test-secret
-        run: pnpm test:e2e
+        run: pnpm --filter @intervuddy/web test:e2e
 
       - name: Upload test artifacts
         if: failure()
@@ -66,6 +66,6 @@ jobs:
         with:
           name: playwright-report
           path: |
-            test-results/
-            playwright-report/
+            apps/web/test-results/
+            apps/web/playwright-report/
           retention-days: 7

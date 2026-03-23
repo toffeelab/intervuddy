@@ -6,7 +6,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/migrate.ts",
+    "db:migrate": "tsx --env-file=../../apps/web/.env.local src/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "db:seed:sample": "tsx --env-file=../../apps/web/.env.local src/seed.ts --sample",
     "db:seed": "tsx --env-file=../../apps/web/.env.local src/seed.ts",
@@ -15,7 +15,6 @@
   "dependencies": {
     "drizzle-orm": "^0.45.1",
     "pg": "^8.20.0",
-    "@neondatabase/serverless": "^1.0.0",
     "@intervuddy/shared": "workspace:*"
   },
   "devDependencies": {

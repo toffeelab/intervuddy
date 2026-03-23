@@ -11,7 +11,7 @@ import {
 } from './schema';
 
 const useSample = process.argv.includes('--sample');
-const dataSource = useSample ? '../../data/seed.sample' : '../../data/seed';
+const dataSource = useSample ? '../../../apps/web/data/seed.sample' : '../../../apps/web/data/seed';
 
 async function main() {
   console.log(`Using ${useSample ? 'sample' : 'personal'} seed data`);

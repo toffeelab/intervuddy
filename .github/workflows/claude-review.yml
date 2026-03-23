@@ -61,7 +61,7 @@ jobs:
             2. 다음 파일/디렉토리는 리뷰에서 제외:
                - `pnpm-lock.yaml`, `package.json`
                - `.github/screenshots/*`, `.github/workflows/*`
-               - `src/components/ui/*` (shadcn/ui 보일러플레이트)
+               - `apps/web/src/components/ui/*` (shadcn/ui 보일러플레이트)
                - `.claude/`, `docs/`
             3. 필터링된 파일만 `git diff origin/develop -- <파일>`로 개별 읽기
             4. 전체 diff를 한번에 읽지 말 것
@@ -114,7 +114,7 @@ jobs:
             - 메모리 저장/설정 작업 금지
             - 전체 diff를 한번에 읽기 금지
             - `gh pr review`, `gh pr comment` 등 직접 게시 명령 실행 금지
-            - `src/components/ui/*` 파일 리뷰 금지 (shadcn/ui 보일러플레이트)
+            - `apps/web/src/components/ui/*` 파일 리뷰 금지 (shadcn/ui 보일러플레이트)
             - `.github/screenshots/*` 파일 읽기 금지 (바이너리)
             - diff에 포함되지 않은 파일에 대한 이슈 제기 금지 — PR 범위 밖 코드는 리뷰 대상이 아님
 
