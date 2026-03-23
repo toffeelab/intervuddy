@@ -1,6 +1,6 @@
+import { DEFAULT_USER_ID, SYSTEM_USER_ID } from '@intervuddy/shared';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { DEFAULT_USER_ID, SYSTEM_USER_ID } from '@/db/constants';
 import { setDb, resetDb } from '@/db/index';
 import * as schema from '@/db/schema';
 import {

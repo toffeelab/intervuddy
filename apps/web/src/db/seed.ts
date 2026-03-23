@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
+import { SYSTEM_USER_ID, DEFAULT_USER_ID } from '@intervuddy/shared';
 import { sql } from 'drizzle-orm';
 import { getDb, getPool } from '@/db';
-import { SYSTEM_USER_ID, DEFAULT_USER_ID } from '@/db/constants';
 import {
   users,
   interviewCategories,

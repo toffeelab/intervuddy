@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { InterviewQuestion, SessionRole } from '@intervuddy/shared';
 import { Square } from 'lucide-react';
 import { SessionAnswerPanel } from '@/components/session/session-answer-panel';
 import { SessionFeedbackPanel } from '@/components/session/session-feedback-panel';
@@ -15,7 +16,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import type { InterviewQuestion, SessionRole } from '@/data-access/types';
 import { useSessionStore } from '@/stores/session-store';
 import type { ClientMessage } from '@/types/session-messages';
 

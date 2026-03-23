@@ -1,13 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import type { CreateFollowupInput, UpdateFollowupInput } from '@intervuddy/shared';
 import {
   createFollowup as dbCreate,
   updateFollowup as dbUpdate,
   softDeleteFollowup as dbDelete,
   restoreFollowup as dbRestore,
 } from '@/data-access/followups';
-import type { CreateFollowupInput, UpdateFollowupInput } from '@/data-access/types';
 import { getCurrentUserId } from '@/lib/auth';
 
 export async function createFollowupAction(input: CreateFollowupInput) {

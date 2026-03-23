@@ -1,7 +1,7 @@
+import type { InterviewSession, SessionStatus, CreateSessionInput } from '@intervuddy/shared';
 import { eq, and, isNull, desc, sql } from 'drizzle-orm';
 import { getDb } from '@/db/index';
 import { interviewSessions, sessionParticipants } from '@/db/schema';
-import type { InterviewSession, SessionStatus, CreateSessionInput } from './types';
 
 export async function createSession(userId: string, input: CreateSessionInput): Promise<string> {
   return await getDb().transaction(async (tx) => {

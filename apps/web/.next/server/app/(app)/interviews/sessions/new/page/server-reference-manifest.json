@@ -1,0 +1,20 @@
+{
+  "node": {
+    "40fd63dced57912c654a05dc5aeabcde3ca1b932eb": {
+      "workers": {
+        "app/(app)/interviews/sessions/new/page": {
+          "moduleId": 80160,
+          "async": true,
+          "exportedName": "createSessionAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/session-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/sessions/new/page": "action-browser"
+      },
+      "exportedName": "createSessionAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/session-actions.ts"
+    }
+  },
+  "edge": {}
+}

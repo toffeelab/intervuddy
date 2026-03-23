@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import type { InterviewCategory, JobDescription, SessionRole } from '@intervuddy/shared';
 import { createSessionAction } from '@/actions/session-actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { InterviewCategory, JobDescription, SessionRole } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
 interface Props {

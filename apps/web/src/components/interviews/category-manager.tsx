@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import type { InterviewCategory } from '@intervuddy/shared';
 import { Pencil, Trash2, Check, X, Plus, MoreHorizontal } from 'lucide-react';
 import {
   createCategoryAction,
@@ -16,7 +17,6 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import type { InterviewCategory } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
 interface Props {

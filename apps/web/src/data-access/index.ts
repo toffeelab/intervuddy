@@ -1,4 +1,3 @@
-export * from './types';
 export * from './questions';
 export * from './categories';
 export * from './jobs';

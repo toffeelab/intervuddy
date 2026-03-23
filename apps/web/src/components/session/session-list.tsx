@@ -1,9 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import type { InterviewSession } from '@intervuddy/shared';
 import { Clock, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import type { InterviewSession } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
 interface Props {

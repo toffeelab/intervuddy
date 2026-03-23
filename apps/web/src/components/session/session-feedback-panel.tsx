@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type { SessionRole } from '@intervuddy/shared';
 import { MessageSquare, Send, Star, StarHalf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import type { SessionRole } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 import { useSessionStore } from '@/stores/session-store';
 import type { ClientMessage } from '@/types/session-messages';

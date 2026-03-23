@@ -2,6 +2,7 @@
 
 import { useTransition, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { JobDescription } from '@intervuddy/shared';
 import { Trash2, FileText, MoreHorizontal } from 'lucide-react';
 import { deleteJobAction } from '@/actions/job-actions';
 import { JobStatusBadge } from '@/components/interviews/job-status-badge';
@@ -13,7 +14,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import type { JobDescription } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
 interface Props {

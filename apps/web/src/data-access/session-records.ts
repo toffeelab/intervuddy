@@ -1,7 +1,7 @@
+import type { SessionQuestionRecord } from '@intervuddy/shared';
 import { eq, and, asc, inArray } from 'drizzle-orm';
 import { getDb } from '@/db/index';
 import { sessionQuestions, sessionAnswers, sessionFeedbacks } from '@/db/schema';
-import type { SessionQuestionRecord } from './types';
 
 export async function recordQuestion(
   sessionId: string,

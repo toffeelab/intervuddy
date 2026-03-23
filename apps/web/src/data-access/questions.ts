@@ -1,12 +1,12 @@
-import { eq, and, isNull, isNotNull, desc, asc, inArray, sql } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { interviewQuestions, interviewCategories, followupQuestions } from '@/db/schema';
 import type {
   InterviewQuestion,
   FollowupQuestion,
   CreateQuestionInput,
   UpdateQuestionInput,
-} from './types';
+} from '@intervuddy/shared';
+import { eq, and, isNull, isNotNull, desc, asc, inArray, sql } from 'drizzle-orm';
+import { getDb } from '@/db/index';
+import { interviewQuestions, interviewCategories, followupQuestions } from '@/db/schema';
 
 interface FollowupRow {
   id: string;

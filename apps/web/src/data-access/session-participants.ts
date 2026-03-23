@@ -1,7 +1,7 @@
+import type { SessionRole, SessionParticipantInfo } from '@intervuddy/shared';
 import { eq, and } from 'drizzle-orm';
 import { getDb } from '@/db/index';
 import { interviewSessions, sessionParticipants, users } from '@/db/schema';
-import type { SessionRole, SessionParticipantInfo } from './types';
 
 export async function addParticipant(
   callerUserId: string,

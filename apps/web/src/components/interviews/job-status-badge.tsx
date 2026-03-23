@@ -1,5 +1,5 @@
+import type { JobDescriptionStatus } from '@intervuddy/shared';
 import { Badge } from '@/components/ui/badge';
-import type { JobDescriptionStatus } from '@/data-access/types';
 
 const STATUS_CONFIG: Record<JobDescriptionStatus, { label: string; className: string }> = {
   in_progress: {

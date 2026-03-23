@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import type { InterviewQuestion } from '@intervuddy/shared';
 import { Pencil, Trash2, ChevronDown, ChevronRight, Lightbulb, MoreHorizontal } from 'lucide-react';
 import { deleteQuestionAction } from '@/actions/question-actions';
 import { useConfirmDialog } from '@/components/shared/confirm-dialog';
@@ -12,7 +13,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import type { InterviewQuestion } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 import { useEditStore } from '@/stores/edit-store';
 

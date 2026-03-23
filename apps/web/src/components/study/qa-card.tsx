@@ -1,7 +1,7 @@
 'use client';
 
+import type { InterviewQuestion } from '@intervuddy/shared';
 import { QAAnswer } from '@/components/study/qa-answer';
-import type { InterviewQuestion } from '@/data-access/types';
 import { TAG_COLORS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useStudyStore } from '@/stores/study-store';

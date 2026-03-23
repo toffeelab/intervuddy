@@ -1,4 +1,4 @@
-import type { FollowupQuestion } from '@/data-access/types';
+import type { FollowupQuestion } from '@intervuddy/shared';
 
 interface DeepQABoxProps {
   items: FollowupQuestion[];

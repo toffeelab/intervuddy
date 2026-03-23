@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import type { CreateQuestionInput, UpdateQuestionInput } from '@intervuddy/shared';
 import {
   createQuestion as dbCreate,
   updateQuestion as dbUpdate,
@@ -8,7 +9,6 @@ import {
   softDeleteQuestion as dbDelete,
   restoreQuestion as dbRestore,
 } from '@/data-access/questions';
-import type { CreateQuestionInput, UpdateQuestionInput } from '@/data-access/types';
 import { getCurrentUserId } from '@/lib/auth';
 
 export async function createQuestionAction(input: CreateQuestionInput) {

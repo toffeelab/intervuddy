@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
+import type { InterviewQuestion, InterviewCategory } from '@intervuddy/shared';
 import { X, Plus, Trash2 } from 'lucide-react';
 import {
   createFollowupAction,
@@ -18,7 +19,6 @@ import {
 } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import type { InterviewQuestion, InterviewCategory } from '@/data-access/types';
 import { useEditStore } from '@/stores/edit-store';
 
 interface Props {

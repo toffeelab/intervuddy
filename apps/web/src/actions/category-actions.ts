@@ -1,13 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import type { CreateCategoryInput, UpdateCategoryInput } from '@intervuddy/shared';
 import {
   createCategory,
   updateCategory,
   softDeleteCategory,
   restoreCategory,
 } from '@/data-access/categories';
-import type { CreateCategoryInput, UpdateCategoryInput } from '@/data-access/types';
 import { getCurrentUserId } from '@/lib/auth';
 
 export async function createCategoryAction(input: CreateCategoryInput) {

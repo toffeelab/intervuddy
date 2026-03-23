@@ -1,0 +1,3 @@
+{
+  "/(app)/interviews/sessions/join/[code]/page": "app/(app)/interviews/sessions/join/[code]/page.js"
+}
