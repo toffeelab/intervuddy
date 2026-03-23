@@ -101,6 +101,24 @@ export default tseslint.config(
     },
   },
 
+  // NestJS server overrides (no React/Next.js)
+  {
+    files: ['apps/server/**/*.ts'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      '@next/next/no-assign-module-variable': 'off',
+    },
+  },
+
+  // NestJS test files
+  {
+    files: ['apps/server/**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+
   // Prettier must be last
   eslintConfigPrettier
 );
