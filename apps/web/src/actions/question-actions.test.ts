@@ -1,10 +1,9 @@
+import { getLibraryQuestions, getDeletedQuestions, interviewQuestions } from '@intervuddy/database';
+import * as schema from '@intervuddy/database';
 import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { eq } from 'drizzle-orm';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import { getLibraryQuestions, getDeletedQuestions } from '@/data-access/questions';
-import * as schema from '@/db/schema';
-import { interviewQuestions } from '@/db/schema';
 import {
   createTestDb,
   cleanupTestDb,
@@ -49,7 +48,7 @@ describe('question-actions', () => {
       await seedTestCategories(db);
       await getLibraryQuestions(DEFAULT_USER_ID);
       // Need a categoryId - get it from DB
-      const { interviewCategories } = await import('@/db/schema');
+      const { interviewCategories } = await import('@intervuddy/database');
       const { getDb } = await import('@/db');
       const cats = await getDb().select({ id: interviewCategories.id }).from(interviewCategories);
 
@@ -65,7 +64,7 @@ describe('question-actions', () => {
 
     it('생성된 질문이 DB에 실제로 저장된다', async () => {
       await seedTestCategories(db);
-      const { interviewCategories } = await import('@/db/schema');
+      const { interviewCategories } = await import('@intervuddy/database');
       const { getDb } = await import('@/db');
       const cats = await getDb().select({ id: interviewCategories.id }).from(interviewCategories);
 
@@ -83,7 +82,7 @@ describe('question-actions', () => {
 
     it('revalidatePath를 /study와 /interviews/questions 경로로 호출한다', async () => {
       await seedTestCategories(db);
-      const { interviewCategories } = await import('@/db/schema');
+      const { interviewCategories } = await import('@intervuddy/database');
       const { getDb } = await import('@/db');
       const cats = await getDb().select({ id: interviewCategories.id }).from(interviewCategories);
 

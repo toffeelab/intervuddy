@@ -1,10 +1,8 @@
+import { getInvitationByCode, getSessionById, users } from '@intervuddy/database';
+import * as schema from '@intervuddy/database';
 import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import { getInvitationByCode } from '@/data-access/session-invitations';
-import { getSessionById } from '@/data-access/sessions';
-import * as schema from '@/db/schema';
-import { users } from '@/db/schema';
 import { createTestDb, cleanupTestDb, truncateAllTables } from '@/test/helpers/db';
 import {
   createSessionAction,

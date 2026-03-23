@@ -1,12 +1,13 @@
 import Link from 'next/link';
+import { getSessionsByUserId } from '@intervuddy/database';
 import { Plus } from 'lucide-react';
 import { SessionList } from '@/components/session/session-list';
-import { getSessionsByUserId } from '@/data-access';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 export default async function SessionsPage() {
   const userId = await getCurrentUserId();
-  const sessions = await getSessionsByUserId(userId);
+  const sessions = await getSessionsByUserId(getDb(), userId);
 
   return (
     <div className="p-4 md:p-6">

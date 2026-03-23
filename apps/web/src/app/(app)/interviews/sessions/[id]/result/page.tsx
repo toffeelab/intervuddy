@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getSessionById, getParticipants, getSessionRecords } from '@intervuddy/database';
 import { ArrowLeft } from 'lucide-react';
 import { SessionResultView } from '@/components/session/session-result-view';
-import { getSessionById, getParticipants, getSessionRecords } from '@/data-access';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
@@ -13,10 +14,11 @@ export default async function SessionResultPage({ params }: Props) {
   const { id } = await params;
   const userId = await getCurrentUserId();
 
+  const db = getDb();
   const [session, participants, records] = await Promise.all([
-    getSessionById(userId, id),
-    getParticipants(userId, id),
-    getSessionRecords(id),
+    getSessionById(db, userId, id),
+    getParticipants(db, userId, id),
+    getSessionRecords(db, id),
   ]);
 
   if (!session) {

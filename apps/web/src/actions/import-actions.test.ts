@@ -1,9 +1,8 @@
+import { getAllJobs, getQuestionsByJdId, getLibraryQuestions } from '@intervuddy/database';
+import * as schema from '@intervuddy/database';
 import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import { getAllJobs } from '@/data-access/jobs';
-import { getQuestionsByJdId, getLibraryQuestions } from '@/data-access/questions';
-import * as schema from '@/db/schema';
 import {
   createTestDb,
   cleanupTestDb,

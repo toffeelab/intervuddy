@@ -1,11 +1,13 @@
+import {
+  getFollowupsByQuestionId,
+  getLibraryQuestions,
+  followupQuestions,
+} from '@intervuddy/database';
+import * as schema from '@intervuddy/database';
 import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { eq } from 'drizzle-orm';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import { getFollowupsByQuestionId } from '@/data-access/followups';
-import { getLibraryQuestions } from '@/data-access/questions';
-import * as schema from '@/db/schema';
-import { followupQuestions } from '@/db/schema';
 import {
   createTestDb,
   cleanupTestDb,

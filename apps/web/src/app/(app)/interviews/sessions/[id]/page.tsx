@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation';
-import { SessionWaitingRoom } from '@/components/session/session-waiting-room';
 import {
   getSessionById,
   getParticipants,
   getParticipantRole,
   getLibraryQuestions,
-} from '@/data-access';
+} from '@intervuddy/database';
+import { SessionWaitingRoom } from '@/components/session/session-waiting-room';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
@@ -16,11 +17,12 @@ export default async function SessionPage({ params }: Props) {
   const { id } = await params;
   const userId = await getCurrentUserId();
 
+  const db = getDb();
   const [session, myRole, participants, libraryQuestions] = await Promise.all([
-    getSessionById(userId, id),
-    getParticipantRole(id, userId),
-    getParticipants(userId, id),
-    getLibraryQuestions(userId),
+    getSessionById(db, userId, id),
+    getParticipantRole(db, id, userId),
+    getParticipants(db, userId, id),
+    getLibraryQuestions(db, userId),
   ]);
 
   if (!session || !myRole) {
