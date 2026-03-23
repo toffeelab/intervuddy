@@ -1,7 +1,7 @@
 import type { SessionRole, InvitationStatus } from '@intervuddy/shared';
 import { eq, and, sql } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { sessionInvitations, sessionParticipants, interviewSessions } from '@/db/schema';
+import type { Database, DbOrTx } from '../connection';
+import { sessionInvitations, sessionParticipants, interviewSessions } from '../schema';
 
 interface InvitationData {
   id: string;
@@ -17,13 +17,12 @@ interface InvitationData {
 }
 
 export async function createInvitation(
+  db: DbOrTx,
   userId: string,
   sessionId: string,
   role: SessionRole,
   options?: { maxUses?: number; expiresInMs?: number }
 ): Promise<{ id: string; inviteCode: string }> {
-  const db = getDb();
-
   const inviteCode = crypto.randomUUID().slice(0, 8);
   const maxUses = options?.maxUses ?? 1;
   const expiresInMs = options?.expiresInMs ?? 24 * 60 * 60 * 1000;
@@ -45,9 +44,10 @@ export async function createInvitation(
   return { id: result.id, inviteCode };
 }
 
-export async function getInvitationByCode(code: string): Promise<InvitationData | null> {
-  const db = getDb();
-
+export async function getInvitationByCode(
+  db: DbOrTx,
+  code: string
+): Promise<InvitationData | null> {
   const [row] = await db
     .select({
       id: sessionInvitations.id,
@@ -69,12 +69,11 @@ export async function getInvitationByCode(code: string): Promise<InvitationData 
 }
 
 export async function acceptInvitation(
+  db: Database,
   code: string,
   userId: string
 ): Promise<{ sessionId: string; role: SessionRole }> {
-  const db = getDb();
-
-  const invitation = await getInvitationByCode(code);
+  const invitation = await getInvitationByCode(db, code);
   if (!invitation) {
     throw new Error('초대를 찾을 수 없습니다');
   }
@@ -133,9 +132,11 @@ export async function acceptInvitation(
   return { sessionId: invitation.sessionId, role };
 }
 
-export async function revokeInvitation(userId: string, invitationId: string): Promise<void> {
-  const db = getDb();
-
+export async function revokeInvitation(
+  db: DbOrTx,
+  userId: string,
+  invitationId: string
+): Promise<void> {
   const [invitation] = await db
     .select({ invitedBy: sessionInvitations.invitedBy })
     .from(sessionInvitations)

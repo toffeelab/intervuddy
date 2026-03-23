@@ -4,14 +4,15 @@ import type {
   UpdateFollowupInput,
 } from '@intervuddy/shared';
 import { eq, and, isNull, sql } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { followupQuestions } from '@/db/schema';
+import type { DbOrTx } from '../connection';
+import { followupQuestions } from '../schema';
 
 export async function getFollowupsByQuestionId(
+  db: DbOrTx,
   userId: string,
   questionId: string
 ): Promise<FollowupQuestion[]> {
-  const rows = await getDb()
+  const rows = await db
     .select({
       id: followupQuestions.id,
       questionId: followupQuestions.questionId,
@@ -35,10 +36,14 @@ export async function getFollowupsByQuestionId(
   return rows;
 }
 
-export async function createFollowup(userId: string, input: CreateFollowupInput): Promise<string> {
+export async function createFollowup(
+  db: DbOrTx,
+  userId: string,
+  input: CreateFollowupInput
+): Promise<string> {
   const questionId = input.questionId;
 
-  const [result] = await getDb()
+  const [result] = await db
     .insert(followupQuestions)
     .values({
       userId,
@@ -52,7 +57,11 @@ export async function createFollowup(userId: string, input: CreateFollowupInput)
   return result.id;
 }
 
-export async function updateFollowup(userId: string, input: UpdateFollowupInput): Promise<void> {
+export async function updateFollowup(
+  db: DbOrTx,
+  userId: string,
+  input: UpdateFollowupInput
+): Promise<void> {
   const updates: Partial<typeof followupQuestions.$inferInsert> = {};
 
   if (input.question !== undefined) updates.question = input.question;
@@ -60,21 +69,21 @@ export async function updateFollowup(userId: string, input: UpdateFollowupInput)
 
   if (Object.keys(updates).length === 0) return;
 
-  await getDb()
+  await db
     .update(followupQuestions)
     .set(updates)
     .where(and(eq(followupQuestions.id, input.id), eq(followupQuestions.userId, userId)));
 }
 
-export async function softDeleteFollowup(userId: string, id: string): Promise<void> {
-  await getDb()
+export async function softDeleteFollowup(db: DbOrTx, userId: string, id: string): Promise<void> {
+  await db
     .update(followupQuestions)
     .set({ deletedAt: sql`NOW()` })
     .where(and(eq(followupQuestions.id, id), eq(followupQuestions.userId, userId)));
 }
 
-export async function restoreFollowup(userId: string, id: string): Promise<void> {
-  await getDb()
+export async function restoreFollowup(db: DbOrTx, userId: string, id: string): Promise<void> {
+  await db
     .update(followupQuestions)
     .set({ deletedAt: null })
     .where(and(eq(followupQuestions.id, id), eq(followupQuestions.userId, userId)));

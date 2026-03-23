@@ -1,10 +1,14 @@
 import type { InterviewSession, SessionStatus, CreateSessionInput } from '@intervuddy/shared';
 import { eq, and, isNull, desc, sql } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { interviewSessions, sessionParticipants } from '@/db/schema';
+import type { Database, DbOrTx } from '../connection';
+import { interviewSessions, sessionParticipants } from '../schema';
 
-export async function createSession(userId: string, input: CreateSessionInput): Promise<string> {
-  return await getDb().transaction(async (tx) => {
+export async function createSession(
+  db: Database,
+  userId: string,
+  input: CreateSessionInput
+): Promise<string> {
+  return await db.transaction(async (tx) => {
     const [session] = await tx
       .insert(interviewSessions)
       .values({
@@ -28,10 +32,11 @@ export async function createSession(userId: string, input: CreateSessionInput): 
 }
 
 export async function getSessionById(
+  db: DbOrTx,
   userId: string,
   sessionId: string
 ): Promise<InterviewSession | null> {
-  const rows = await getDb()
+  const rows = await db
     .select({
       id: interviewSessions.id,
       title: interviewSessions.title,
@@ -62,8 +67,8 @@ export async function getSessionById(
   return { ...row, status: row.status as SessionStatus };
 }
 
-export async function getSessionsByUserId(userId: string): Promise<InterviewSession[]> {
-  const rows = await getDb()
+export async function getSessionsByUserId(db: DbOrTx, userId: string): Promise<InterviewSession[]> {
+  const rows = await db
     .select({
       id: interviewSessions.id,
       title: interviewSessions.title,
@@ -94,6 +99,7 @@ export async function getSessionsByUserId(userId: string): Promise<InterviewSess
 }
 
 export async function updateSessionStatus(
+  db: DbOrTx,
   userId: string,
   sessionId: string,
   status: SessionStatus,
@@ -110,14 +116,14 @@ export async function updateSessionStatus(
     }
   }
 
-  await getDb()
+  await db
     .update(interviewSessions)
     .set(updates)
     .where(and(eq(interviewSessions.id, sessionId), eq(interviewSessions.createdBy, userId)));
 }
 
-export async function deleteSession(userId: string, sessionId: string): Promise<void> {
-  await getDb()
+export async function deleteSession(db: DbOrTx, userId: string, sessionId: string): Promise<void> {
+  await db
     .update(interviewSessions)
     .set({ deletedAt: sql`NOW()` })
     .where(and(eq(interviewSessions.id, sessionId), eq(interviewSessions.createdBy, userId)));

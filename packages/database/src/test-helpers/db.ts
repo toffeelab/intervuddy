@@ -1,15 +1,14 @@
 import { DEFAULT_USER_ID, SYSTEM_USER_ID } from '@intervuddy/shared';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { setDb, resetDb } from '@/db/index';
-import * as schema from '@/db/schema';
+import * as schema from '../schema';
 import {
   interviewCategories,
   interviewQuestions,
   followupQuestions,
   jobDescriptions,
   interviewSessions,
-} from '@/db/schema';
+} from '../schema';
 
 const TEST_DATABASE_URL =
   process.env.DATABASE_URL?.replace(/\/[^/]+$/, '/intervuddy_test') ??
@@ -40,7 +39,6 @@ function getSharedDb(): NodePgDatabase<typeof schema> {
 
 export async function createTestDb(): Promise<NodePgDatabase<typeof schema>> {
   const db = getSharedDb();
-  setDb(db);
   // Note: users are seeded inside truncateAllTables, not here,
   // to avoid concurrent INSERT conflicts with other test files' beforeEach calls.
   return db;
@@ -170,5 +168,4 @@ export async function closeTestPool(): Promise<void> {
     _sharedPool = null;
     _sharedDb = null;
   }
-  resetDb();
 }

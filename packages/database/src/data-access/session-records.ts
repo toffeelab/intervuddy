@@ -1,14 +1,13 @@
 import type { SessionQuestionRecord } from '@intervuddy/shared';
 import { eq, and, asc, inArray } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { sessionQuestions, sessionAnswers, sessionFeedbacks } from '@/db/schema';
+import type { DbOrTx } from '../connection';
+import { sessionQuestions, sessionAnswers, sessionFeedbacks } from '../schema';
 
 export async function recordQuestion(
+  db: DbOrTx,
   sessionId: string,
   input: { questionId?: string; content: string; displayOrder: number }
 ): Promise<string> {
-  const db = getDb();
-
   const [result] = await db
     .insert(sessionQuestions)
     .values({
@@ -23,12 +22,11 @@ export async function recordQuestion(
 }
 
 export async function recordAnswer(
+  db: DbOrTx,
   sessionQuestionId: string,
   userId: string,
   content: string
 ): Promise<string> {
-  const db = getDb();
-
   const [result] = await db
     .insert(sessionAnswers)
     .values({
@@ -42,13 +40,12 @@ export async function recordAnswer(
 }
 
 export async function recordFeedback(
+  db: DbOrTx,
   sessionQuestionId: string,
   userId: string,
   content: string | null,
   score: number | null
 ): Promise<string> {
-  const db = getDb();
-
   const [result] = await db
     .insert(sessionFeedbacks)
     .values({
@@ -62,9 +59,10 @@ export async function recordFeedback(
   return result.id;
 }
 
-export async function getSessionRecords(sessionId: string): Promise<SessionQuestionRecord[]> {
-  const db = getDb();
-
+export async function getSessionRecords(
+  db: DbOrTx,
+  sessionId: string
+): Promise<SessionQuestionRecord[]> {
   // Fetch questions
   const questions = await db
     .select({
@@ -138,11 +136,10 @@ export async function getSessionRecords(sessionId: string): Promise<SessionQuest
 }
 
 export async function getSessionQuestionByDisplayOrder(
+  db: DbOrTx,
   sessionId: string,
   displayOrder: number
 ): Promise<{ id: string } | null> {
-  const db = getDb();
-
   const [row] = await db
     .select({ id: sessionQuestions.id })
     .from(sessionQuestions)

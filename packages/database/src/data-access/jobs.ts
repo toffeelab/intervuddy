@@ -5,18 +5,18 @@ import type {
   UpdateJobInput,
 } from '@intervuddy/shared';
 import { eq, and, isNull, isNotNull, sql, desc, count } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { jobDescriptions, interviewQuestions } from '@/db/schema';
+import type { Database, DbOrTx } from '../connection';
+import { jobDescriptions, interviewQuestions } from '../schema';
 
-export async function getAllJobs(userId: string): Promise<JobDescription[]> {
-  const questionCountSq = getDb()
+export async function getAllJobs(db: DbOrTx, userId: string): Promise<JobDescription[]> {
+  const questionCountSq = db
     .select({ count: count() })
     .from(interviewQuestions)
     .where(
       and(eq(interviewQuestions.jdId, jobDescriptions.id), isNull(interviewQuestions.deletedAt))
     );
 
-  const rows = await getDb()
+  const rows = await db
     .select({
       id: jobDescriptions.id,
       companyName: jobDescriptions.companyName,
@@ -38,15 +38,19 @@ export async function getAllJobs(userId: string): Promise<JobDescription[]> {
   }));
 }
 
-export async function getJobById(userId: string, id: string): Promise<JobDescription | null> {
-  const questionCountSq = getDb()
+export async function getJobById(
+  db: DbOrTx,
+  userId: string,
+  id: string
+): Promise<JobDescription | null> {
+  const questionCountSq = db
     .select({ count: count() })
     .from(interviewQuestions)
     .where(
       and(eq(interviewQuestions.jdId, jobDescriptions.id), isNull(interviewQuestions.deletedAt))
     );
 
-  const rows = await getDb()
+  const rows = await db
     .select({
       id: jobDescriptions.id,
       companyName: jobDescriptions.companyName,
@@ -72,8 +76,12 @@ export async function getJobById(userId: string, id: string): Promise<JobDescrip
   return { ...row, status: row.status as JobDescriptionStatus };
 }
 
-export async function createJob(userId: string, input: CreateJobInput): Promise<string> {
-  const [result] = await getDb()
+export async function createJob(
+  db: DbOrTx,
+  userId: string,
+  input: CreateJobInput
+): Promise<string> {
+  const [result] = await db
     .insert(jobDescriptions)
     .values({
       userId,
@@ -86,7 +94,7 @@ export async function createJob(userId: string, input: CreateJobInput): Promise<
   return result.id;
 }
 
-export async function updateJob(userId: string, input: UpdateJobInput): Promise<void> {
+export async function updateJob(db: DbOrTx, userId: string, input: UpdateJobInput): Promise<void> {
   const updates: Partial<typeof jobDescriptions.$inferInsert> = {};
 
   if (input.companyName !== undefined) updates.companyName = input.companyName;
@@ -96,39 +104,44 @@ export async function updateJob(userId: string, input: UpdateJobInput): Promise<
 
   if (Object.keys(updates).length === 0) return;
 
-  await getDb()
+  await db
     .update(jobDescriptions)
     .set(updates)
     .where(and(eq(jobDescriptions.id, input.id), eq(jobDescriptions.userId, userId)));
 }
 
 export async function updateJobStatus(
+  db: DbOrTx,
   userId: string,
   id: string,
   status: JobDescriptionStatus
 ): Promise<void> {
-  await getDb()
+  await db
     .update(jobDescriptions)
     .set({ status })
     .where(and(eq(jobDescriptions.id, id), eq(jobDescriptions.userId, userId)));
 }
 
-export async function softDeleteJob(userId: string, id: string): Promise<void> {
-  await getDb()
+export async function softDeleteJob(db: DbOrTx, userId: string, id: string): Promise<void> {
+  await db
     .update(jobDescriptions)
     .set({ deletedAt: sql`NOW()` })
     .where(and(eq(jobDescriptions.id, id), eq(jobDescriptions.userId, userId)));
 }
 
-export async function restoreJob(userId: string, id: string): Promise<void> {
-  await getDb()
+export async function restoreJob(db: DbOrTx, userId: string, id: string): Promise<void> {
+  await db
     .update(jobDescriptions)
     .set({ deletedAt: null })
     .where(and(eq(jobDescriptions.id, id), eq(jobDescriptions.userId, userId)));
 }
 
-export async function softDeleteJobWithQuestions(userId: string, id: string): Promise<void> {
-  await getDb().transaction(async (tx) => {
+export async function softDeleteJobWithQuestions(
+  db: Database,
+  userId: string,
+  id: string
+): Promise<void> {
+  await db.transaction(async (tx) => {
     await tx
       .update(jobDescriptions)
       .set({ deletedAt: sql`NOW()` })
@@ -146,8 +159,12 @@ export async function softDeleteJobWithQuestions(userId: string, id: string): Pr
   });
 }
 
-export async function restoreJobWithQuestions(userId: string, id: string): Promise<void> {
-  await getDb().transaction(async (tx) => {
+export async function restoreJobWithQuestions(
+  db: Database,
+  userId: string,
+  id: string
+): Promise<void> {
+  await db.transaction(async (tx) => {
     await tx
       .update(jobDescriptions)
       .set({ deletedAt: null })
@@ -165,15 +182,15 @@ export async function restoreJobWithQuestions(userId: string, id: string): Promi
   });
 }
 
-export async function getDeletedJobs(userId: string): Promise<JobDescription[]> {
-  const questionCountSq = getDb()
+export async function getDeletedJobs(db: DbOrTx, userId: string): Promise<JobDescription[]> {
+  const questionCountSq = db
     .select({ count: count() })
     .from(interviewQuestions)
     .where(
       and(eq(interviewQuestions.jdId, jobDescriptions.id), isNull(interviewQuestions.deletedAt))
     );
 
-  const rows = await getDb()
+  const rows = await db
     .select({
       id: jobDescriptions.id,
       companyName: jobDescriptions.companyName,

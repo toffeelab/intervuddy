@@ -1,11 +1,11 @@
 import { SYSTEM_USER_ID } from '@intervuddy/shared';
 import type { InterviewCategory, InterviewQuestion } from '@intervuddy/shared';
 import { eq, and, isNull, asc, count, inArray } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { interviewCategories, interviewQuestions, followupQuestions } from '@/db/schema';
+import type { Database, DbOrTx } from '../connection';
+import { interviewCategories, interviewQuestions, followupQuestions } from '../schema';
 
-export async function getSystemCategories(): Promise<InterviewCategory[]> {
-  const rows = await getDb()
+export async function getSystemCategories(db: DbOrTx): Promise<InterviewCategory[]> {
+  const rows = await db
     .select({
       id: interviewCategories.id,
       jdId: interviewCategories.jdId,
@@ -40,8 +40,8 @@ export async function getSystemCategories(): Promise<InterviewCategory[]> {
   return rows.map((row) => ({ ...row, questionCount: Number(row.questionCount) }));
 }
 
-export async function getSystemQuestions(): Promise<InterviewQuestion[]> {
-  const rows = await getDb()
+export async function getSystemQuestions(db: DbOrTx): Promise<InterviewQuestion[]> {
+  const rows = await db
     .select({
       id: interviewQuestions.id,
       categoryId: interviewQuestions.categoryId,
@@ -67,7 +67,7 @@ export async function getSystemQuestions(): Promise<InterviewQuestion[]> {
   if (rows.length === 0) return [];
 
   const ids = rows.map((r) => r.id);
-  const followupsMap = await batchLoadFollowups(ids);
+  const followupsMap = await batchLoadFollowups(db, ids);
   return rows.map((row) => ({
     ...row,
     followups: followupsMap.get(row.id) ?? [],
@@ -75,9 +75,10 @@ export async function getSystemQuestions(): Promise<InterviewQuestion[]> {
 }
 
 export async function getSystemQuestionsByCategory(
+  db: DbOrTx,
   categoryId: number
 ): Promise<InterviewQuestion[]> {
-  const rows = await getDb()
+  const rows = await db
     .select({
       id: interviewQuestions.id,
       categoryId: interviewQuestions.categoryId,
@@ -109,7 +110,7 @@ export async function getSystemQuestionsByCategory(
   if (rows.length === 0) return [];
 
   const ids = rows.map((r) => r.id);
-  const followupsMap = await batchLoadFollowups(ids);
+  const followupsMap = await batchLoadFollowups(db, ids);
   return rows.map((row) => ({
     ...row,
     followups: followupsMap.get(row.id) ?? [],
@@ -117,12 +118,13 @@ export async function getSystemQuestionsByCategory(
 }
 
 async function batchLoadFollowups(
+  db: DbOrTx,
   questionIds: string[]
 ): Promise<Map<string, InterviewQuestion['followups']>> {
   const map = new Map<string, InterviewQuestion['followups']>();
   if (questionIds.length === 0) return map;
 
-  const rows = await getDb()
+  const rows = await db
     .select({
       id: followupQuestions.id,
       questionId: followupQuestions.questionId,
@@ -153,6 +155,7 @@ export interface ImportSystemToLibraryResult {
 }
 
 export async function importSystemToLibrary(
+  db: Database,
   userId: string,
   params: {
     categoryIds?: number[];
@@ -162,7 +165,7 @@ export async function importSystemToLibrary(
   let importedCategories = 0;
   let importedQuestions = 0;
 
-  await getDb().transaction(async (tx) => {
+  await db.transaction(async (tx) => {
     // Import categories
     if (params.categoryIds && params.categoryIds.length > 0) {
       const systemCats = await tx

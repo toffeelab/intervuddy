@@ -5,8 +5,8 @@ import type {
   UpdateQuestionInput,
 } from '@intervuddy/shared';
 import { eq, and, isNull, isNotNull, desc, asc, inArray, sql } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { interviewQuestions, interviewCategories, followupQuestions } from '@/db/schema';
+import type { DbOrTx } from '../connection';
+import { interviewQuestions, interviewCategories, followupQuestions } from '../schema';
 
 interface FollowupRow {
   id: string;
@@ -59,11 +59,14 @@ function mapRow(
   };
 }
 
-async function batchLoadFollowups(ids: string[]): Promise<Map<string, FollowupQuestion[]>> {
+async function batchLoadFollowups(
+  db: DbOrTx,
+  ids: string[]
+): Promise<Map<string, FollowupQuestion[]>> {
   const map = new Map<string, FollowupQuestion[]>();
   if (ids.length === 0) return map;
 
-  const rows = await getDb()
+  const rows = await db
     .select({
       id: followupQuestions.id,
       questionId: followupQuestions.questionId,
@@ -96,6 +99,7 @@ async function batchLoadFollowups(ids: string[]): Promise<Map<string, FollowupQu
 }
 
 async function mapRows(
+  db: DbOrTx,
   rows: {
     id: string;
     categoryId: number;
@@ -115,7 +119,7 @@ async function mapRows(
   }[]
 ): Promise<InterviewQuestion[]> {
   const ids = rows.map((r) => r.id);
-  const followupsMap = await batchLoadFollowups(ids);
+  const followupsMap = await batchLoadFollowups(db, ids);
   return rows.map((row) => mapRow(row, followupsMap.get(row.id) ?? []));
 }
 
@@ -137,8 +141,11 @@ const questionSelect = {
   updatedAt: interviewQuestions.updatedAt,
 };
 
-export async function getLibraryQuestions(userId: string): Promise<InterviewQuestion[]> {
-  const rows = await getDb()
+export async function getLibraryQuestions(
+  db: DbOrTx,
+  userId: string
+): Promise<InterviewQuestion[]> {
+  const rows = await db
     .select(questionSelect)
     .from(interviewQuestions)
     .innerJoin(interviewCategories, eq(interviewCategories.id, interviewQuestions.categoryId))
@@ -151,14 +158,15 @@ export async function getLibraryQuestions(userId: string): Promise<InterviewQues
     )
     .orderBy(asc(interviewCategories.displayOrder), asc(interviewQuestions.displayOrder));
 
-  return mapRows(rows);
+  return mapRows(db, rows);
 }
 
 export async function getQuestionsByJdId(
+  db: DbOrTx,
   userId: string,
   jdId: string
 ): Promise<InterviewQuestion[]> {
-  const rows = await getDb()
+  const rows = await db
     .select(questionSelect)
     .from(interviewQuestions)
     .innerJoin(interviewCategories, eq(interviewCategories.id, interviewQuestions.categoryId))
@@ -171,14 +179,15 @@ export async function getQuestionsByJdId(
     )
     .orderBy(asc(interviewCategories.displayOrder), asc(interviewQuestions.displayOrder));
 
-  return mapRows(rows);
+  return mapRows(db, rows);
 }
 
 export async function getQuestionsByCategory(
+  db: DbOrTx,
   userId: string,
   categoryId: number
 ): Promise<InterviewQuestion[]> {
-  const rows = await getDb()
+  const rows = await db
     .select(questionSelect)
     .from(interviewQuestions)
     .innerJoin(interviewCategories, eq(interviewCategories.id, interviewQuestions.categoryId))
@@ -191,13 +200,17 @@ export async function getQuestionsByCategory(
     )
     .orderBy(asc(interviewQuestions.displayOrder));
 
-  return mapRows(rows);
+  return mapRows(db, rows);
 }
 
-export async function createQuestion(userId: string, input: CreateQuestionInput): Promise<string> {
+export async function createQuestion(
+  db: DbOrTx,
+  userId: string,
+  input: CreateQuestionInput
+): Promise<string> {
   const categoryId = input.categoryId;
 
-  const [result] = await getDb()
+  const [result] = await db
     .insert(interviewQuestions)
     .values({
       userId,
@@ -214,7 +227,11 @@ export async function createQuestion(userId: string, input: CreateQuestionInput)
   return result.id;
 }
 
-export async function updateQuestion(userId: string, input: UpdateQuestionInput): Promise<void> {
+export async function updateQuestion(
+  db: DbOrTx,
+  userId: string,
+  input: UpdateQuestionInput
+): Promise<void> {
   const updates: Partial<typeof interviewQuestions.$inferInsert> = {};
 
   // categoryId 변경은 허용하지 않음 (display_order 계산 로직 깨짐 방지, 생성 시에만 설정)
@@ -225,42 +242,44 @@ export async function updateQuestion(userId: string, input: UpdateQuestionInput)
 
   if (Object.keys(updates).length === 0) return;
 
-  await getDb()
+  await db
     .update(interviewQuestions)
     .set(updates)
     .where(and(eq(interviewQuestions.id, input.id), eq(interviewQuestions.userId, userId)));
 }
 
 export async function updateQuestionKeywords(
+  db: DbOrTx,
   userId: string,
   id: string,
   keywords: string[]
 ): Promise<void> {
-  await getDb()
+  await db
     .update(interviewQuestions)
     .set({ keywords })
     .where(and(eq(interviewQuestions.id, id), eq(interviewQuestions.userId, userId)));
 }
 
-export async function softDeleteQuestion(userId: string, id: string): Promise<void> {
-  await getDb()
+export async function softDeleteQuestion(db: DbOrTx, userId: string, id: string): Promise<void> {
+  await db
     .update(interviewQuestions)
     .set({ deletedAt: sql`NOW()` })
     .where(and(eq(interviewQuestions.id, id), eq(interviewQuestions.userId, userId)));
 }
 
-export async function restoreQuestion(userId: string, id: string): Promise<void> {
-  await getDb()
+export async function restoreQuestion(db: DbOrTx, userId: string, id: string): Promise<void> {
+  await db
     .update(interviewQuestions)
     .set({ deletedAt: null })
     .where(and(eq(interviewQuestions.id, id), eq(interviewQuestions.userId, userId)));
 }
 
 export async function getDeletedQuestions(
+  db: DbOrTx,
   userId: string,
   jdId?: string
 ): Promise<InterviewQuestion[]> {
-  const rows = await getDb()
+  const rows = await db
     .select(questionSelect)
     .from(interviewQuestions)
     .innerJoin(interviewCategories, eq(interviewCategories.id, interviewQuestions.categoryId))
@@ -275,5 +294,5 @@ export async function getDeletedQuestions(
     )
     .orderBy(desc(interviewQuestions.deletedAt));
 
-  return mapRows(rows);
+  return mapRows(db, rows);
 }
