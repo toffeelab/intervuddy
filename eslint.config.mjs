@@ -9,11 +9,12 @@ export default tseslint.config(
   // Global ignores
   {
     ignores: [
-      '.next/',
-      'out/',
-      'build/',
-      'node_modules/',
-      'coverage/',
+      '**/.next/',
+      '**/out/',
+      '**/build/',
+      '**/dist/',
+      '**/node_modules/',
+      '**/coverage/',
       '*.db',
       '.worktrees/',
       '.claude/worktrees/',
@@ -84,10 +85,19 @@ export default tseslint.config(
 
   // E2E test overrides (Playwright's `use()` is not a React Hook)
   {
-    files: ['e2e/**/*.{ts,tsx}'],
+    files: ['**/e2e/**/*.{ts,tsx}'],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+
+  // PartyKit overrides (no React)
+  {
+    files: ['apps/partykit/**/*.ts'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
     },
   },
 
