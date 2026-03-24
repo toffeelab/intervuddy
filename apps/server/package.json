@@ -1,0 +1,38 @@
+{
+  "name": "@intervuddy/server",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "start": "node dist/main",
+    "start:debug": "nest start --debug --watch",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11",
+    "@nestjs/core": "^11",
+    "@nestjs/platform-fastify": "^11",
+    "@nestjs/config": "^4",
+    "@nestjs/jwt": "^11",
+    "@nestjs/passport": "^11",
+    "passport": "^0.7",
+    "passport-jwt": "^4.0",
+    "fastify": "^5",
+    "reflect-metadata": "^0.2",
+    "rxjs": "^7",
+    "pg": "^8.20.0",
+    "@intervuddy/database": "workspace:*",
+    "@intervuddy/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11",
+    "@nestjs/schematics": "^11",
+    "@nestjs/testing": "^11",
+    "@types/passport-jwt": "^4",
+    "typescript": "^5",
+    "vitest": "^4.1.0"
+  }
+}
