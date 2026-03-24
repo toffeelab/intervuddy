@@ -53,6 +53,9 @@ data/seed.ts
 .superpowers
 .playwright-mcp/
 
+# turbo
+.turbo/
+
 # Claude worktrees
 .claude/worktrees/
 .worktrees/
