@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
+import { getJobById } from '@intervuddy/database';
 import { JobForm } from '@/components/interviews/job-form';
-import { getJobById } from '@/data-access/jobs';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
@@ -10,7 +11,7 @@ interface Props {
 export default async function EditJobPage({ params }: Props) {
   const userId = await getCurrentUserId();
   const { id } = await params;
-  const job = await getJobById(userId, id);
+  const job = await getJobById(getDb(), userId, id);
   if (!job) notFound();
 
   return (

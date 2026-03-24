@@ -1,10 +1,11 @@
+import { getGlobalCategories } from '@intervuddy/database';
+import { interviewCategories } from '@intervuddy/database';
+import * as schema from '@intervuddy/database/src/schema';
 import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { eq } from 'drizzle-orm';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import { getGlobalCategories } from '@/data-access/categories';
-import * as schema from '@/db/schema';
-import { interviewCategories } from '@/db/schema';
+import { getDb } from '@/db';
 import {
   createTestDb,
   cleanupTestDb,
@@ -62,7 +63,7 @@ describe('category-actions', () => {
         icon: '✅',
       });
 
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       expect(categories).toHaveLength(1);
       expect(categories[0].name).toBe('저장 확인 카테고리');
       expect(categories[0].slug).toBe('save-check');
@@ -83,7 +84,7 @@ describe('category-actions', () => {
         icon: '2️⃣',
       });
 
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       expect(categories).toHaveLength(2);
       expect(categories[0].displayOrder).toBeLessThan(categories[1].displayOrder);
     });
@@ -106,10 +107,10 @@ describe('category-actions', () => {
     it('카테고리 필드를 부분 수정한다', async () => {
       await seedTestCategories(db);
 
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       await updateCategoryAction(cats[0].id, { displayLabel: '수정된 라벨' });
 
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       const updated = categories.find((c) => c.id === cats[0].id);
       expect(updated?.displayLabel).toBe('수정된 라벨');
       expect(updated?.name).toBe('자기소개/커리어');
@@ -118,10 +119,10 @@ describe('category-actions', () => {
     it('여러 필드를 동시에 수정할 수 있다', async () => {
       await seedTestCategories(db);
 
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       await updateCategoryAction(cats[0].id, { name: '수정된 이름', icon: '🔄' });
 
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       const updated = categories.find((c) => c.id === cats[0].id);
       expect(updated?.name).toBe('수정된 이름');
       expect(updated?.icon).toBe('🔄');
@@ -130,7 +131,7 @@ describe('category-actions', () => {
 
     it('revalidatePath를 /study와 /interviews/questions 경로로 호출한다', async () => {
       await seedTestCategories(db);
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
 
       await updateCategoryAction(cats[0].id, { name: '수정' });
 
@@ -143,19 +144,19 @@ describe('category-actions', () => {
   describe('deleteCategoryAction', () => {
     it('카테고리를 소프트 삭제한다', async () => {
       await seedTestCategories(db);
-      expect(await getGlobalCategories(DEFAULT_USER_ID)).toHaveLength(2);
+      expect(await getGlobalCategories(getDb(), DEFAULT_USER_ID)).toHaveLength(2);
 
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       await deleteCategoryAction(cats[0].id);
 
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       expect(categories).toHaveLength(1);
       expect(categories[0].name).toBe('기술역량');
     });
 
     it('삭제 후 deleted_at이 설정된다', async () => {
       await seedTestCategories(db);
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
 
       await deleteCategoryAction(cats[0].id);
 
@@ -168,7 +169,7 @@ describe('category-actions', () => {
 
     it('revalidatePath를 /study와 /interviews/questions, /interviews/trash 경로로 호출한다', async () => {
       await seedTestCategories(db);
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
 
       await deleteCategoryAction(cats[0].id);
 
@@ -182,22 +183,22 @@ describe('category-actions', () => {
   describe('restoreCategoryAction', () => {
     it('소프트 삭제된 카테고리를 복원한다', async () => {
       await seedTestCategories(db);
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       // Soft-delete first category
       await db
         .update(interviewCategories)
         .set({ deletedAt: new Date() })
         .where(eq(interviewCategories.id, cats[0].id));
-      expect(await getGlobalCategories(DEFAULT_USER_ID)).toHaveLength(1);
+      expect(await getGlobalCategories(getDb(), DEFAULT_USER_ID)).toHaveLength(1);
 
       await restoreCategoryAction(cats[0].id);
 
-      expect(await getGlobalCategories(DEFAULT_USER_ID)).toHaveLength(2);
+      expect(await getGlobalCategories(getDb(), DEFAULT_USER_ID)).toHaveLength(2);
     });
 
     it('복원 후 deleted_at이 NULL로 돌아온다', async () => {
       await seedTestCategories(db);
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       await db
         .update(interviewCategories)
         .set({ deletedAt: new Date() })
@@ -214,7 +215,7 @@ describe('category-actions', () => {
 
     it('revalidatePath를 /study와 /interviews/questions, /interviews/trash 경로로 호출한다', async () => {
       await seedTestCategories(db);
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(getDb(), DEFAULT_USER_ID);
       await db
         .update(interviewCategories)
         .set({ deletedAt: new Date() })

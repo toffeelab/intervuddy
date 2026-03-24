@@ -1,13 +1,18 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import {
+  getCategoriesByJdId,
+  getGlobalCategories,
+  getJobById,
+  getQuestionsByJdId,
+  getLibraryQuestions,
+} from '@intervuddy/database';
 import { Pencil } from 'lucide-react';
 import { ImportModal } from '@/components/interviews/import-modal';
 import { JobStatusBadge } from '@/components/interviews/job-status-badge';
 import { QuestionEditDrawer } from '@/components/interviews/question-edit-drawer';
 import { QuestionTable } from '@/components/interviews/question-table';
-import { getCategoriesByJdId, getGlobalCategories } from '@/data-access/categories';
-import { getJobById } from '@/data-access/jobs';
-import { getQuestionsByJdId, getLibraryQuestions } from '@/data-access/questions';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
@@ -17,14 +22,15 @@ interface Props {
 export default async function JobDetailPage({ params }: Props) {
   const userId = await getCurrentUserId();
   const { id } = await params;
-  const job = await getJobById(userId, id);
+  const db = getDb();
+  const job = await getJobById(db, userId, id);
   if (!job) notFound();
 
   const [jdQuestions, jdCategories, libraryQuestions, globalCategories] = await Promise.all([
-    getQuestionsByJdId(userId, job.id),
-    getCategoriesByJdId(userId, job.id),
-    getLibraryQuestions(userId),
-    getGlobalCategories(userId),
+    getQuestionsByJdId(db, userId, job.id),
+    getCategoriesByJdId(db, userId, job.id),
+    getLibraryQuestions(db, userId),
+    getGlobalCategories(db, userId),
   ]);
   const importedOriginIds = jdQuestions
     .filter((q) => q.originQuestionId !== null)

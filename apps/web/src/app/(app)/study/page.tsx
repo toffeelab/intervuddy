@@ -1,7 +1,12 @@
+import {
+  getLibraryQuestions,
+  getGlobalCategories,
+  getAllJobs,
+  getCategoriesByJdId,
+  getQuestionsByJdId,
+} from '@intervuddy/database';
 import { StudyClientShell } from '@/components/study/study-client-shell';
-import { getLibraryQuestions, getGlobalCategories, getAllJobs } from '@/data-access';
-import { getCategoriesByJdId } from '@/data-access/categories';
-import { getQuestionsByJdId } from '@/data-access/questions';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 interface StudyPageProps {
@@ -12,11 +17,16 @@ export default async function StudyPage({ searchParams }: StudyPageProps) {
   const userId = await getCurrentUserId();
   const { jdId } = await searchParams;
   const validJdId = jdId || null;
+  const db = getDb();
 
   const [items, categories, jobs] = await Promise.all([
-    validJdId !== null ? getQuestionsByJdId(userId, validJdId) : getLibraryQuestions(userId),
-    validJdId !== null ? getCategoriesByJdId(userId, validJdId) : getGlobalCategories(userId),
-    getAllJobs(userId),
+    validJdId !== null
+      ? getQuestionsByJdId(db, userId, validJdId)
+      : getLibraryQuestions(db, userId),
+    validJdId !== null
+      ? getCategoriesByJdId(db, userId, validJdId)
+      : getGlobalCategories(db, userId),
+    getAllJobs(db, userId),
   ]);
   const allItemIds = items.map((item) => item.id);
 

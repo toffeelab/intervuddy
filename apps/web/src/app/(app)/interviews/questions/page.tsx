@@ -1,15 +1,17 @@
+import { getGlobalCategories, getLibraryQuestions } from '@intervuddy/database';
 import { CategoryManager } from '@/components/interviews/category-manager';
 import { QuestionEditDrawer } from '@/components/interviews/question-edit-drawer';
 import { QuestionTable } from '@/components/interviews/question-table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { getGlobalCategories, getLibraryQuestions } from '@/data-access';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 export default async function InterviewQuestionsPage() {
   const userId = await getCurrentUserId();
+  const db = getDb();
   const [categories, questions] = await Promise.all([
-    getGlobalCategories(userId),
-    getLibraryQuestions(userId),
+    getGlobalCategories(db, userId),
+    getLibraryQuestions(db, userId),
   ]);
 
   return (

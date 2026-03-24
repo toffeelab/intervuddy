@@ -1,9 +1,10 @@
+import { getAllJobs } from '@intervuddy/database';
+import { getQuestionsByJdId, getLibraryQuestions } from '@intervuddy/database';
+import * as schema from '@intervuddy/database/src/schema';
 import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import { getAllJobs } from '@/data-access/jobs';
-import { getQuestionsByJdId, getLibraryQuestions } from '@/data-access/questions';
-import * as schema from '@/db/schema';
+import { getDb } from '@/db';
 import {
   createTestDb,
   cleanupTestDb,
@@ -41,8 +42,8 @@ describe('importQuestionsAction', () => {
     await seedTestQuestions(db);
     await seedTestJobDescription(db);
 
-    const questions = await getLibraryQuestions(DEFAULT_USER_ID);
-    const jobs = await getAllJobs(DEFAULT_USER_ID);
+    const questions = await getLibraryQuestions(getDb(), DEFAULT_USER_ID);
+    const jobs = await getAllJobs(getDb(), DEFAULT_USER_ID);
 
     const result = await importQuestionsAction({
       jdId: jobs[0].id,
@@ -52,6 +53,6 @@ describe('importQuestionsAction', () => {
     expect(result.skippedCount).toBe(0);
     expect(mockRevalidatePath).toHaveBeenCalledWith('/study');
     expect(mockRevalidatePath).toHaveBeenCalledWith(`/interviews/jobs/${jobs[0].id}`);
-    expect(await getQuestionsByJdId(DEFAULT_USER_ID, jobs[0].id)).toHaveLength(1);
+    expect(await getQuestionsByJdId(getDb(), DEFAULT_USER_ID, jobs[0].id)).toHaveLength(1);
   });
 });

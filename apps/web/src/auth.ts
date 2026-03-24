@@ -1,8 +1,8 @@
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
+import { users, accounts, verificationTokens } from '@intervuddy/database';
 import NextAuth from 'next-auth';
 import Resend from 'next-auth/providers/resend';
 import { getDb } from '@/db';
-import { users, accounts, verificationTokens } from '@/db/schema';
 import authConfig from './auth.config';
 
 /**

@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../../../../../.worktrees/monorepo-nestjs/apps/web/src/app/%28app%29/study/layout.tsx"],"sourcesContent":["export default function StudyLayout({ children }: { children: React.ReactNode }) {\n  return <>{children}</>;\n}\n"],"names":[],"mappings":"wDAAe,SAAS,EAAY,UAAE,CAAQ,CAAiC,EAC7E,MAAO,CAAA,EAAA,EAAA,GAAA,EAAA,EAAA,QAAA,CAAA,UAAG,GACZ"}

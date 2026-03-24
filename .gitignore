@@ -65,3 +65,4 @@ test-results/
 playwright-report/
 e2e/.auth/
 .superpowers/
+apps/web/.next/

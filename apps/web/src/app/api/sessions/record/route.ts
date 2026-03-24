@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getParticipantRole } from '@/data-access/session-participants';
 import {
+  getParticipantRole,
   recordQuestion,
   recordAnswer,
   recordFeedback,
   getSessionQuestionByDisplayOrder,
-} from '@/data-access/session-records';
-import { updateSessionStatus } from '@/data-access/sessions';
+  updateSessionStatus,
+} from '@intervuddy/database';
+import { getDb } from '@/db';
 
 export async function POST(request: NextRequest) {
   // 1. Verify shared secret
@@ -18,10 +19,11 @@ export async function POST(request: NextRequest) {
   // 2. Parse body
   const { sessionId, message } = await request.json();
   const { type, payload, sender } = message;
+  const db = getDb();
 
   // 3. Verify sender is a participant of the session
   if (sender) {
-    const role = await getParticipantRole(sessionId, sender);
+    const role = await getParticipantRole(db, sessionId, sender);
     if (!role) {
       return NextResponse.json(
         { error: 'Sender is not a participant of this session' },
@@ -33,28 +35,28 @@ export async function POST(request: NextRequest) {
   try {
     switch (type) {
       case 'session:start':
-        await updateSessionStatus(sender, sessionId, 'in_progress');
+        await updateSessionStatus(db, sender, sessionId, 'in_progress');
         break;
       case 'session:end':
-        await updateSessionStatus(sender, sessionId, 'completed', {
+        await updateSessionStatus(db, sender, sessionId, 'completed', {
           summary: payload?.summary,
         });
         break;
       case 'question:send':
-        await recordQuestion(sessionId, {
+        await recordQuestion(db, sessionId, {
           questionId: payload.questionId,
           content: payload.content,
           displayOrder: payload.displayOrder,
         });
         break;
       case 'answer:send': {
-        const sq = await getSessionQuestionByDisplayOrder(sessionId, payload.displayOrder);
-        if (sq) await recordAnswer(sq.id, sender, payload.content);
+        const sq = await getSessionQuestionByDisplayOrder(db, sessionId, payload.displayOrder);
+        if (sq) await recordAnswer(db, sq.id, sender, payload.content);
         break;
       }
       case 'feedback:send': {
-        const sq2 = await getSessionQuestionByDisplayOrder(sessionId, payload.displayOrder);
-        if (sq2) await recordFeedback(sq2.id, sender, payload.content, payload.score ?? null);
+        const sq2 = await getSessionQuestionByDisplayOrder(db, sessionId, payload.displayOrder);
+        if (sq2) await recordFeedback(db, sq2.id, sender, payload.content, payload.score ?? null);
         break;
       }
       default:

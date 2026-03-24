@@ -1,10 +1,11 @@
+import { getInvitationByCode } from '@intervuddy/database';
+import { getSessionById } from '@intervuddy/database';
+import { users } from '@intervuddy/database';
+import * as schema from '@intervuddy/database/src/schema';
 import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import { getInvitationByCode } from '@/data-access/session-invitations';
-import { getSessionById } from '@/data-access/sessions';
-import * as schema from '@/db/schema';
-import { users } from '@/db/schema';
+import { getDb } from '@/db';
 import { createTestDb, cleanupTestDb, truncateAllTables } from '@/test/helpers/db';
 import {
   createSessionAction,
@@ -54,7 +55,7 @@ describe('session-actions', () => {
         role: 'interviewee',
       });
 
-      const session = await getSessionById(DEFAULT_USER_ID, id);
+      const session = await getSessionById(getDb(), DEFAULT_USER_ID, id);
       expect(session).not.toBeNull();
       expect(session!.title).toBe('저장 확인용 세션');
       expect(session!.status).toBe('waiting');
@@ -81,7 +82,7 @@ describe('session-actions', () => {
 
       await deleteSessionAction(id);
 
-      const session = await getSessionById(DEFAULT_USER_ID, id);
+      const session = await getSessionById(getDb(), DEFAULT_USER_ID, id);
       expect(session).toBeNull();
     });
 
@@ -121,7 +122,7 @@ describe('session-actions', () => {
 
       const { inviteCode } = await createInvitationAction(sessionId, 'interviewee');
 
-      const invitation = await getInvitationByCode(inviteCode);
+      const invitation = await getInvitationByCode(getDb(), inviteCode);
       expect(invitation).not.toBeNull();
       expect(invitation!.sessionId).toBe(sessionId);
       expect(invitation!.role).toBe('interviewee');

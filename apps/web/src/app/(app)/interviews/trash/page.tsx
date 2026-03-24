@@ -1,18 +1,19 @@
+import { getDeletedJobs, getDeletedQuestions } from '@intervuddy/database';
 import { Trash2, FolderOpen, FileText } from 'lucide-react';
 import { restoreJobAction } from '@/actions/job-actions';
 import { restoreQuestionAction } from '@/actions/question-actions';
 import { TrashSection } from '@/components/interviews/trash-section';
 import type { TrashItem } from '@/components/interviews/trash-section';
-import { getDeletedJobs } from '@/data-access/jobs';
-import { getDeletedQuestions } from '@/data-access/questions';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 import { DEFAULT_RETENTION_DAYS } from '@/lib/retention-policy';
 
 export default async function TrashPage() {
   const userId = await getCurrentUserId();
+  const db = getDb();
   const [deletedJobs, deletedQuestions] = await Promise.all([
-    getDeletedJobs(userId),
-    getDeletedQuestions(userId),
+    getDeletedJobs(db, userId),
+    getDeletedQuestions(db, userId),
   ]);
 
   const jobItems: TrashItem[] = deletedJobs.map((j) => ({

@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import { getAllJobs } from '@intervuddy/database';
 import { Plus } from 'lucide-react';
 import { JobCard } from '@/components/interviews/job-card';
 import { JobStatusFilter } from '@/components/interviews/job-status-filter';
-import { getAllJobs } from '@/data-access/jobs';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 export default async function InterviewsPage({ searchParams }: Props) {
   const userId = await getCurrentUserId();
   const { status } = await searchParams;
-  const allJobs = await getAllJobs(userId);
+  const allJobs = await getAllJobs(getDb(), userId);
   const jobs = status ? allJobs.filter((j) => j.status === status) : allJobs;
 
   return (

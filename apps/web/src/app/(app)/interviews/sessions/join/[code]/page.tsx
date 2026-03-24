@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { acceptInvitation, getInvitationByCode } from '@intervuddy/database';
 import { AlertCircle } from 'lucide-react';
-import { acceptInvitation, getInvitationByCode } from '@/data-access';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 interface Props {
@@ -11,8 +12,9 @@ interface Props {
 export default async function JoinSessionPage({ params }: Props) {
   const { code } = await params;
   const userId = await getCurrentUserId();
+  const db = getDb();
 
-  const invitation = await getInvitationByCode(code);
+  const invitation = await getInvitationByCode(db, code);
 
   // Validate invitation
   if (!invitation) {
@@ -34,7 +36,7 @@ export default async function JoinSessionPage({ params }: Props) {
   // Accept invitation and redirect (직접 data-access 호출 — Server Action은 렌더링 중 revalidatePath 불가)
   let sessionId: string;
   try {
-    const result = await acceptInvitation(code, userId);
+    const result = await acceptInvitation(db, code, userId);
     sessionId = result.sessionId;
   } catch (error: unknown) {
     const message =

@@ -1,10 +1,15 @@
+import { getGlobalCategories, getAllJobs } from '@intervuddy/database';
 import { SessionCreateForm } from '@/components/session/session-create-form';
-import { getGlobalCategories, getAllJobs } from '@/data-access';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 export default async function NewSessionPage() {
   const userId = await getCurrentUserId();
-  const [categories, jobs] = await Promise.all([getGlobalCategories(userId), getAllJobs(userId)]);
+  const db = getDb();
+  const [categories, jobs] = await Promise.all([
+    getGlobalCategories(db, userId),
+    getAllJobs(db, userId),
+  ]);
 
   return (
     <div className="p-4 md:p-6">

@@ -1,18 +1,19 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type { CreateFollowupInput, UpdateFollowupInput } from '@intervuddy/shared';
 import {
   createFollowup as dbCreate,
   updateFollowup as dbUpdate,
   softDeleteFollowup as dbDelete,
   restoreFollowup as dbRestore,
-} from '@/data-access/followups';
+} from '@intervuddy/database';
+import type { CreateFollowupInput, UpdateFollowupInput } from '@intervuddy/shared';
+import { getDb } from '@/db';
 import { getCurrentUserId } from '@/lib/auth';
 
 export async function createFollowupAction(input: CreateFollowupInput) {
   const userId = await getCurrentUserId();
-  const id = await dbCreate(userId, input);
+  const id = await dbCreate(getDb(), userId, input);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   return { id };
@@ -20,14 +21,14 @@ export async function createFollowupAction(input: CreateFollowupInput) {
 
 export async function updateFollowupAction(input: UpdateFollowupInput) {
   const userId = await getCurrentUserId();
-  await dbUpdate(userId, input);
+  await dbUpdate(getDb(), userId, input);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
 }
 
 export async function deleteFollowupAction(id: string) {
   const userId = await getCurrentUserId();
-  await dbDelete(userId, id);
+  await dbDelete(getDb(), userId, id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   revalidatePath('/interviews/trash');
@@ -35,7 +36,7 @@ export async function deleteFollowupAction(id: string) {
 
 export async function restoreFollowupAction(id: string) {
   const userId = await getCurrentUserId();
-  await dbRestore(userId, id);
+  await dbRestore(getDb(), userId, id);
   revalidatePath('/study');
   revalidatePath('/interviews/questions');
   revalidatePath('/interviews/trash');
