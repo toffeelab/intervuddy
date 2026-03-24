@@ -28,6 +28,7 @@ export default tseslint.config(
   // React + Next.js + Import ordering
   {
     files: ['**/*.{ts,tsx}'],
+    ignores: ['apps/server/**'],
     ...react.configs.flat.recommended,
     ...react.configs.flat['jsx-runtime'],
     plugins: {
@@ -90,6 +91,38 @@ export default tseslint.config(
     files: ['e2e/**/*.{ts,tsx}', 'apps/web/e2e/**/*.{ts,tsx}'],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+
+  // NestJS server (no React/Next.js rules)
+  {
+    files: ['apps/server/**/*.ts'],
+    plugins: {
+      'import-x': importX,
+    },
+    rules: {
+      'import-x/order': [
+        'warn',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'never',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      '@typescript-eslint/no-explicit-any': 'error',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  },
+
+  // NestJS server test overrides
+  {
+    files: ['apps/server/**/*.spec.ts', 'apps/server/**/*.test.ts'],
+    rules: {
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
