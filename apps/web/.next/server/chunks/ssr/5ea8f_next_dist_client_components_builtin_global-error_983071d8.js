@@ -1,0 +1,3 @@
+module.exports=[58332,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(97440);a.n(d("[project]/.worktrees/monorepo-nestjs/node_modules/.pnpm/next@16.1.7_@babel+core@7.29.0_@playwright+test@1.58.2_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/client/components/builtin/global-error.js <module evaluation>"))},25497,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(97440);a.n(d("[project]/.worktrees/monorepo-nestjs/node_modules/.pnpm/next@16.1.7_@babel+core@7.29.0_@playwright+test@1.58.2_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/client/components/builtin/global-error.js"))},21428,a=>{"use strict";a.i(58332);var b=a.i(25497);a.n(b)}];
+
+//# sourceMappingURL=5ea8f_next_dist_client_components_builtin_global-error_983071d8.js.map

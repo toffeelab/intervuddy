@@ -1,0 +1,125 @@
+{
+  "node": {
+    "40cc65a79df5ed7bffeb7167561cee585b8a5acfa8": {
+      "workers": {
+        "app/(app)/interviews/questions/page": {
+          "moduleId": 87367,
+          "async": true,
+          "exportedName": "createCategoryAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/category-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/questions/page": "action-browser"
+      },
+      "exportedName": "createCategoryAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/category-actions.ts"
+    },
+    "606d0ade1093db430807828331076e6269305d2ba3": {
+      "workers": {
+        "app/(app)/interviews/questions/page": {
+          "moduleId": 87367,
+          "async": true,
+          "exportedName": "updateCategoryAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/category-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/questions/page": "action-browser"
+      },
+      "exportedName": "updateCategoryAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/category-actions.ts"
+    },
+    "404a2a978df1facedc17a26aeea7bc8282a46af0c9": {
+      "workers": {
+        "app/(app)/interviews/questions/page": {
+          "moduleId": 87367,
+          "async": true,
+          "exportedName": "deleteCategoryAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/category-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/questions/page": "action-browser"
+      },
+      "exportedName": "deleteCategoryAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/category-actions.ts"
+    },
+    "403db84c6cab5cd0357ae800ad4e539b9c27afa88f": {
+      "workers": {
+        "app/(app)/interviews/questions/page": {
+          "moduleId": 87367,
+          "async": true,
+          "exportedName": "createFollowupAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/followup-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/questions/page": "action-browser"
+      },
+      "exportedName": "createFollowupAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/followup-actions.ts"
+    },
+    "40592654326066629e43af72ef25ce7a1cf1155793": {
+      "workers": {
+        "app/(app)/interviews/questions/page": {
+          "moduleId": 87367,
+          "async": true,
+          "exportedName": "updateFollowupAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/followup-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/questions/page": "action-browser"
+      },
+      "exportedName": "updateFollowupAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/followup-actions.ts"
+    },
+    "404fe6c5fa469d63fff6aef08b5f969e47df80cd67": {
+      "workers": {
+        "app/(app)/interviews/questions/page": {
+          "moduleId": 87367,
+          "async": true,
+          "exportedName": "deleteFollowupAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/followup-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/questions/page": "action-browser"
+      },
+      "exportedName": "deleteFollowupAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/followup-actions.ts"
+    },
+    "40887b5c6f558bdcb6f4e2ea6a3ba48986424a74d1": {
+      "workers": {
+        "app/(app)/interviews/questions/page": {
+          "moduleId": 87367,
+          "async": true,
+          "exportedName": "updateQuestionAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/question-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/questions/page": "action-browser"
+      },
+      "exportedName": "updateQuestionAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/question-actions.ts"
+    },
+    "4034453f2bec937b68a79b8cbe89be50505f637bb3": {
+      "workers": {
+        "app/(app)/interviews/questions/page": {
+          "moduleId": 87367,
+          "async": true,
+          "exportedName": "deleteQuestionAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/question-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/questions/page": "action-browser"
+      },
+      "exportedName": "deleteQuestionAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/question-actions.ts"
+    }
+  },
+  "edge": {}
+}

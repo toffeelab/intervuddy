@@ -1,0 +1,50 @@
+{
+  "node": {
+    "0020bf1231e7abbeb93182f4175177dd14db673986": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": 50796,
+          "async": true,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/app/login/page.tsx"
+        }
+      },
+      "layer": {
+        "app/login/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/app/login/page.tsx"
+    },
+    "0051a87aee1649184eb4e43de6ebaab976540060a9": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": 50796,
+          "async": true,
+          "exportedName": "$$RSC_SERVER_ACTION_1",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/app/login/page.tsx"
+        }
+      },
+      "layer": {
+        "app/login/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_1",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/app/login/page.tsx"
+    },
+    "40bf0e6177a86efc664f7cae8ec5b26ac571e0be73": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": 50796,
+          "async": true,
+          "exportedName": "$$RSC_SERVER_ACTION_2",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/app/login/page.tsx"
+        }
+      },
+      "layer": {
+        "app/login/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_2",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/app/login/page.tsx"
+    }
+  },
+  "edge": {}
+}

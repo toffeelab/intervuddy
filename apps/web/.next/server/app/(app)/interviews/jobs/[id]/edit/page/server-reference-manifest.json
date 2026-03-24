@@ -1,0 +1,35 @@
+{
+  "node": {
+    "4079d40e71e115335ed662379998514e1a5b7d67c2": {
+      "workers": {
+        "app/(app)/interviews/jobs/[id]/edit/page": {
+          "moduleId": 98868,
+          "async": true,
+          "exportedName": "createJobAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/job-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/jobs/[id]/edit/page": "action-browser"
+      },
+      "exportedName": "createJobAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/job-actions.ts"
+    },
+    "402dd5e6512b2fb0f3a8e8bbf3706b182ce987f46e": {
+      "workers": {
+        "app/(app)/interviews/jobs/[id]/edit/page": {
+          "moduleId": 98868,
+          "async": true,
+          "exportedName": "updateJobAction",
+          "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/job-actions.ts"
+        }
+      },
+      "layer": {
+        "app/(app)/interviews/jobs/[id]/edit/page": "action-browser"
+      },
+      "exportedName": "updateJobAction",
+      "filename": ".worktrees/monorepo-nestjs/apps/web/src/actions/job-actions.ts"
+    }
+  },
+  "edge": {}
+}
