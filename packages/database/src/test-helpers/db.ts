@@ -1,15 +1,15 @@
 import { DEFAULT_USER_ID, SYSTEM_USER_ID } from '@intervuddy/shared';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { setDb, resetDb } from '@/db/index';
-import * as schema from '@/db/schema';
+import type { Database } from '../connection';
+import * as schema from '../schema';
 import {
   interviewCategories,
   interviewQuestions,
   followupQuestions,
   jobDescriptions,
   interviewSessions,
-} from '@/db/schema';
+} from '../schema';
 
 const TEST_DATABASE_URL =
   process.env.DATABASE_URL?.replace(/\/[^/]+$/, '/intervuddy_test') ??
@@ -38,9 +38,24 @@ function getSharedDb(): NodePgDatabase<typeof schema> {
   return _sharedDb;
 }
 
+/**
+ * Optional callback: when set, createTestDb() will call it to inject
+ * the test DB instance into the app-level wrapper (e.g., apps/web's setDb).
+ */
+let _onCreateTestDb: ((db: Database) => void) | null = null;
+let _onCloseTestPool: (() => void) | null = null;
+
+export function registerTestDbCallbacks(callbacks: {
+  onSetDb?: (db: Database) => void;
+  onResetDb?: () => void;
+}) {
+  _onCreateTestDb = callbacks.onSetDb ?? null;
+  _onCloseTestPool = callbacks.onResetDb ?? null;
+}
+
 export async function createTestDb(): Promise<NodePgDatabase<typeof schema>> {
   const db = getSharedDb();
-  setDb(db);
+  if (_onCreateTestDb) _onCreateTestDb(db as Database);
   // Note: users are seeded inside truncateAllTables, not here,
   // to avoid concurrent INSERT conflicts with other test files' beforeEach calls.
   return db;
@@ -170,5 +185,5 @@ export async function closeTestPool(): Promise<void> {
     _sharedPool = null;
     _sharedDb = null;
   }
-  resetDb();
+  if (_onCloseTestPool) _onCloseTestPool();
 }

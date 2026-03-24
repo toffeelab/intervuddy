@@ -1,12 +1,13 @@
 import { and, eq, isNotNull, sql } from 'drizzle-orm';
-import { getDb } from '@/db/index';
+import type { Database } from '../connection';
 import {
   jobDescriptions,
   interviewCategories,
   interviewQuestions,
   followupQuestions,
-} from '@/db/schema';
-import { DEFAULT_RETENTION_DAYS } from '@/lib/retention-policy';
+} from '../schema';
+
+const DEFAULT_RETENTION_DAYS = 30;
 
 interface PurgeResult {
   questions: number;
@@ -20,6 +21,7 @@ interface PurgeResult {
  * Intended for server-side admin/cron use only — do NOT call from user-facing code.
  */
 export async function purgeAllExpiredItems(
+  db: Database,
   retentionDays: number = DEFAULT_RETENTION_DAYS
 ): Promise<PurgeResult> {
   let followupsCount = 0;
@@ -27,7 +29,7 @@ export async function purgeAllExpiredItems(
   let categoriesCount = 0;
   let jobsCount = 0;
 
-  await getDb().transaction(async (tx) => {
+  await db.transaction(async (tx) => {
     // 순서 중요: FK 의존성 (자식 → 부모)
     const deletedFollowups = await tx
       .delete(followupQuestions)
@@ -93,6 +95,7 @@ export async function purgeAllExpiredItems(
  * Purges expired soft-deleted items for a single user.
  */
 export async function purgeExpiredItemsForUser(
+  db: Database,
   userId: string,
   retentionDays: number = DEFAULT_RETENTION_DAYS
 ): Promise<PurgeResult> {
@@ -101,7 +104,7 @@ export async function purgeExpiredItemsForUser(
   let categoriesCount = 0;
   let jobsCount = 0;
 
-  await getDb().transaction(async (tx) => {
+  await db.transaction(async (tx) => {
     // 순서 중요: FK 의존성 (자식 → 부모)
     const deletedFollowups = await tx
       .delete(followupQuestions)

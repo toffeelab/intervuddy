@@ -1,15 +1,15 @@
 import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
-import * as schema from '@/db/schema';
-import { interviewCategories, interviewQuestions, jobDescriptions } from '@/db/schema';
+import * as schema from '../schema';
+import { interviewCategories, interviewQuestions, jobDescriptions } from '../schema';
 import {
   createTestDb,
   cleanupTestDb,
   seedTestCategories,
   seedTestJobDescription,
   truncateAllTables,
-} from '@/test/helpers/db';
+} from '../test-helpers/db';
 import {
   getGlobalCategories,
   getCategoriesByJdId,
@@ -36,12 +36,12 @@ describe('categories data-access', () => {
 
   describe('getGlobalCategories', () => {
     it('빈 DB에서 빈 배열을 반환한다', async () => {
-      expect(await getGlobalCategories(DEFAULT_USER_ID)).toEqual([]);
+      expect(await getGlobalCategories(db, DEFAULT_USER_ID)).toEqual([]);
     });
 
     it('글로벌 카테고리(jd_id IS NULL)만 반환한다', async () => {
       await seedTestCategories(db);
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(db, DEFAULT_USER_ID);
       expect(categories).toHaveLength(2);
       expect(categories[0].name).toBe('자기소개/커리어');
       expect(categories[1].name).toBe('기술역량');
@@ -49,23 +49,23 @@ describe('categories data-access', () => {
 
     it('display_order 순으로 정렬된다', async () => {
       await seedTestCategories(db);
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(db, DEFAULT_USER_ID);
       expect(categories[0].displayOrder).toBe(1);
       expect(categories[1].displayOrder).toBe(2);
     });
 
     it('삭제된 카테고리는 제외한다', async () => {
       await seedTestCategories(db);
-      const all = await getGlobalCategories(DEFAULT_USER_ID);
-      await softDeleteCategory(DEFAULT_USER_ID, all[0].id);
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const all = await getGlobalCategories(db, DEFAULT_USER_ID);
+      await softDeleteCategory(db, DEFAULT_USER_ID, all[0].id);
+      const categories = await getGlobalCategories(db, DEFAULT_USER_ID);
       expect(categories).toHaveLength(1);
       expect(categories[0].name).toBe('기술역량');
     });
 
     it('questionCount를 포함한다', async () => {
       await seedTestCategories(db);
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(db, DEFAULT_USER_ID);
       const catId = cats[0].id;
       await db.insert(interviewQuestions).values([
         {
@@ -83,7 +83,7 @@ describe('categories data-access', () => {
           displayOrder: 2,
         },
       ]);
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(db, DEFAULT_USER_ID);
       expect(categories[0].questionCount).toBe(2);
       expect(categories[1].questionCount).toBe(0);
     });
@@ -101,7 +101,7 @@ describe('categories data-access', () => {
         icon: '📋',
         displayOrder: 1,
       });
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(db, DEFAULT_USER_ID);
       expect(categories).toHaveLength(2);
     });
   });
@@ -121,7 +121,7 @@ describe('categories data-access', () => {
         icon: '📋',
         displayOrder: 3,
       });
-      const categories = await getCategoriesByJdId(DEFAULT_USER_ID, jdId);
+      const categories = await getCategoriesByJdId(db, DEFAULT_USER_ID, jdId);
       expect(categories).toHaveLength(3);
     });
 
@@ -157,21 +157,21 @@ describe('categories data-access', () => {
           displayOrder: 3,
         },
       ]);
-      const categories = await getCategoriesByJdId(DEFAULT_USER_ID, jd1.id);
+      const categories = await getCategoriesByJdId(db, DEFAULT_USER_ID, jd1.id);
       expect(categories.map((c) => c.name)).not.toContain('JD2카테고리');
     });
   });
 
   describe('createCategory', () => {
     it('글로벌 카테고리를 생성하고 id를 반환한다', async () => {
-      const id = await createCategory(DEFAULT_USER_ID, {
+      const id = await createCategory(db, DEFAULT_USER_ID, {
         name: '새 카테고리',
         slug: 'new-cat',
         displayLabel: '새 카테고리',
         icon: '🆕',
       });
       expect(id).toBeDefined();
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const categories = await getGlobalCategories(db, DEFAULT_USER_ID);
       expect(categories).toHaveLength(1);
       expect(categories[0].name).toBe('새 카테고리');
     });
@@ -179,7 +179,7 @@ describe('categories data-access', () => {
     it('JD 카테고리를 생성할 수 있다', async () => {
       await seedTestJobDescription(db);
       const jobs = await db.select({ id: jobDescriptions.id }).from(jobDescriptions);
-      const id = await createCategory(DEFAULT_USER_ID, {
+      const id = await createCategory(db, DEFAULT_USER_ID, {
         jdId: jobs[0].id,
         name: 'JD 카테고리',
         slug: 'jd-cat',
@@ -193,9 +193,9 @@ describe('categories data-access', () => {
   describe('updateCategory', () => {
     it('카테고리를 부분 수정할 수 있다', async () => {
       await seedTestCategories(db);
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
-      await updateCategory(DEFAULT_USER_ID, cats[0].id, { displayLabel: '수정된 라벨' });
-      const categories = await getGlobalCategories(DEFAULT_USER_ID);
+      const cats = await getGlobalCategories(db, DEFAULT_USER_ID);
+      await updateCategory(db, DEFAULT_USER_ID, cats[0].id, { displayLabel: '수정된 라벨' });
+      const categories = await getGlobalCategories(db, DEFAULT_USER_ID);
       expect(categories[0].displayLabel).toBe('수정된 라벨');
       expect(categories[0].name).toBe('자기소개/커리어');
     });
@@ -204,12 +204,12 @@ describe('categories data-access', () => {
   describe('softDeleteCategory / restoreCategory', () => {
     it('소프트 삭제 후 복원할 수 있다', async () => {
       await seedTestCategories(db);
-      const cats = await getGlobalCategories(DEFAULT_USER_ID);
-      await softDeleteCategory(DEFAULT_USER_ID, cats[0].id);
-      expect(await getGlobalCategories(DEFAULT_USER_ID)).toHaveLength(1);
+      const cats = await getGlobalCategories(db, DEFAULT_USER_ID);
+      await softDeleteCategory(db, DEFAULT_USER_ID, cats[0].id);
+      expect(await getGlobalCategories(db, DEFAULT_USER_ID)).toHaveLength(1);
 
-      await restoreCategory(DEFAULT_USER_ID, cats[0].id);
-      expect(await getGlobalCategories(DEFAULT_USER_ID)).toHaveLength(2);
+      await restoreCategory(db, DEFAULT_USER_ID, cats[0].id);
+      expect(await getGlobalCategories(db, DEFAULT_USER_ID)).toHaveLength(2);
     });
   });
 });

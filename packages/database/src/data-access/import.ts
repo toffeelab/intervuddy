@@ -1,6 +1,6 @@
 import { eq, and, asc, isNull } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { interviewQuestions, followupQuestions } from '@/db/schema';
+import type { Database } from '../connection';
+import { interviewQuestions, followupQuestions } from '../schema';
 
 interface ImportResult {
   importedCount: number;
@@ -8,6 +8,7 @@ interface ImportResult {
 }
 
 export async function importQuestionsToJob(
+  db: Database,
   userId: string,
   params: {
     jdId: string;
@@ -17,7 +18,7 @@ export async function importQuestionsToJob(
   let importedCount = 0;
   let skippedCount = 0;
 
-  await getDb().transaction(async (tx) => {
+  await db.transaction(async (tx) => {
     for (const questionId of params.questionIds) {
       const [original] = await tx
         .select({

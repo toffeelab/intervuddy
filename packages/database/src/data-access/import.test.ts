@@ -1,14 +1,14 @@
 import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
-import * as schema from '@/db/schema';
+import * as schema from '../schema';
 import {
   createTestDb,
   cleanupTestDb,
   seedTestQuestions,
   seedTestJobDescription,
   truncateAllTables,
-} from '@/test/helpers/db';
+} from '../test-helpers/db';
 import { importQuestionsToJob } from './import';
 import { getAllJobs } from './jobs';
 import { getQuestionsByJdId, getLibraryQuestions } from './questions';
@@ -32,17 +32,17 @@ describe('importQuestionsToJob', () => {
     await seedTestQuestions(db);
     await seedTestJobDescription(db);
 
-    const questions = await getLibraryQuestions(DEFAULT_USER_ID);
-    const jobs = await getAllJobs(DEFAULT_USER_ID);
+    const questions = await getLibraryQuestions(db, DEFAULT_USER_ID);
+    const jobs = await getAllJobs(db, DEFAULT_USER_ID);
 
-    const result = await importQuestionsToJob(DEFAULT_USER_ID, {
+    const result = await importQuestionsToJob(db, DEFAULT_USER_ID, {
       jdId: jobs[0].id,
       questionIds: [questions[0].id],
     });
     expect(result.importedCount).toBe(1);
     expect(result.skippedCount).toBe(0);
 
-    const jdQuestions = await getQuestionsByJdId(DEFAULT_USER_ID, jobs[0].id);
+    const jdQuestions = await getQuestionsByJdId(db, DEFAULT_USER_ID, jobs[0].id);
     expect(jdQuestions).toHaveLength(1);
     expect(jdQuestions[0].jdId).toBe(jobs[0].id);
     expect(jdQuestions[0].originQuestionId).toBe(questions[0].id);
@@ -54,29 +54,29 @@ describe('importQuestionsToJob', () => {
   it('이미 가져온 질문은 스킵', async () => {
     await seedTestQuestions(db);
     await seedTestJobDescription(db);
-    const questions = await getLibraryQuestions(DEFAULT_USER_ID);
-    const jobs = await getAllJobs(DEFAULT_USER_ID);
+    const questions = await getLibraryQuestions(db, DEFAULT_USER_ID);
+    const jobs = await getAllJobs(db, DEFAULT_USER_ID);
 
-    await importQuestionsToJob(DEFAULT_USER_ID, {
+    await importQuestionsToJob(db, DEFAULT_USER_ID, {
       jdId: jobs[0].id,
       questionIds: [questions[0].id],
     });
-    const result = await importQuestionsToJob(DEFAULT_USER_ID, {
+    const result = await importQuestionsToJob(db, DEFAULT_USER_ID, {
       jdId: jobs[0].id,
       questionIds: [questions[0].id],
     });
     expect(result.importedCount).toBe(0);
     expect(result.skippedCount).toBe(1);
 
-    expect(await getQuestionsByJdId(DEFAULT_USER_ID, jobs[0].id)).toHaveLength(1);
+    expect(await getQuestionsByJdId(db, DEFAULT_USER_ID, jobs[0].id)).toHaveLength(1);
   });
 
   it('존재하지 않는 questionId는 스킵', async () => {
     await seedTestQuestions(db);
     await seedTestJobDescription(db);
-    const jobs = await getAllJobs(DEFAULT_USER_ID);
+    const jobs = await getAllJobs(db, DEFAULT_USER_ID);
 
-    const result = await importQuestionsToJob(DEFAULT_USER_ID, {
+    const result = await importQuestionsToJob(db, DEFAULT_USER_ID, {
       jdId: jobs[0].id,
       questionIds: ['nonexistent-id'],
     });
@@ -87,14 +87,14 @@ describe('importQuestionsToJob', () => {
   it('원본 질문의 category_id를 유지', async () => {
     await seedTestQuestions(db);
     await seedTestJobDescription(db);
-    const questions = await getLibraryQuestions(DEFAULT_USER_ID);
-    const jobs = await getAllJobs(DEFAULT_USER_ID);
+    const questions = await getLibraryQuestions(db, DEFAULT_USER_ID);
+    const jobs = await getAllJobs(db, DEFAULT_USER_ID);
 
-    await importQuestionsToJob(DEFAULT_USER_ID, {
+    await importQuestionsToJob(db, DEFAULT_USER_ID, {
       jdId: jobs[0].id,
       questionIds: [questions[0].id],
     });
-    const jdQuestions = await getQuestionsByJdId(DEFAULT_USER_ID, jobs[0].id);
+    const jdQuestions = await getQuestionsByJdId(db, DEFAULT_USER_ID, jobs[0].id);
     expect(jdQuestions[0].categoryId).toBe(questions[0].categoryId);
   });
 });

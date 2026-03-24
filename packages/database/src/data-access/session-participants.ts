@@ -1,16 +1,15 @@
 import type { SessionRole, SessionParticipantInfo } from '@intervuddy/shared';
 import { eq, and } from 'drizzle-orm';
-import { getDb } from '@/db/index';
-import { interviewSessions, sessionParticipants, users } from '@/db/schema';
+import type { DbOrTx } from '../connection';
+import { interviewSessions, sessionParticipants, users } from '../schema';
 
 export async function addParticipant(
+  db: DbOrTx,
   callerUserId: string,
   sessionId: string,
   userId: string,
   role: SessionRole
 ): Promise<string> {
-  const db = getDb();
-
   // Check caller is creator
   const [session] = await db
     .select({ createdBy: interviewSessions.createdBy })
@@ -54,12 +53,11 @@ export async function addParticipant(
 }
 
 export async function removeParticipant(
+  db: DbOrTx,
   callerUserId: string,
   sessionId: string,
   userId: string
 ): Promise<void> {
-  const db = getDb();
-
   // Check caller is creator
   const [session] = await db
     .select({ createdBy: interviewSessions.createdBy })
@@ -78,11 +76,10 @@ export async function removeParticipant(
 }
 
 export async function getParticipants(
+  db: DbOrTx,
   callerUserId: string,
   sessionId: string
 ): Promise<SessionParticipantInfo[]> {
-  const db = getDb();
-
   // Verify caller is a participant
   const [callerParticipant] = await db
     .select({ id: sessionParticipants.id })
@@ -118,11 +115,10 @@ export async function getParticipants(
 }
 
 export async function getParticipantRole(
+  db: DbOrTx,
   sessionId: string,
   userId: string
 ): Promise<SessionRole | null> {
-  const db = getDb();
-
   const [row] = await db
     .select({ role: sessionParticipants.role })
     .from(sessionParticipants)

@@ -1,22 +1,27 @@
 /* eslint-disable no-console */
 import { SYSTEM_USER_ID, DEFAULT_USER_ID } from '@intervuddy/shared';
 import { sql } from 'drizzle-orm';
-import { getDb, getPool } from '@/db';
+import { createDb } from './connection';
 import {
   users,
   interviewCategories,
   interviewQuestions,
   followupQuestions,
   jobDescriptions,
-} from '@/db/schema';
+} from './schema';
 
 const useSample = process.argv.includes('--sample');
-const dataSource = useSample ? '../../data/seed.sample' : '../../data/seed';
+const dataSource = useSample ? '../../../data/seed.sample' : '../../../data/seed';
 
 async function main() {
   console.log(`Using ${useSample ? 'sample' : 'personal'} seed data`);
 
-  const db = getDb();
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL environment variable is required');
+  }
+
+  const { db, pool } = createDb(connectionString);
   const { categories, questions } = await import(dataSource);
 
   console.log('Clearing existing data...');
@@ -120,7 +125,7 @@ async function main() {
   console.log(`  Questions:   ${qCount}`);
   console.log(`  Followups:   ${fCount}`);
 
-  await getPool().end();
+  await pool.end();
 }
 
 main().catch(console.error);

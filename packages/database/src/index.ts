@@ -1,2 +1,4 @@
-// Placeholder — will be populated in Task 4 (database extraction)
-export {};
+export * from './schema';
+export { createDb } from './connection';
+export type { Database, Transaction, DbOrTx } from './connection';
+export * from './data-access';
