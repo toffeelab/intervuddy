@@ -2,50 +2,76 @@
 
 ## 프로젝트 개요
 
-면접 예상 Q&A 관리 웹앱. Next.js 16 App Router + TypeScript + PostgreSQL.
+면접 예상 Q&A 관리 웹앱. 모노레포 (pnpm workspace + Turborepo) 구조.
 
 ## 기술 스택
 
-- Next.js 16.1.7 (App Router, RSC), React 19, TypeScript 5
+- **프론트엔드**: Next.js 16.1.7 (App Router, RSC), React 19, TypeScript 5
+- **백엔드**: NestJS 11 + Fastify (REST API)
+- **실시간**: PartyKit (WebSocket)
 - Tailwind CSS v4, shadcn/ui (base-nova 스타일, lucide 아이콘)
 - PostgreSQL (Drizzle ORM, Neon 프로덕션 / Docker 로컬), Zustand (UI 상태)
 - Auth.js v5 (Google/GitHub OAuth + 매직 링크), JWT 세션 전략
-- pnpm (패키지 매니저 — npm/yarn 사용 금지)
+- 서비스 JWT: Next.js → NestJS 인증 (`JWT_SECRET` 환경변수)
+- pnpm (패키지 매니저 — npm/yarn 사용 금지), Turborepo (빌드 오케스트레이션)
 - ESLint 9 (flat config) + Prettier (코드 품질/포매팅)
 
 ## 디렉토리 구조
 
 ```
-src/
-├── app/              # 페이지 및 레이아웃 (App Router)
-├── components/
-│   ├── ui/           # shadcn/ui 공통 컴포넌트
-│   ├── interview/    # 면접 Q&A 페이지 컴포넌트
-│   ├── landing/      # 랜딩 페이지 컴포넌트
-│   └── shared/       # 공통 컴포넌트
-├── db/               # Drizzle 스키마, DB 연결, 마이그레이션, 시드
-├── data-access/      # DB 접근 추상화 레이어
-├── stores/           # Zustand 상태 관리
-├── test/             # 테스트 헬퍼 및 setup
-└── lib/              # 유틸리티, 상수
+apps/
+├── web/              # Next.js 프론트엔드
+│   └── src/
+│       ├── app/              # 페이지 및 레이아웃 (App Router)
+│       ├── components/       # UI 컴포넌트
+│       ├── db/               # DB 연결 (getDb)
+│       ├── stores/           # Zustand 상태 관리
+│       └── lib/              # 유틸리티, 상수
+├── server/           # NestJS 백엔드 (Fastify)
+│   └── src/
+│       ├── auth/             # JWT 인증 가드
+│       ├── health/           # 헬스체크 엔드포인트
+│       └── database/         # DB 모듈 (DI)
+└── partykit/         # PartyKit WebSocket
+packages/
+├── database/         # Drizzle 스키마, data-access, 마이그레이션
+│   └── src/
+│       ├── schema.ts         # Drizzle pgTable 정의
+│       └── data-access/      # DB 접근 추상화 레이어
+└── shared/           # 공통 타입, 상수
 ```
 
 ## 명령어
 
+### Turbo (루트)
+
 ```bash
-pnpm dev              # 개발 서버 (localhost:3000)
-pnpm build            # 프로덕션 빌드
+pnpm dev              # turbo로 web + server 동시 실행
+pnpm build            # turbo로 전체 빌드
+pnpm lint             # ESLint 검사
+pnpm lint:fix         # ESLint 자동 수정
+pnpm format           # Prettier 포매팅
+pnpm format:check     # Prettier 포매팅 검사
+```
+
+### 개별 앱/패키지
+
+```bash
+pnpm --filter @intervuddy/web dev       # Next.js만 (localhost:3000)
+pnpm --filter @intervuddy/server dev    # NestJS만 (localhost:4000)
+pnpm --filter @intervuddy/web build     # Next.js 빌드
+pnpm --filter @intervuddy/server build  # NestJS 빌드
+pnpm --filter @intervuddy/web test      # 프론트엔드 테스트
+```
+
+### DB
+
+```bash
 pnpm db:generate      # Drizzle 스키마 → 마이그레이션 SQL 생성
 pnpm db:migrate       # PostgreSQL 마이그레이션 실행
 pnpm db:studio        # Drizzle Studio (DB GUI)
 pnpm db:seed:sample   # 샘플 데이터 시드
 pnpm db:seed          # 개인 데이터 시드 (data/seed.ts 필요)
-pnpm test             # 테스트 실행 (Docker PG 필요)
-pnpm test:watch       # 테스트 watch 모드
-pnpm lint             # ESLint 검사
-pnpm lint:fix         # ESLint 자동 수정
-pnpm format           # Prettier 포매팅
-pnpm format:check     # Prettier 포매팅 검사
 ```
 
 ### 로컬 개발 시작
@@ -54,7 +80,7 @@ pnpm format:check     # Prettier 포매팅 검사
 docker compose up -d   # PostgreSQL 컨테이너 기동
 pnpm db:migrate        # 마이그레이션 실행 (최초 1회 또는 스키마 변경 시)
 pnpm db:seed:sample    # 샘플 데이터 시드 (선택)
-pnpm dev               # 개발 서버
+pnpm dev               # web + server 동시 실행
 ```
 
 ## 코드 컨벤션
@@ -78,7 +104,8 @@ pnpm dev               # 개발 서버
 - `src/lib/auth.ts`: `getCurrentUserId()` (미인증 시 /login 리다이렉트), `getOptionalUserId()`
 - 모든 Server Action에서 `getCurrentUserId()` 호출로 userId 획득 — 직접 세션 접근 금지
 - JWT 세션 전략 사용 (DB 세션 없음)
-- 필수 환경변수: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `AUTH_RESEND_KEY`, `AUTH_EMAIL_FROM`
+- 필수 환경변수: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `AUTH_RESEND_KEY`, `AUTH_EMAIL_FROM`, `JWT_SECRET`
+- `JWT_SECRET`: 서비스 JWT 발급/검증 (Next.js ↔ NestJS 간 인증). 양쪽 `.env.local`에 동일 값 설정
 - `SYSTEM_USER_ID = 'system'`: 시스템 템플릿 데이터용
 - `DEFAULT_USER_ID = 'local-user'`: 로컬 개발 / 테스트용 (실제 OAuth 사용자 ID 아님)
 
@@ -86,9 +113,9 @@ pnpm dev               # 개발 서버
 
 - **Drizzle ORM** + PostgreSQL (비동기 API)
 - 프로덕션: Neon PostgreSQL, 로컬: Docker PostgreSQL 17
-- 스키마 정의: `src/db/schema.ts` (Drizzle pgTable)
-- 마이그레이션: `drizzle/migrations/` (Drizzle Kit 생성 + 커스텀 SQL)
-- data-access 레이어를 통해 접근 (db 직접 import 금지)
+- 스키마 정의: `packages/database/src/schema.ts` (Drizzle pgTable)
+- 마이그레이션: `packages/database/drizzle/migrations/` (Drizzle Kit 생성 + 커스텀 SQL)
+- data-access 레이어를 통해 접근 (`@intervuddy/database`에서 import)
 - 모든 data-access 함수는 `async` — 호출 시 `await` 필수
 - 환경변수: `DATABASE_URL` (.env.local에 설정)
 - **시드 업데이트**: DB 스키마 변경 시 `data/seed.sample.ts`와 `src/test/helpers/db.ts`도 동기화 필수
@@ -97,7 +124,15 @@ pnpm dev               # 개발 서버
 
 ### Import 경로
 
-- 절대 경로 사용: `@/components/...`, `@/lib/...`, `@/stores/...`
+- apps/web 내부: 절대 경로 `@/components/...`, `@/lib/...`, `@/stores/...`
+- 공유 패키지: `@intervuddy/database` (DB 함수/스키마), `@intervuddy/shared` (타입/상수)
+- apps/web에서 DB 접근: `getDb()` from `@/db`
+- NestJS에서 DB 접근: `@Inject(DATABASE_TOKEN)` DI
+
+### data-access 패턴
+
+- data-access 함수는 `db` 파라미터를 첫 번째 인자로 받음 (DI 호환)
+- NestJS에서는 `DatabaseModule`이 Drizzle 인스턴스를 주입
 
 ### 린팅 & 포매팅
 
