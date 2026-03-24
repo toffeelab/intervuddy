@@ -17,6 +17,8 @@ export default tseslint.config(
       '*.db',
       '.worktrees/',
       '.claude/worktrees/',
+      'apps/partykit/',
+      'apps/web/.next/',
     ],
   },
 
@@ -37,6 +39,7 @@ export default tseslint.config(
     },
     settings: {
       react: { version: 'detect' },
+      next: { rootDir: 'apps/web/' },
     },
     rules: {
       // React hooks
@@ -84,7 +87,7 @@ export default tseslint.config(
 
   // E2E test overrides (Playwright's `use()` is not a React Hook)
   {
-    files: ['e2e/**/*.{ts,tsx}'],
+    files: ['e2e/**/*.{ts,tsx}', 'apps/web/e2e/**/*.{ts,tsx}'],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
