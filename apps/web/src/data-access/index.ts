@@ -1,4 +1,4 @@
-export * from './types';
+export * from '@intervuddy/shared';
 export * from './questions';
 export * from './categories';
 export * from './jobs';

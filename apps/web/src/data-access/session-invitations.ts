@@ -1,7 +1,7 @@
+import type { SessionRole, InvitationStatus } from '@intervuddy/shared';
 import { eq, and, sql } from 'drizzle-orm';
 import { getDb } from '@/db/index';
 import { sessionInvitations, sessionParticipants, interviewSessions } from '@/db/schema';
-import type { SessionRole, InvitationStatus } from './types';
 
 interface InvitationData {
   id: string;

@@ -2,11 +2,11 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import type { JobDescription } from '@intervuddy/shared';
 import { createJobAction, updateJobAction } from '@/actions/job-actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import type { JobDescription } from '@/data-access/types';
 
 interface Props {
   job?: JobDescription;

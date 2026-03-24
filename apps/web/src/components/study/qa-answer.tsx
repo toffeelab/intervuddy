@@ -1,13 +1,13 @@
 'use client';
 
 import { useTransition } from 'react';
+import type { InterviewQuestion } from '@intervuddy/shared';
 import { Trash2 } from 'lucide-react';
 import { updateQuestionAction, deleteQuestionAction } from '@/actions/question-actions';
 import { InlineEdit } from '@/components/shared/inline-edit';
 import { FollowupItem } from '@/components/study/followup-item';
 import { KeywordBox } from '@/components/study/keyword-box';
 import { QuickAddForm } from '@/components/study/quick-add-form';
-import type { InterviewQuestion } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
 interface QAAnswerProps {

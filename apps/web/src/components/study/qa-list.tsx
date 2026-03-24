@@ -1,10 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
+import type { InterviewQuestion } from '@intervuddy/shared';
 import { EmptyState } from '@/components/study/empty-state';
 import { QACard } from '@/components/study/qa-card';
 import { QuickAddForm } from '@/components/study/quick-add-form';
-import type { InterviewQuestion } from '@/data-access/types';
 import { CATEGORY_ALL } from '@/lib/constants';
 import { useStudyStore } from '@/stores/study-store';
 

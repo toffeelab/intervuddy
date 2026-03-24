@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { InterviewQuestion, SessionRole } from '@intervuddy/shared';
 import { Check, Copy, Link2, Loader2, Play } from 'lucide-react';
 import { createInvitationAction } from '@/actions/session-actions';
 import { SessionInterviewRoom } from '@/components/session/session-interview-room';
@@ -15,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { InterviewQuestion, SessionRole } from '@/data-access/types';
 import { useWebSocket } from '@/lib/hooks/use-websocket';
 import { useSessionStore } from '@/stores/session-store';
 import type { ServerMessage } from '@/types/session-messages';

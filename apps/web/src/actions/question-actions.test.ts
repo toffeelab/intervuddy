@@ -1,8 +1,8 @@
+import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { eq } from 'drizzle-orm';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import { getLibraryQuestions, getDeletedQuestions } from '@/data-access/questions';
-import { DEFAULT_USER_ID } from '@/db/constants';
 import * as schema from '@/db/schema';
 import { interviewQuestions } from '@/db/schema';
 import {

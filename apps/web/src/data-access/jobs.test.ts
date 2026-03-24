@@ -1,7 +1,7 @@
+import { DEFAULT_USER_ID, SYSTEM_USER_ID } from '@intervuddy/shared';
 import { sql } from 'drizzle-orm';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
-import { DEFAULT_USER_ID, SYSTEM_USER_ID } from '@/db/constants';
 import * as schema from '@/db/schema';
 import { interviewCategories, interviewQuestions, users } from '@/db/schema';
 import {

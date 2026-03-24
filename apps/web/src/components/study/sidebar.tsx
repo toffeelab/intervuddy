@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import type { InterviewCategory, JobDescription } from '@intervuddy/shared';
 import { Briefcase, LayoutList, Target } from 'lucide-react';
 import { CategoryIcon } from '@/components/study/category-icon';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
@@ -12,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { InterviewCategory, JobDescription } from '@/data-access/types';
 import { CATEGORY_ALL } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useStudyStore } from '@/stores/study-store';

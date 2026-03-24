@@ -1,7 +1,11 @@
+import type {
+  InterviewCategory,
+  CreateCategoryInput,
+  UpdateCategoryInput,
+} from '@intervuddy/shared';
 import { eq, and, isNull, or, asc, count, sql } from 'drizzle-orm';
 import { getDb } from '@/db/index';
 import { interviewCategories, interviewQuestions } from '@/db/schema';
-import type { InterviewCategory, CreateCategoryInput, UpdateCategoryInput } from './types';
 
 export async function getLibraryCategories(userId: string): Promise<InterviewCategory[]> {
   const rows = await getDb()

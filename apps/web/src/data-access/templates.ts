@@ -1,8 +1,8 @@
+import { SYSTEM_USER_ID } from '@intervuddy/shared';
+import type { InterviewCategory, InterviewQuestion } from '@intervuddy/shared';
 import { eq, and, isNull, asc, count, inArray } from 'drizzle-orm';
-import { SYSTEM_USER_ID } from '@/db/constants';
 import { getDb } from '@/db/index';
 import { interviewCategories, interviewQuestions, followupQuestions } from '@/db/schema';
-import type { InterviewCategory, InterviewQuestion } from './types';
 
 export async function getSystemCategories(): Promise<InterviewCategory[]> {
   const rows = await getDb()

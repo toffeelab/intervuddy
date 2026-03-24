@@ -1,9 +1,9 @@
+import { DEFAULT_USER_ID } from '@intervuddy/shared';
 import { eq } from 'drizzle-orm';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import { getFollowupsByQuestionId } from '@/data-access/followups';
 import { getLibraryQuestions } from '@/data-access/questions';
-import { DEFAULT_USER_ID } from '@/db/constants';
 import * as schema from '@/db/schema';
 import { followupQuestions } from '@/db/schema';
 import {

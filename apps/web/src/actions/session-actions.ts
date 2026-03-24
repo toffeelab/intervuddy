@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import type { CreateSessionInput, SessionRole } from '@intervuddy/shared';
 import {
   createInvitation as dbCreateInvitation,
   acceptInvitation as dbAcceptInvitation,
@@ -9,7 +10,6 @@ import {
   createSession as dbCreateSession,
   deleteSession as dbDeleteSession,
 } from '@/data-access/sessions';
-import type { CreateSessionInput, SessionRole } from '@/data-access/types';
 import { getCurrentUserId } from '@/lib/auth';
 
 export async function createSessionAction(input: CreateSessionInput) {

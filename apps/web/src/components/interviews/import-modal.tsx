@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import type { InterviewQuestion, InterviewCategory } from '@intervuddy/shared';
 import { Download, Check } from 'lucide-react';
 import { importQuestionsAction } from '@/actions/import-actions';
 import { DrawerDialog } from '@/components/shared/drawer-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { InterviewQuestion, InterviewCategory } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
 interface Props {

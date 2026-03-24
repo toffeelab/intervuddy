@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
+import type { InterviewQuestion, InterviewCategory } from '@intervuddy/shared';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
@@ -8,7 +9,6 @@ import {
   deleteFollowupAction,
 } from '@/actions/followup-actions';
 import { updateQuestionAction, updateQuestionKeywordsAction } from '@/actions/question-actions';
-import type { InterviewQuestion, InterviewCategory } from '@/data-access/types';
 import { useEditStore } from '@/stores/edit-store';
 import { QuestionEditDrawer } from './question-edit-drawer';
 

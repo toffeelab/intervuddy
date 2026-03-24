@@ -1,7 +1,11 @@
+import type {
+  FollowupQuestion,
+  CreateFollowupInput,
+  UpdateFollowupInput,
+} from '@intervuddy/shared';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { getDb } from '@/db/index';
 import { followupQuestions } from '@/db/schema';
-import type { FollowupQuestion, CreateFollowupInput, UpdateFollowupInput } from './types';
 
 export async function getFollowupsByQuestionId(
   userId: string,

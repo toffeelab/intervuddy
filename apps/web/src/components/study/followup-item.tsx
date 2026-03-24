@@ -1,10 +1,10 @@
 'use client';
 
 import { useTransition } from 'react';
+import type { FollowupQuestion } from '@intervuddy/shared';
 import { Trash2 } from 'lucide-react';
 import { updateFollowupAction, deleteFollowupAction } from '@/actions/followup-actions';
 import { InlineEdit } from '@/components/shared/inline-edit';
-import type { FollowupQuestion } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 
 interface FollowupItemProps {

@@ -1,10 +1,10 @@
-import { MessageSquare, Star, StarHalf } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import type {
   InterviewSession,
   SessionParticipantInfo,
   SessionQuestionRecord,
-} from '@/data-access/types';
+} from '@intervuddy/shared';
+import { MessageSquare, Star, StarHalf } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface Props {

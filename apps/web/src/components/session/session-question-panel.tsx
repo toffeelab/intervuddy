@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import type { InterviewQuestion } from '@intervuddy/shared';
 import { ChevronDown, ChevronRight, Search, Send, Timer } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import type { InterviewQuestion } from '@/data-access/types';
 import { cn } from '@/lib/utils';
 import { useSessionStore } from '@/stores/session-store';
 import type { ClientMessage } from '@/types/session-messages';

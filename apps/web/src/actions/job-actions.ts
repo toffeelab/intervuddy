@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import type { CreateJobInput, UpdateJobInput, JobDescriptionStatus } from '@intervuddy/shared';
 import {
   createJob,
   updateJob,
@@ -8,7 +9,6 @@ import {
   softDeleteJobWithQuestions,
   restoreJobWithQuestions,
 } from '@/data-access/jobs';
-import type { CreateJobInput, UpdateJobInput, JobDescriptionStatus } from '@/data-access/types';
 import { getCurrentUserId } from '@/lib/auth';
 
 export async function createJobAction(input: CreateJobInput) {

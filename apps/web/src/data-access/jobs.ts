@@ -1,7 +1,12 @@
+import type {
+  JobDescription,
+  JobDescriptionStatus,
+  CreateJobInput,
+  UpdateJobInput,
+} from '@intervuddy/shared';
 import { eq, and, isNull, isNotNull, sql, desc, count } from 'drizzle-orm';
 import { getDb } from '@/db/index';
 import { jobDescriptions, interviewQuestions } from '@/db/schema';
-import type { JobDescription, JobDescriptionStatus, CreateJobInput, UpdateJobInput } from './types';
 
 export async function getAllJobs(userId: string): Promise<JobDescription[]> {
   const questionCountSq = getDb()
