@@ -2,11 +2,11 @@ export interface EnvConfig {
   /** 필수 — PostgreSQL 연결 문자열 */
   DATABASE_URL: string;
   /** 선택 — 기본값 4000 */
-  PORT: number;
+  PORT?: number;
   /** 필수 — 서비스 JWT 시크릿 (Next.js ↔ NestJS 인증) */
   JWT_SECRET: string;
   /** 선택 — 기본값 http://localhost:3000 (CORS origin) */
-  WEB_URL: string;
+  WEB_URL?: string;
 }
 
 export function validateEnv(): EnvConfig {
