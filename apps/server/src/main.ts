@@ -8,8 +8,9 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
 
+  const origins = (process.env.WEB_URL || 'http://localhost:3000').split(',').map((s) => s.trim());
   app.enableCors({
-    origin: process.env.WEB_URL || 'http://localhost:3000',
+    origin: origins.length === 1 ? origins[0] : origins,
     credentials: true,
   });
 
