@@ -6,42 +6,48 @@
 
 ## 기술 스택
 
-- **Framework**: Next.js 16 (App Router, React 19)
-- **Language**: TypeScript
+- **모노레포**: pnpm workspace + Turborepo
+- **프론트엔드**: Next.js 16 (App Router, React 19), TypeScript
+- **백엔드**: NestJS 11 + Fastify
+- **실시간**: PartyKit (WebSocket)
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **State Management**: Zustand (UI 상태 전용)
-- **Database**: SQLite (better-sqlite3) — 서버 재시작 후에도 데이터 유지
+- **Database**: PostgreSQL (Drizzle ORM) — Neon (프로덕션) / Docker (로컬)
+- **Auth**: Auth.js v5 (Google/GitHub OAuth + 매직 링크)
 - **Font**: Noto Sans KR + JetBrains Mono
 - **Code Quality**: ESLint 9 + Prettier
 
 ## 프로젝트 구조
 
 ```
-src/
-├── app/
-│   ├── page.tsx              # 랜딩 페이지 (브랜딩/기능 소개)
-│   ├── globals.css           # 다크/라이트 테마 + Tailwind 설정
-│   ├── study/                # 학습 페이지 (Q&A 카드 뷰 + 간편편집)
-│   └── interviews/           # 관리 페이지 (질문 CRUD, JD 관리)
-├── actions/                  # Next.js Server Actions (질문/꼬리질문/카테고리)
-├── components/
-│   ├── ui/                   # shadcn/ui 컴포넌트
-│   ├── shared/               # 공통 컴포넌트 (테마 토글, 인라인 편집 등)
-│   ├── landing/              # 랜딩 페이지 컴포넌트
-│   ├── study/                # 학습 페이지 컴포넌트
-│   └── interviews/           # 관리 페이지 컴포넌트
-├── db/                       # SQLite 연결 및 스키마
-├── data-access/              # 데이터 접근 추상화 레이어
-├── stores/                   # Zustand 상태 관리
-└── lib/                      # 유틸리티 및 상수
+apps/
+├── web/                # Next.js 프론트엔드 (localhost:3000)
+│   └── src/
+│       ├── app/                # 페이지 및 레이아웃 (App Router)
+│       ├── actions/            # Server Actions
+│       ├── components/         # UI 컴포넌트
+│       ├── db/                 # DB 연결 (getDb)
+│       ├── stores/             # Zustand 상태 관리
+│       └── lib/                # 유틸리티, 상수
+├── server/             # NestJS 백엔드 (localhost:4000)
+│   └── src/
+│       ├── auth/               # JWT 인증 가드
+│       ├── health/             # 헬스체크 엔드포인트
+│       └── database/           # DB 모듈 (DI)
+└── partykit/           # PartyKit WebSocket
+
+packages/
+├── database/           # 공유 DB 레이어 (Drizzle 스키마, data-access, 마이그레이션)
+└── shared/             # 공유 타입, 상수
 ```
 
 ## 시작하기
 
 ### 사전 요구사항
 
-- Node.js 18+
+- Node.js 22+
 - pnpm
+- Docker (PostgreSQL 컨테이너)
 
 ### 설치 및 실행
 
@@ -49,15 +55,22 @@ src/
 # 의존성 설치
 pnpm install
 
-# 데이터베이스 시드 (최초 1회, 아래 둘 중 택 1)
+# PostgreSQL 컨테이너 기동
+docker compose up -d
+
+# 데이터베이스 마이그레이션 (최초 1회 또는 스키마 변경 시)
+pnpm db:migrate
+
+# 샘플 데이터 시드 (선택, 아래 둘 중 택 1)
 pnpm db:seed:sample   # 샘플 데이터로 시작 (처음 사용자 권장)
 pnpm db:seed           # 개인 데이터 시드 (data/seed.ts 필요)
 
-# 개발 서버 실행
+# 개발 서버 실행 (web + server 동시)
 pnpm dev
 ```
 
-http://localhost:3000 에서 확인할 수 있습니다.
+- 프론트엔드: http://localhost:3000
+- 백엔드 API: http://localhost:4000
 
 ### 나만의 면접 데이터 추가하기
 
@@ -67,11 +80,29 @@ http://localhost:3000 에서 확인할 수 있습니다.
 
 > `data/seed.ts`는 `.gitignore`에 포함되어 있어 개인 데이터가 커밋되지 않습니다.
 
+### 주요 명령어
+
+```bash
+# Turbo (루트)
+pnpm dev              # web + server 동시 실행
+pnpm build            # 전체 빌드
+pnpm lint             # ESLint 검사
+pnpm format           # Prettier 포매팅
+
+# 개별 앱
+pnpm --filter @intervuddy/web dev       # Next.js만
+pnpm --filter @intervuddy/server dev    # NestJS만
+
+# DB
+pnpm db:generate      # 마이그레이션 SQL 생성
+pnpm db:migrate       # 마이그레이션 실행
+pnpm db:studio        # Drizzle Studio (DB GUI)
+```
+
 ### 빌드
 
 ```bash
 pnpm build
-pnpm start
 ```
 
 ## 주요 기능
@@ -85,24 +116,25 @@ pnpm start
 - **인라인 편집**: /study 페이지에서 답변/팁/꼬리질문을 클릭하여 바로 수정
 - **질문 관리**: /interviews에서 질문 테이블, 편집 드로어, 카테고리 관리
 - **다크/라이트 테마**: 시스템 설정 연동 + 수동 토글
-- **데이터 영속성**: SQLite 기반으로 서버 재시작 후에도 데이터 보존
 
-## 아키텍처 설계 원칙
+## 아키텍처
 
 ### Server / Client 분리
 
 - **Server Component**: 데이터 fetching, 정적 UI (통계, 키워드 태그)
 - **Client Component**: 사용자 인터랙션 (카테고리 선택, 검색, 카드 펼치기/접기)
 
-### 상태 관리 전략
+### 데이터 접근
 
-- **Zustand**: UI 상태 (activeCategory, searchQuery, expandedCards) — 여러 컴포넌트에서 동시 소비
-- **Server Props**: QA 데이터 — Server Component에서 fetch 후 props로 전달
-- **추후 확장**: API Route + React Query로 전환 시 data-access 레이어만 교체
+`packages/database`의 data-access 모듈이 DB 접근을 추상화합니다. 모든 data-access 함수는 `db` 파라미터를 첫 번째 인자로 받아 DI 호환됩니다.
 
-### 데이터 접근 추상화
+- **Next.js (web)**: `getDb()`로 Drizzle 인스턴스 획득 → data-access 함수 호출
+- **NestJS (server)**: `DatabaseModule`이 Drizzle 인스턴스를 DI로 주입
 
-`src/data-access/`의 모듈별 함수(`questions.ts`, `categories.ts`, `followups.ts`, `jobs.ts`)가 SQLite를 직접 호출합니다. Server Actions(`src/actions/`)가 이를 래핑하여 `revalidatePath`를 호출합니다.
+### 인증
+
+- **프론트엔드**: Auth.js v5 (Google/GitHub OAuth + 매직 링크), JWT 세션 전략
+- **서비스 간 통신**: 전용 `JWT_SECRET`으로 Next.js → NestJS 인증
 
 ## Git Flow
 
@@ -134,20 +166,9 @@ gh pr create --base develop
 gh pr merge --squash --delete-branch
 ```
 
-### 병렬 작업 (Worktree)
-
-```bash
-git worktree add ../intervuddy-wt-taskB feature/taskB
-cd ../intervuddy-wt-taskB && pnpm install
-pnpm dev --port 3001
-
-# 완료 후 정리
-git worktree remove ../intervuddy-wt-taskB
-```
-
 ## Claude 자동 PR 리뷰
 
-`src/` 하위 코드 변경 시 Claude Haiku가 자동으로 코드리뷰를 수행합니다.
+`apps/` 또는 `packages/` 하위 코드 변경 시 Claude Haiku가 자동으로 코드리뷰를 수행합니다.
 
 ### 설정
 
@@ -161,23 +182,13 @@ git worktree remove ../intervuddy-wt-taskB
 
 ### 동작 방식
 
-- `src/**` 파일 변경 PR → 자동 전체 리뷰
+- 코드 변경 PR → 자동 전체 리뷰
 - 리뷰 반영 후 push → 자동 증분 리뷰 (이전 이슈 해결 여부 확인)
 - **Draft PR에서는 리뷰 스킵** → Draft → Ready 전환 시 리뷰 트리거
 - PR 코멘트에 `@claude` → 수동 리뷰/질문
 - 리뷰는 한국어로 작성되며, 토큰 사용량이 하단에 표시됨
 - **자동 판정**: Claude 리뷰 결과를 후처리 step이 파싱하여 `gh pr review`로 Approve/Request Changes 게시
-- **파일 제외**: `src/components/ui/*`(shadcn 보일러플레이트), `.github/screenshots/*`, lock 파일 등은 리뷰에서 자동 제외
-
-### Draft PR 활용
-
-리뷰 피드백 반영 중 중간 저장이 필요할 때 (장소 이동 등):
-
-```bash
-gh pr ready --undo <PR번호>   # draft 전환 → 이후 push에 리뷰 안 돌아감
-# ... 중간 작업 commit & push ...
-gh pr ready <PR번호>           # ready 전환 → 리뷰 트리거
-```
+- **파일 제외**: `apps/web/src/components/ui/*`(shadcn 보일러플레이트), `.github/screenshots/*`, lock 파일 등은 리뷰에서 자동 제외
 
 ### Workflow 파일 수정 시 주의사항
 
