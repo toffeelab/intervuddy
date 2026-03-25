@@ -1,6 +1,7 @@
 services:
-  db:
+  postgres:
     image: postgres:17-alpine
+    container_name: intervuddy-postgres
     ports:
       - '5433:5432'
     environment:
@@ -10,6 +11,27 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/init-test-db.sh:/docker-entrypoint-initdb.d/init-test-db.sh
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'intervuddy']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    container_name: intervuddy-server
+    ports:
+      - '4000:4000'
+    environment:
+      DATABASE_URL: postgresql://intervuddy:intervuddy@postgres:5432/intervuddy
+      JWT_SECRET: dev-jwt-secret-change-in-production
+      WEB_URL: http://localhost:3000
+      PORT: '4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   pgdata:

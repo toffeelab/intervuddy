@@ -1,0 +1,27 @@
+{
+  "name": "@intervuddy/database",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/migrate.ts",
+    "db:studio": "drizzle-kit studio",
+    "db:seed:sample": "tsx --env-file=../../apps/web/.env.local src/seed.ts --sample",
+    "db:seed": "tsx --env-file=../../apps/web/.env.local src/seed.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.1",
+    "pg": "^8.20.0",
+    "@neondatabase/serverless": "^1.0.2",
+    "@intervuddy/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.21.0",
+    "vitest": "^4.1.0",
+    "@types/pg": "^8.18.0"
+  }
+}

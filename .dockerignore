@@ -1,0 +1,11 @@
+**/node_modules
+**/.next
+**/dist
+**/.env.local
+**/.env.production
+apps/web/
+e2e/
+test-results/
+.git/
+.husky/
+docs/

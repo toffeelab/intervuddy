@@ -1,0 +1,26 @@
+import type { FollowupQuestion } from '@intervuddy/shared';
+
+interface DeepQABoxProps {
+  items: FollowupQuestion[];
+}
+
+export function DeepQABox({ items }: DeepQABoxProps) {
+  return (
+    <div className="bg-iv-accent2/[0.06] border-iv-accent2/15 rounded-lg border p-3.5">
+      <p className="mb-2.5 text-[11px] font-semibold text-[#a89ff5]">꼬리 질문 &amp; 기술 심화</p>
+      <div className="space-y-3">
+        {items.map((dqa) => (
+          <div key={dqa.id} className="space-y-1">
+            <p className="text-[12px] font-medium text-[#a89ff5]">
+              <span className="mr-1">↳</span>
+              {dqa.question}
+            </p>
+            <p className="text-iv-text3 pl-4 text-[12px] leading-[1.75] whitespace-pre-line">
+              {dqa.answer}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
